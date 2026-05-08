@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node / Espruino tooling (if used)
+node_modules/
+*.log
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build / dist
+dist/
+build/
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Thesis-specific local artifacts
+data/raw/
+data/recordings/
+*.bak
