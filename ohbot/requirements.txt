@@ -1,0 +1,5 @@
+# Ohbot-only dependencies (for running scripts/hello.py standalone).
+# If you're running the full integration demos in interface/presence/, use
+# interface/requirements.txt instead -- it's a superset of this file.
+
+ohbot>=2.0,<3

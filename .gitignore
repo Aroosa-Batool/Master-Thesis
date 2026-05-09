@@ -35,3 +35,8 @@ build/
 data/raw/
 data/recordings/
 *.bak
+
+# Ohbot SDK runtime cache. The SDK writes ohbotData/ into the current
+# working directory at runtime (TTS .wav cache, settings, etc.). Ignore
+# the root-level copy; the canonical templates live in ohbot/ohbotData/.
+/ohbotData/

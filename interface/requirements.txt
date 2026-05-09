@@ -1,0 +1,13 @@
+# Intermediate-layer dependencies.
+# Install into a per-machine venv: `pip install -r interface/requirements.txt`.
+
+# Webcam capture + face detection (presence sensing).
+opencv-python>=4.8,<5
+
+# BLE client for talking to the Bangle.js watch.
+# bleak abstracts over WinRT (Windows) and CoreBluetooth (macOS) so the
+# same code runs on both laptops.
+bleak>=0.22,<1
+
+# Ohbot SDK (used by the integration demos under interface/presence/).
+ohbot>=2.0,<3
