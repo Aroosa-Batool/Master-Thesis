@@ -40,3 +40,11 @@ data/recordings/
 # working directory at runtime (TTS .wav cache, settings, etc.). Ignore
 # the root-level copy; the canonical templates live in ohbot/ohbotData/.
 /ohbotData/
+
+# Face recognition: ONNX model weights (~37MB) auto-downloaded by
+# face_id.ensure_models() on first run, and the runtime face-identity
+# gallery + consent cache + owner enrollment (user data, not source).
+interface/presence/models/
+interface/presence/face_db.json
+interface/presence/consent_cache.json
+interface/presence/owner_face.json
