@@ -508,9 +508,9 @@ def main() -> None:
                 # locals below; recompute the stable flag each tick.
                 # (kept structurally identical to the camera demo)
                 elevated_stable = _update_elevated(now, bpm, fresh)
-                # TEST-ONLY: uncomment to fire trials without a real elevated
+                # TEST-ONLY: forces trials to fire without a real elevated
                 # reading (mirrors the knob used in the camera demos).
-                # elevated_stable = True
+                elevated_stable = True
 
                 presence_verdict: str | None = None
                 if have_full_window:
