@@ -1,8 +1,8 @@
-"""One-shot owner enrollment for the consent demos.
+"""One-shot owner enrollment for the consent demo.
 
 Captures the watch-wearer's face from the webcam and writes the
 averaged SFace embedding to ``owner_face.json``. After this runs once,
-``demo_cache_memory.py`` and ``demo_reconsent.py`` can tell the owner
+``demo_cache_memory.py`` can tell the owner
 apart from bystanders in the camera frame, which is what makes the
 "remember Anna's decision next time Anna is in the room" behavior
 robust (without owner filtering, the cache key would change every

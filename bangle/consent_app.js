@@ -1,11 +1,9 @@
 // consent_app.js -- Bangle.js: HR broadcast + private consent prompt.
 //
-// Extends hrm_broadcast.js with a wrist-side consent channel for the
-// thesis "watch as private disclosure channel" pipeline (stage 5 of the
-// brief in docs/). Two things happen on the watch:
+// Provides a wrist-side consent channel for the thesis "watch as
+// private disclosure channel" pipeline. Two things happen on the watch:
 //
-//   1. Continuously broadcast "BPM:<n>" lines over Nordic UART, same as
-//      hrm_broadcast.js.
+//   1. Continuously broadcast "BPM:<n>" lines over Nordic UART.
 //   2. Expose a global `consent(id, msg)` function. When the laptop
 //      sends a line like `consent("p17","Allow private reminder?")` to
 //      the UART, Espruino's REPL evaluates it, the watch buzzes and

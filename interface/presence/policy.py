@@ -10,10 +10,11 @@ Provides:
   elapses.
 
 - ``ConsentStore``: small JSON-backed cache mapping
-  ``(bystander_id, content_type)`` -> ``"YES" | "NO"``. Used by the
-  Cache-Memory policy script; the Re-Consent policy script ignores it.
+  ``(bystander_id, content_type)`` -> ``"YES" | "NO"``. This is what
+  lets the robot remember a person's decision and skip re-asking the
+  next time the same bystander appears.
 
-Wire format (same Nordic UART transport as ``hrm_broadcast.js``):
+Wire format (line-oriented Nordic UART, served by ``bangle/consent_app.js``):
 
 - Watch -> laptop, line-oriented::
 
@@ -33,8 +34,6 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import select
-import sys
 import tempfile
 import threading
 import time
@@ -331,62 +330,6 @@ class BangleClient:
                 f"[ble] consent prompt {prompt_id} cancelled - BLE link closed."
             )
             return None
-
-
-# ---------------------------------------------------------------------------
-# Cancellable terminal input.
-
-
-def cancellable_input(
-    prompt: str,
-    cancel_event: threading.Event,
-    poll_interval: float = 0.4,
-) -> str | None:
-    """``input(prompt)`` that also wakes up when ``cancel_event`` is set.
-
-    Returns the user's line on Enter, or None if the cancel event was
-    fired first (e.g. the main thread is shutting down because 'q' was
-    pressed in the cv2 window). EOF on stdin also returns None.
-
-    Implementation notes:
-      - Uses ``select.select`` on ``sys.stdin`` to poll for readiness
-        without blocking the thread indefinitely. This is what lets the
-        worker thread bail out promptly on shutdown.
-      - ``select.select`` on ``sys.stdin`` works for terminals and files
-        on POSIX (macOS, Linux). On Windows it is not supported for
-        file handles; we fall back to plain blocking ``input()`` there,
-        which means the worker won't notice ``cancel_event`` until the
-        user presses Enter. That's acceptable for the thesis demos
-        because all of the lab kit runs on macOS/Linux.
-    """
-
-    sys.stdout.write(prompt)
-    sys.stdout.flush()
-
-    if os.name != "posix":
-        try:
-            return input("")
-        except EOFError:
-            return None
-
-    line = ""
-    while not cancel_event.is_set():
-        try:
-            rlist, _, _ = select.select([sys.stdin], [], [], poll_interval)
-        except (ValueError, OSError):
-            # stdin was closed under us; treat as EOF.
-            return None
-        if not rlist:
-            continue
-        chunk = sys.stdin.readline()
-        if chunk == "":
-            # readline returns "" only on EOF (e.g. stdin closed). A
-            # bare Enter returns "\n", which the strip below handles.
-            return None
-        line += chunk
-        if line.endswith("\n"):
-            return line.rstrip("\r\n")
-    return None
 
 
 # ---------------------------------------------------------------------------

@@ -1,24 +1,24 @@
-"""Cache-Memory policy demo.
+"""Presence-aware consent demo (the project's single entry point).
 
-Same sensing pipeline as ``demo_with_watch.py`` (webcam face count +
-heart rate from the Bangle.js), but the disclosure decision goes
-through a consent cache keyed by ``(bystander_id, content_type)``:
+End-to-end pipeline:
 
-  - First time we see a bystander while the user's heart rate is
-    elevated: ask the watch ("I have noticed someone is present with
-    you - do you want me to send private reminders in front of them?").
-    Whatever the user taps is stored in the cache.
-  - Next time we see the *same* bystander: skip the watch prompt
-    entirely and reuse the stored decision.
+  - Read live heart rate from the Bangle.js watch over BLE.
+  - Watch the webcam for faces; the owner (watch-wearer) is told apart
+    from bystanders with SFace, having been enrolled once beforehand
+    via ``enroll_owner.py``.
+  - When the owner's heart rate is elevated AND a bystander is present,
+    ask the watch ("I have noticed someone is present with you - do you
+    want me to send private reminders in front of them?"). The user
+    answers Yes/No on the watch; the laptop terminal never takes input.
+  - Yes -> the Ohbot speaks the private wellbeing suggestion
+           ("...would you like to take a few deep breaths together?").
+    No  -> the Ohbot just greets neutrally ("Hello there.").
+  - The decision is cached keyed by ``(bystander_id, content_type)``,
+    so the next time the *same* bystander appears the robot reuses the
+    stored choice and does not ask again.
 
-This is the script the thesis brief calls the "Cache-Memory" policy.
-The companion ``demo_reconsent.py`` always asks; the difference between
-the two is exactly the cache lookup added here.
-
-Bystander identification is a stand-in: the operator types a label
-(e.g. "anna", "stranger_1") at the CLI when the trigger fires.
-FaceNet-based re-identification (planned for week 2-3 of the thesis
-schedule) will drop into this same slot later.
+Bystander identity is assigned automatically from the camera frame
+(YuNet + SFace, persisted in ``face_db.json``); no labels are typed.
 
 Run:
     python interface/presence/demo_cache_memory.py
@@ -85,7 +85,7 @@ if sys.platform == "darwin":
 
 # Shared state for thread-safe Ohbot access and shutdown coordination.
 # - shutting_down: main thread sets this on 'q' or in finally so the
-#   worker thread can abort promptly (cancellable_input, ohbot calls).
+#   worker thread can abort promptly (watch round-trip, ohbot calls).
 # - ohbot_lock:    serialises every call into the (non-thread-safe)
 #   ohbot SDK. Worker holds it during behavior_disclose/withhold;
 #   main holds it during the finally reset/close path.
