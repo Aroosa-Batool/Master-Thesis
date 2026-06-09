@@ -50,3 +50,10 @@ interface/presence/models/
 interface/presence/face_db.json
 interface/presence/consent_cache.json
 interface/presence/owner_face.json
+
+# Voice modality: runtime speaker-identity gallery + consent cache + owner
+# voice enrollment (user data, not source). Resemblyzer's model weights ship
+# inside the pip package, so there is nothing to ignore for those.
+interface/presence/voice_db.json
+interface/presence/consent_cache_voice.json
+interface/presence/owner_voice.json

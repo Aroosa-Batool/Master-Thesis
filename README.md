@@ -83,6 +83,43 @@ policy is compared against in the thesis.
 
 ---
 
+## Sensing modalities — camera and voice
+
+"Is someone present with the user, and who are they?" can be answered two ways.
+Both feed the **same** downstream logic (heart-rate gate → watch consent →
+disclose/withhold → per-person memory); they differ only in the sensor and the
+embedding model.
+
+| | **Camera** (`demo_cache_memory.py`) | **Voice** (`demo_voice_cache_memory.py`) |
+| --- | --- | --- |
+| Sensor | Webcam | Microphone |
+| Presence cue | A face is in view | Someone is speaking |
+| Identity model | YuNet detect + **SFace** 128-D face embedding | **Resemblyzer** 256-D speaker "d-vector" |
+| Owner enrollment | [`enroll_owner.py`](interface/presence/enroll_owner.py) | [`enroll_owner_voice.py`](interface/presence/enroll_owner_voice.py) |
+| Owner vs. bystander | per **face**, cosine similarity | per **~1.6 s voiced window**, cosine similarity |
+| Quit | `q` in the camera window | `q` in the status window |
+
+Both modalities use the **same** owner-vs-bystander idea (subtract the enrolled
+owner; everyone else is a bystander with a stable auto-minted ID) and in fact
+**reuse the same code** for it — `face_db.py` (the embedding gallery) and
+`owner.py` (the owner template) are embedding-agnostic, so the voice pipeline
+just points them at separate files. The two modalities keep **independent**
+state, so a voice `person_001` and a face `person_001` never collide:
+
+| | Camera | Voice |
+| --- | --- | --- |
+| Owner template | `owner_face.json` | `owner_voice.json` |
+| Bystander gallery | `face_db.json` | `voice_db.json` |
+| Consent memory | `consent_cache.json` | `consent_cache_voice.json` |
+
+> **Voice has one inherent limit:** it can only notice a bystander who actually
+> **speaks**. A silently-present third party is invisible to the microphone —
+> that case is exactly what the camera modality covers. (Owner presence in the
+> room is established by the **watch BLE link** in both modalities, so the owner
+> need not be the one talking / on camera.)
+
+---
+
 ## How it works
 
 ```
@@ -155,13 +192,19 @@ Windows, but the lab kit runs on macOS/Linux).
 ├── interface/
 │   ├── requirements.txt        # Laptop deps (opencv, bleak, ohbot)
 │   └── presence/
-│       ├── demo_cache_memory.py  # ▶ MAIN APP — full pipeline, REMEMBERS each decision
-│       ├── demo_reconsent.py     # Baseline — same pipeline but ALWAYS re-asks (no memory)
-│       ├── enroll_owner.py       # One-time owner face enrollment (run first)
+│       │   # ── Camera modality ──────────────────────────────────────
+│       ├── demo_cache_memory.py        # ▶ camera app — full pipeline, REMEMBERS decisions
+│       ├── demo_reconsent.py           # camera baseline — ALWAYS re-asks (no memory)
+│       ├── enroll_owner.py             # one-time owner FACE enrollment
+│       │   # ── Voice modality ───────────────────────────────────────
+│       ├── demo_voice_cache_memory.py  # ▶ voice app — same flow, mic instead of camera
+│       ├── enroll_owner_voice.py       # one-time owner VOICE enrollment
+│       ├── voice_id.py                 # Resemblyzer speaker (d-vector) embeddings
+│       │   # ── Shared ───────────────────────────────────────────────
 │       ├── policy.py             # BLE client (HR + ask_consent) + consent memory store
-│       ├── face_id.py            # YuNet detection + SFace embeddings (auto-downloads models)
-│       ├── face_db.py            # Bystander face gallery (stable person IDs)
-│       └── owner.py              # Owner face template store + matcher
+│       ├── face_id.py            # YuNet detection + SFace face embeddings (auto-downloads)
+│       ├── face_db.py            # Embedding gallery → stable IDs (reused for faces AND voices)
+│       └── owner.py              # Owner template store + matcher (reused for face AND voice)
 ├── ohbot/
 │   ├── requirements.txt        # Ohbot-only dep (subset of interface/requirements.txt)
 │   └── ohbotData/              # Ohbot SDK runtime templates (motors, voice, settings)
@@ -186,9 +229,18 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r interface/requirements.txt
 ```
 
-This installs `opencv-python`, `bleak` (BLE), and `ohbot`. The YuNet + SFace face
-models (~37 MB total) are **downloaded automatically** on first run into
-`interface/presence/models/`.
+This installs `opencv-python`, `bleak` (BLE), and `ohbot`, plus the voice-modality
+deps `sounddevice` (mic) and `resemblyzer` (speaker embeddings — pulls in
+**torch**, so the install is a few hundred MB). The YuNet + SFace face models
+(~37 MB) are **downloaded automatically** on first run into
+`interface/presence/models/`; Resemblyzer's speaker weights ship inside the
+package (no download).
+
+`sounddevice` needs the **PortAudio** system library — bundled in the
+macOS/Windows wheels; on Debian/Ubuntu install it with
+`sudo apt install libportaudio2`. If you only ever run the **camera** demos, you
+can skip the voice deps (`sounddevice`, `resemblyzer`) and the camera scripts
+still work.
 
 ### 2. Speech engine (espeak)
 
@@ -254,6 +306,24 @@ When the conditions line up (elevated HR + someone present + watch connected) th
   remembered for that person.
 - **No** → the Ohbot says "Hello there.", and that's remembered too.
 - **Same person again** → no prompt; the robot repeats the remembered behaviour.
+
+### Voice modality (instead of the camera)
+
+To run the microphone-based pipeline, enroll the owner's **voice** once, then run
+the voice demo — the watch consent + memory + Ohbot behaviour is identical:
+
+```bash
+cd interface/presence
+python enroll_owner_voice.py    # speak alone for a bit; 'q' in the window to finish
+python demo_voice_cache_memory.py   # NO_OHBOT=1 to run without the robot
+```
+
+On startup the voice demo calibrates the mic to the room (stay quiet for ~1.5 s),
+then shows a small status window with a live level meter. A trial fires when your
+heart rate is elevated, the watch is connected, and **a non-owner voice is
+heard** — at which point the watch prompts exactly as in the camera demo. Press
+`q` in the status window to quit (the first run may trigger a macOS Microphone
+permission prompt for your terminal / IDE).
 
 ---
 
@@ -327,13 +397,16 @@ per-machine state — not source):
 | File | Created by | Contents |
 | --- | --- | --- |
 | `models/*.onnx` | `face_id.ensure_models()` | YuNet + SFace weights, auto-downloaded once. |
-| `owner_face.json` | `enroll_owner.py` | Averaged owner face embedding + enrollment metadata. |
-| `face_db.json` | `demo_cache_memory.py` | Bystander face gallery (stable `person_NNN` IDs). |
-| `consent_cache.json` | `demo_cache_memory.py` | The remembered Yes/No decisions, keyed by bystander. |
+| `owner_face.json` | `enroll_owner.py` | Averaged owner **face** embedding + metadata. |
+| `face_db.json` | `demo_cache_memory.py` | Bystander **face** gallery (stable `person_NNN` IDs). |
+| `consent_cache.json` | `demo_cache_memory.py` | Remembered Yes/No decisions (camera), keyed by bystander. |
+| `owner_voice.json` | `enroll_owner_voice.py` | Averaged owner **voice** embedding + metadata. |
+| `voice_db.json` | `demo_voice_cache_memory.py` | Bystander **voice** gallery (stable `person_NNN` IDs). |
+| `consent_cache_voice.json` | `demo_voice_cache_memory.py` | Remembered Yes/No decisions (voice), keyed by bystander. |
 
-Delete `consent_cache.json` to make the robot "forget" all preferences; delete
-`face_db.json` to reset bystander identities; re-run `enroll_owner.py` to replace
-the owner template.
+Delete a `consent_cache*.json` to make the robot "forget" all preferences for that
+modality; delete a `*_db.json` to reset bystander identities; re-run the matching
+`enroll_owner*` script to replace an owner template.
 
 ---
 
