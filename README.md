@@ -65,6 +65,24 @@ The end-to-end behaviour, in order:
 
 ---
 
+## Two consent policies
+
+The project ships **two** runtime scripts that share an identical sensing and
+face-recognition pipeline and differ only in *how consent is handled*:
+
+| Script | Consent behaviour | Memory |
+| --- | --- | --- |
+| [`demo_cache_memory.py`](interface/presence/demo_cache_memory.py) | Asks the first time it sees a given person; reuses that answer afterwards. | **Remembers** each person's Yes/No (`consent_cache.json`). |
+| [`demo_reconsent.py`](interface/presence/demo_reconsent.py) | Asks **every single time** the situation arises, even for the same person. | **Forgets** — no decision is ever stored. |
+
+Both still **recognise** people (the owner is filtered out and bystanders get
+stable IDs in the shared `face_db.json` gallery); the difference is purely whether
+a recognised person's earlier answer is reused (`cache_memory`) or ignored
+(`reconsent`). The `reconsent` script is the privacy baseline the cache-memory
+policy is compared against in the thesis.
+
+---
+
 ## How it works
 
 ```
@@ -137,7 +155,8 @@ Windows, but the lab kit runs on macOS/Linux).
 ├── interface/
 │   ├── requirements.txt        # Laptop deps (opencv, bleak, ohbot)
 │   └── presence/
-│       ├── demo_cache_memory.py  # ▶ MAIN APP — the full pipeline / entry point
+│       ├── demo_cache_memory.py  # ▶ MAIN APP — full pipeline, REMEMBERS each decision
+│       ├── demo_reconsent.py     # Baseline — same pipeline but ALWAYS re-asks (no memory)
 │       ├── enroll_owner.py       # One-time owner face enrollment (run first)
 │       ├── policy.py             # BLE client (HR + ask_consent) + consent memory store
 │       ├── face_id.py            # YuNet detection + SFace embeddings (auto-downloads models)
@@ -218,7 +237,9 @@ you from others. Press `q` to finish. Re-run any time to re-enroll.
 
 ```bash
 cd interface/presence
-python demo_cache_memory.py
+python demo_cache_memory.py     # remembers each person's decision
+# or, for the always-ask baseline (never remembers):
+# python demo_reconsent.py
 ```
 
 You'll see a camera preview with a live status overlay (face count, BPM, watch
