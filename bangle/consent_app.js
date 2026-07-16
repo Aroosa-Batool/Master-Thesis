@@ -1,15 +1,20 @@
-// consent_app.js -- Bangle.js: HR broadcast + private consent prompt.
+// consent_app.js -- Bangle.js: private consent prompt + wrist notifications.
 //
 // Provides a wrist-side consent channel for the thesis "watch as
-// private disclosure channel" pipeline. Two things happen on the watch:
+// private disclosure channel" pipeline. The watch:
 //
-//   1. Continuously broadcast "BPM:<n>" lines over Nordic UART.
-//   2. Expose a global `consent(id, msg)` function. When the laptop
-//      sends a line like `consent("p17","Allow private reminder?")` to
-//      the UART, Espruino's REPL evaluates it, the watch buzzes and
-//      shows a Yes/No prompt, and the answer comes back as a single
-//      line: "CONSENT:p17:YES" or "CONSENT:p17:NO". The id is a free-
-//      form correlation token chosen by the laptop.
+//   - Exposes a global `consent(id, msg)` function. When the laptop
+//     sends a line like `consent("p17","Allow private reminder?")` to
+//     the UART, Espruino's REPL evaluates it, the watch buzzes and
+//     shows a Yes/No prompt, and the answer comes back as a single
+//     line: "CONSENT:p17:YES" or "CONSENT:p17:NO". The id is a free-
+//     form correlation token chosen by the laptop.
+//   - Exposes a global `notify(msg)` function that shows a one-way
+//     private note on the wrist (used to deliver a reminder privately).
+//
+// The watch stays connected over BLE; the laptop uses that link as the
+// owner-presence signal. (The earlier heart-rate broadcast was removed -
+// reminders are now the only trigger.)
 //
 // HOW TO RUN:
 //   1. Open https://www.espruino.com/ide/ in Chrome/Edge.
@@ -22,8 +27,8 @@
 // Why echo(0): with the default REPL echo on, every character we send
 // from the laptop ("consent(...)") gets reflected back on the same UART
 // the laptop is reading - we'd see ">consent(...)" plus an "=undefined"
-// result line, plus a stray ">" prompt prefixed onto the next BPM
-// frame, breaking the line parser. echo(0) keeps the wire clean.
+// result line, plus a stray ">" prompt prefixed onto the next line,
+// breaking the line parser. echo(0) keeps the wire clean.
 //
 // We call echo(0) once at module load AND from NRF.on('connect', ...)
 // because Espruino re-enables echo on every new BLE connection
@@ -37,92 +42,113 @@ NRF.on('connect', function () { echo(0); });
 Bangle.setLCDPower(1);
 Bangle.setLocked(false);
 
-// "broadcast" tag lets us turn the HRM off by name later without
-// touching other parts of the OS.
-Bangle.setHRMPower(1, "broadcast");
-
-var lastBpm = 0;
-var lastBpmTime = 0;
-var lastConf = 0;
-var lastLogMs = 0;
-// If we don't get a confident reading for this long, the displayed bpm
-// is treated as stale and we show "no signal".
-var STALE_MS = 10000;
-
-Bangle.on("HRM", function (hrm) {
-  lastConf = hrm.confidence;
-  if (hrm.confidence < 30) return;
-  lastBpm = hrm.bpm;
-  lastBpmTime = Date.now();
-  // Bluetooth.println is the ONLY thing we want on the UART. The
-  // earlier console.log() debug line went to the same console (BLE
-  // when connected) and polluted the laptop's line parser, so it's
-  // gone - the laptop already logs every BPM frame it parses.
-  Bluetooth.println("BPM:" + hrm.bpm);
-});
-
+// Idle screen shown between prompts: just confirms the consent channel is
+// live. A consent()/notify() call takes over the screen and restoreScreen()
+// brings this back afterwards.
 function redraw() {
   g.reset();
   g.clear();
   g.setFont("Vector", 22);
-  g.drawString("HR broadcast", 10, 30);
-  g.setFont("Vector", 32);
-  var stale = !lastBpm || (Date.now() - lastBpmTime) > STALE_MS;
-  g.drawString(stale ? "no signal" : lastBpm + " bpm", 10, 70);
-  g.setFont("Vector", 14);
-  g.drawString("conf " + lastConf, 10, 130);
+  g.drawString("Robot linked", 10, 40);
+  g.setFont("Vector", 16);
+  g.drawString("consent ready", 10, 90);
   g.flip();
 }
 
 var redrawTimer = setInterval(redraw, 1000);
 redraw();
 
-// Called by the laptop over UART. Pauses the HR redraw, buzzes, and
-// shows a touch Yes/No prompt. The answer is sent back as a single
-// CONSENT line keyed by `id` so the laptop can correlate concurrent
-// prompts (only one is expected at a time, but the id makes the
-// protocol robust to retries or stale replies).
+// Called by the laptop over UART. Pauses the idle redraw, buzzes, and shows a
+// touch Yes/No prompt; the answer is sent back as one CONSENT line keyed by
+// `id` so the laptop can correlate replies.
 //
-// pendingConsent guards re-entrancy: if a second consent() arrives
-// while the first prompt is still on screen, we immediately reply NO
-// for the new id and skip the UI. Without the guard, two overlapping
-// E.showPrompt calls would each schedule their own .then closure,
-// leak setInterval handles, and only the topmost prompt would be
-// actionable - the user would answer one prompt and see a stale
-// message underneath.
+// Robustness (this used to be broken): the laptop asks one prompt at a time
+// and gives up after ~30 s, but E.showPrompt stays on screen until tapped. The
+// old design left `pendingConsent` set forever if the user never tapped, then
+// auto-replied NO to EVERY future request. Two mechanisms prevent that now:
+//   - CONSENT_MS timeout: an unanswered prompt auto-dismisses and clears
+//     pendingConsent WITHOUT sending a reply (the laptop treats no-answer as a
+//     safe non-disclosure and does not cache it), so the next request gets a
+//     fresh prompt; and
+//   - a `uiSeq` token: showing a new prompt/note bumps the token, so a
+//     superseded prompt's late tap/reject/timeout callbacks become no-ops
+//     instead of corrupting the current prompt's state.
+var CONSENT_MS = 30000;   // auto-dismiss an unanswered prompt (~laptop timeout)
 var pendingConsent = null;
-function consent(id, msg) {
-  if (pendingConsent !== null) {
-    Bluetooth.println("CONSENT:" + id + ":NO");
-    return;
+var uiSeq = 0;            // bumped each time a prompt/note takes over the screen
+var uiTimer = null;
+
+function restoreScreen() {
+  // Bring back the idle "Robot linked" screen after a prompt/note clears.
+  if (!redrawTimer) {
+    redrawTimer = setInterval(redraw, 1000);
   }
+  redraw();
+}
+
+function consent(id, msg) {
+  var seq = ++uiSeq;      // this prompt now owns the screen
+  var handled = false;    // fires once (guards tap-vs-timeout race)
+  if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
   pendingConsent = id;
   if (redrawTimer) {
     clearInterval(redrawTimer);
     redrawTimer = null;
   }
   Bangle.buzz(400);
-  // done() centralises cleanup so both resolve and reject paths
-  // restore the HR redraw exactly once and always send a reply.
-  // Without the .catch, a rejected prompt (e.g. the firmware tears
-  // down showPrompt under the hood) would leave the watch UI frozen
-  // with no HR redraw and no CONSENT line to the laptop, so the
-  // demo's worker would just time out and the watch screen would
-  // stay stuck until the next reboot.
-  function done(answer) {
-    Bluetooth.println("CONSENT:" + id + ":" + answer);
-    pendingConsent = null;
-    if (!redrawTimer) {
-      redrawTimer = setInterval(redraw, 1000);
+  // finish() runs for whichever of tap / firmware-reject / timeout comes first.
+  // answer === null means "timed out - send nothing". The seq guard drops it if
+  // a newer prompt has already superseded this one.
+  function finish(answer) {
+    if (handled || seq !== uiSeq) return;
+    handled = true;
+    if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+    if (answer !== null) {
+      Bluetooth.println("CONSENT:" + id + ":" + answer);
     }
-    redraw();
+    pendingConsent = null;
+    restoreScreen();
   }
+  uiTimer = setTimeout(function () {
+    E.showPrompt();        // remove the unanswered prompt
+    finish(null);
+  }, CONSENT_MS);
   E.showPrompt(msg, {
     title: "Robot asks",
     buttons: { "Yes": 1, "No": 0 }
   }).then(function (answer) {
-    done(answer ? "YES" : "NO");
+    finish(answer ? "YES" : "NO");
   }).catch(function (err) {
-    done("NO");
+    finish("NO");
   });
+}
+
+// Called by the laptop over UART, like consent(), but one-way: it shows a
+// PRIVATE message on the watch and sends nothing back. Used to deliver a
+// reminder privately to the wrist when the user tapped No to disclosure - so
+// the owner still gets the information, just privately here instead of spoken
+// aloud in front of the bystander.
+//
+// A note supersedes any prompt on screen: it bumps uiSeq (neutralising a stale
+// consent prompt's callbacks), cancels the consent timeout, and clears
+// pendingConsent - so it also self-heals a consent prompt the user never
+// dismissed. Buzzes, shows the note with a single OK button, and restores the
+// idle screen once acknowledged.
+function notify(msg) {
+  var seq = ++uiSeq;
+  if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+  pendingConsent = null;
+  if (redrawTimer) {
+    clearInterval(redrawTimer);
+    redrawTimer = null;
+  }
+  Bangle.buzz(400);
+  function restore() {
+    if (seq !== uiSeq) return;
+    restoreScreen();
+  }
+  E.showPrompt(msg, {
+    title: "Private note",
+    buttons: { "OK": 1 }
+  }).then(restore).catch(restore);
 }

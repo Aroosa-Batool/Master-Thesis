@@ -1,0 +1,7 @@
+name,stage,ok,init_ms,lat_median_ms,lat_p95_ms,lat_mean_ms,fps,rtf,peak_rss_mb,model_size_mb,embedding_dim,deploy,accuracy,error
+rms,vad,True,0.00,0.003,0.003,0.003,363633.59,0.0001,198.5,0.00,,builtin; zero deps,,
+webrtc,vad,True,0.00,0.004,0.004,0.004,266666.71,0.0001,200.7,0.00,,pip; tiny (already a dep),,
+silero,vad,True,31.03,0.086,0.092,0.088,11571.87,0.0027,370.4,10.80,,pip; torch (already a dep),,
+resemblyzer,speaker,True,13.92,23.743,24.448,23.768,42.12,0.0040,379.4,16.30,256,pip; weights bundled (no download),,
+ecapa,speaker,True,14333.63,31.277,32.099,31.382,31.97,0.0052,600.5,84.86,192,pip; downloads ~20-80MB from HF,,
+xvector,speaker,True,9465.43,5.983,6.242,6.031,167.14,0.0010,388.0,31.36,512,pip; downloads ~20-80MB from HF,,

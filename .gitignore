@@ -43,17 +43,16 @@ data/recordings/
 # Generated TTS output the ohbot SDK writes into the CWD on each say().
 ohbotspeech.wav
 
-# Face recognition: ONNX model weights (~37MB) auto-downloaded by
-# face_id.ensure_models() on first run, and the runtime face-identity
-# gallery + consent cache + owner enrollment (user data, not source).
-interface/presence/models/
-interface/presence/face_db.json
-interface/presence/consent_cache.json
-interface/presence/owner_face.json
+# All runtime state lives under robot/state/ (see robot/paths.py) and is user
+# data / auto-downloaded weights, never source: the face + voice bystander
+# galleries, the per-modality consent caches, the owner face/voice enrollments,
+# the reminders list, and the ~37 MB YuNet/SFace ONNX weights that
+# face_id.ensure_models() downloads on first run. Ignore the whole directory.
+robot/state/
 
-# Voice modality: runtime speaker-identity gallery + consent cache + owner
-# voice enrollment (user data, not source). Resemblyzer's model weights ship
-# inside the pip package, so there is nothing to ignore for those.
-interface/presence/voice_db.json
-interface/presence/consent_cache_voice.json
-interface/presence/owner_voice.json
+# Algorithm-comparison benchmark (robot/bench/): downloaded challenger model
+# weights (SSD caffemodel, BlazeFace tflite, SpeechBrain/InsightFace caches) and
+# the user-recorded eval set (faces/voices - personal data). The bench scripts
+# and committed results/*.csv|md stay tracked.
+robot/bench/models/
+robot/bench/eval_data/

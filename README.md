@@ -1,19 +1,21 @@
 # Presence-Aware Social Robot with Watch-Mediated Consent
 
-A master's-thesis prototype in which a desktop social robot (**Ohbot**) reacts to
-the wearer's **heart rate** and to **who else is in the room**, but only ever
-discloses private wellbeing prompts *out loud* after the wearer gives **consent
-on their smartwatch** (a **Bangle.js**). The robot then **remembers each
-person's decision** so it never asks twice about the same bystander.
+A master's-thesis prototype in which a desktop social robot (**Ohbot**) delivers
+scheduled **private reminders** (e.g. a doctor's appointment), reacting to **who
+else is in the room**, but only ever discloses a *sensitive* reminder *out loud*
+after the wearer gives **consent on their smartwatch** (a **Bangle.js**). The
+robot then **remembers each person's decision** so it never asks twice about the
+same bystander.
 
 The design goal is a GDPR-flavoured privacy model: sensitive content is never
 surfaced in front of a third party without an explicit, in-the-moment, *private*
 "yes" from the data subject — and that "yes" (or "no") is given on the watch, not
 spoken aloud and not typed on the laptop.
 
-> **Input policy:** the laptop terminal never takes interactive input during a
-> session. Every decision is made **on the watch** (Yes/No buttons); the only
-> laptop interaction is pressing `q` in the camera preview window to quit.
+> **Input policy:** the laptop terminal never takes consent input during a live
+> session. Every disclosure decision is made **on the watch** (Yes/No buttons);
+> the live camera/voice demos only use `q` in their OpenCV window to quit.
+> One-time enrollment and reminder creation do use terminal confirmation.
 
 ---
 
@@ -23,6 +25,7 @@ spoken aloud and not typed on the laptop.
 - [How it works](#how-it-works)
 - [Hardware](#hardware)
 - [Repository layout](#repository-layout)
+- [Documentation](#documentation)
 - [Setup](#setup)
 - [Running a session](#running-a-session)
 - [What the robot says](#what-the-robot-says)
@@ -37,67 +40,83 @@ spoken aloud and not typed on the laptop.
 
 The end-to-end behaviour, in order:
 
-1. **Read heart rate from the watch.** The Bangle.js streams live BPM to the
-   laptop over Bluetooth Low Energy (BLE).
+1. **Add a reminder ahead of time.** You speak a reminder to the robot (e.g.
+   *"remind me about my doctor's appointment at 3 PM"*); Whisper transcribes it,
+   dateparser extracts the time, and a local **AI classifier labels it sensitive
+   or not** (health/finance/personal vs. an everyday errand). See
+   [Voice reminders](#voice-reminders-schedule-private-content-by-voice).
 2. **Connect the Ohbot to the watch pipeline.** One laptop process holds the BLE
    link to the watch *and* the USB serial link to the Ohbot, so the robot can act
    on watch events.
-3. **Detect an elevated heart rate.** BPM above a threshold, sustained for a few
-   seconds, is what arms the robot to act.
-4. **Enroll the owner once, by camera.** Before the first session you sit in
-   front of the webcam and the system learns your face, so it can later tell *you*
-   (the watch-wearer) apart from other people.
-5. **Sense who is present.** The webcam watches the scene and decides whether
-   anyone is in view.
-6. **Ask for consent on the watch (GDPR step).** If the wearer's heart rate is
-   elevated **and** someone else is present, the robot does **not** blurt out a
-   private message. Instead the watch **buzzes and shows a Yes/No prompt**:
-   *"I have noticed that someone is present with you. Do you want me to send
-   private reminders in front of them?"*
-7. **Yes → the robot suggests a wellbeing action.** The Ohbot speaks the private
-   prompt out loud, e.g. *"...would you like to take a few deep breaths
-   together?"*
-8. **Remember the decision per person.** The answer is cached against that
+3. **Enroll the owner once.** Before the first session you enroll your face
+   (camera) or voice, so the system can later tell *you* (the watch-wearer) apart
+   from other people.
+4. **Sense who is present.** When a reminder is due, the robot senses whether
+   anyone else is around — the **webcam** watches for faces, or the **microphone**
+   listens for other voices.
+5. **When a reminder becomes due, deliver it.** A **non-sensitive** reminder is
+   simply spoken. A **sensitive** one is presence-gated: with the owner alone it
+   is spoken; with someone else present the robot does **not** blurt it out —
+   instead the watch **buzzes and shows a Yes/No prompt**: *"I have noticed that
+   someone is present with you. Do you want me to send private reminders in front
+   of them?"*
+6. **Yes → the robot speaks the reminder.** *"Here is your reminder. …"*
+   **No → it stays neutral** (*"Hello there."*) and the reminder is delivered
+   **privately to the wrist** instead.
+7. **Remember the decision per person.** The answer is cached against that
    specific bystander. The **next** time the same person is present, the robot
-   **does not ask again** — it just repeats the remembered behaviour.
-9. **No → the robot stays neutral.** The Ohbot simply greets: *"Hello there."*
-   and the private content is withheld.
+   **does not ask again** — it reuses the remembered choice.
 
 ---
 
-## Two consent policies
+## Four delivery apps: two consent policies × two modalities
 
-The project ships **two** runtime scripts that share an identical sensing and
-face-recognition pipeline and differ only in *how consent is handled*:
+The project's delivery apps form a **2×2** — the **same** consent-memory contrast
+runs in **both** sensing modalities, giving **four** runnable apps that share an
+identical sensing and recognition pipeline and differ only in *how consent is
+handled* and *which sensor* detects presence (all launch as
+`python -m robot.apps.<name>`):
 
-| Script | Consent behaviour | Memory |
+| | **Camera** (webcam) | **Microphone** (voice) |
 | --- | --- | --- |
-| [`demo_cache_memory.py`](interface/presence/demo_cache_memory.py) | Asks the first time it sees a given person; reuses that answer afterwards. | **Remembers** each person's Yes/No (`consent_cache.json`). |
-| [`demo_reconsent.py`](interface/presence/demo_reconsent.py) | Asks **every single time** the situation arises, even for the same person. | **Forgets** — no decision is ever stored. |
+| **Remembers** preference (cache-memory) | [`camera_remember`](robot/apps/camera_remember.py) | [`mic_remember`](robot/apps/mic_remember.py) |
+| **Re-asks** every time (re-consent) | [`camera_reask`](robot/apps/camera_reask.py) | [`mic_reask`](robot/apps/mic_reask.py) |
 
-Both still **recognise** people (the owner is filtered out and bystanders get
-stable IDs in the shared `face_db.json` gallery); the difference is purely whether
+The two **columns** differ only in the sensor (and embedding model); the two
+**rows** differ only in how a recognised person's earlier answer is treated:
+
+| Policy | Consent behaviour | Memory |
+| --- | --- | --- |
+| **remember** (cache-memory) | Asks the first time it sees/hears a given person; reuses that answer afterwards. | **Remembers** each person's Yes/No (`consent_cache*.json`). |
+| **reask** (re-consent) | Asks **every single time** the situation arises, even for the same person. | **Forgets** — no decision is ever stored. |
+
+All four still **recognise** people (the owner is filtered out and bystanders get
+stable IDs in the shared per-modality gallery); the difference is purely whether
 a recognised person's earlier answer is reused (`cache_memory`) or ignored
-(`reconsent`). The `reconsent` script is the privacy baseline the cache-memory
-policy is compared against in the thesis.
+(`reconsent`). The **remember** apps store a bystander's Yes/No and reuse it —
+the thesis's "remembers their privacy preferences" (the Privacy Management arm);
+the **reask** apps ask the watch every time and store nothing — the Consent
+baseline the cache-memory policy is compared against. That contrast now exists in
+**both** modalities (four apps), not just the camera; the voice re-ask app
+(`mic_reask`) is new, where previously only the camera had a re-consent baseline.
 
 ---
 
 ## Sensing modalities — camera and voice
 
 "Is someone present with the user, and who are they?" can be answered two ways.
-Both feed the **same** downstream logic (heart-rate gate → watch consent →
-disclose/withhold → per-person memory); they differ only in the sensor and the
-embedding model.
+Both feed the **same** downstream logic (reminder due → presence check → watch
+consent → disclose/withhold → per-person memory); they differ only in the sensor
+and the embedding model.
 
-| | **Camera** (`demo_cache_memory.py`) | **Voice** (`demo_voice_cache_memory.py`) |
+| | **Camera** (`camera_remember.py`) | **Voice** (`mic_remember.py`) |
 | --- | --- | --- |
 | Sensor | Webcam | Microphone |
 | Presence cue | A face is in view | Someone is speaking |
 | Identity model | YuNet detect + **SFace** 128-D face embedding | **Resemblyzer** 256-D speaker "d-vector" |
-| Owner enrollment | [`enroll_owner.py`](interface/presence/enroll_owner.py) | [`enroll_owner_voice.py`](interface/presence/enroll_owner_voice.py) |
+| Owner enrollment | [`enroll_face.py`](robot/apps/enroll_face.py) | [`enroll_voice.py`](robot/apps/enroll_voice.py) |
 | Owner vs. bystander | per **face**, cosine similarity | per **~1.6 s voiced window**, cosine similarity |
-| Quit | `q` in the camera window | `q` in the status window |
+| Quit | `q` in the camera window | `Ctrl-C` in the terminal |
 
 Both modalities use the **same** owner-vs-bystander idea (subtract the enrolled
 owner; everyone else is a bystander with a stable auto-minted ID) and in fact
@@ -124,49 +143,46 @@ state, so a voice `person_001` and a face `person_001` never collide:
 
 ```
    ┌──────────────┐   BLE (Nordic UART)    ┌───────────────────────────────┐
-   │  Bangle.js   │ ─── BPM:<n> ─────────▶ │           Laptop              │
-   │   watch      │ ◀── consent(id,msg) ── │  demo_cache_memory.py         │
-   │              │ ─── CONSENT:id:YES ──▶ │                               │
-   │ HR + buzzer  │                        │  ┌─────────┐  ┌─────────────┐ │
-   │ Yes/No touch │                        │  │ BLE     │  │ webcam      │ │
+   │  Bangle.js   │ ◀── consent(id,msg) ── │           Laptop              │
+   │   watch      │ ─── CONSENT:id:YES ──▶ │  camera_remember.py /             │
+   │              │ ◀── notify(msg) ─────── │  mic_remember.py             │
+   │ buzzer +     │                        │  ┌─────────┐  ┌─────────────┐ │
+   │ Yes/No touch │                        │  │ BLE     │  │ webcam/mic  │ │
    └──────────────┘                        │  │ client  │  │ presence +  │ │
-                                           │  │ (HR +   │  │ face ID     │ │
-   ┌──────────────┐   USB serial           │  │ consent)│  │ (YuNet/SFace)│ │
+                                           │  │ (consent│  │ face/voice  │ │
+   ┌──────────────┐   USB serial           │  │  +notify)│  │ ID          │ │
    │    Ohbot     │ ◀───────────────────── │  └─────────┘  └─────────────┘ │
-   │  (speech +   │                        │        consent cache (memory) │
+   │  (speech +   │                        │   reminders + consent cache   │
    │   motors)    │                        └───────────────────────────────┘
    └──────────────┘
 ```
 
 The laptop runs the orchestration ("intermediate layer"). Each piece:
 
-- **Presence sensing.** Every camera frame is run through a fast Haar-cascade face
-  detector to get a face count. A 15-second sliding window votes on whether a face
-  is reliably *in view* (≥70 % of frames) or reliably *absent* (≤30 %), so the
-  robot reacts to a stable situation rather than to one flickery frame.
+- **The trigger.** Delivery is triggered by a **reminder becoming due** — a
+  scheduled piece of private content added ahead of time with
+  [`add_reminder.py`](robot/apps/add_reminder.py). Each
+  reminder is labelled **sensitive or not** by a local AI classifier; only
+  sensitive reminders are presence-gated.
+- **Presence sensing.** When a sensitive reminder is due, the robot checks who
+  else is around. In the **camera** demo every frame runs a fast Haar detector for
+  a face count, and YuNet+SFace identify who is in view at delivery time. In the
+  **voice** runner the mic records the window before the reminder and Resemblyzer
+  identifies any other speaker.
 - **Owner vs. bystander.** *Owner presence in the room* is taken from the **BLE
   link**: while the watch is connected (Bangle.js reaches ~10 m ≈ "same room"),
-  the owner is assumed present even if not on camera. *Who is on camera* is
-  resolved at decision time with **YuNet** (precise face boxes) + **SFace**
-  (128-D face embeddings). Any face matching the enrolled owner template is
-  filtered out; every other face is a **bystander** and is given a stable
-  `person_NNN` ID in a local face gallery.
-- **The trigger.** The robot starts a "trial" only when **all** of these hold:
-  the heart rate is elevated and stable, a face is reliably in view, and the watch
-  is connected. It fires once per encounter and re-arms when the scene changes
-  (camera empties, HR settles, watch drops, or a new person arrives).
-- **Consent + memory.** On a trial, the system builds a key from the bystander
-  ID(s). If that key already has a remembered Yes/No, it acts immediately with no
-  prompt. Otherwise it asks the watch and stores whatever the user taps. The store
-  is a small JSON file, so memory survives restarts.
+  the owner is assumed present even if not on camera / not talking — so a due
+  reminder is **held** until the watch is in range. *Who else is present* is
+  resolved at delivery time; any face/voice matching the enrolled owner is
+  filtered out, and every other one is a **bystander** with a stable `person_NNN`
+  ID in a local gallery.
+- **Consent + memory.** With a bystander present, the system builds a key from the
+  bystander ID(s). If that key already has a remembered Yes/No it acts immediately
+  with no prompt; otherwise it asks the watch and stores whatever the user taps.
+  The store is a small JSON file, so memory survives restarts.
 - **Privacy-safe defaults.** If the watch doesn't answer within the timeout, or
-  the BLE link drops mid-prompt, the robot **withholds** (treats it as "no") and
-  does **not** cache that non-answer as a preference.
-
-> **Note on the heart-rate gate:** the robot only acts on a *genuinely* elevated,
-> sustained reading (see [Configuration](#configuration-reference)). If you want to
-> exercise the consent/memory flow without raising your pulse, see
-> [Troubleshooting](#troubleshooting).
+  the BLE link drops mid-prompt, the robot **withholds** (delivers the reminder
+  privately to the wrist) and does **not** cache that non-answer as a preference.
 
 ---
 
@@ -174,9 +190,9 @@ The laptop runs the orchestration ("intermediate layer"). Each piece:
 
 | Device | Role | Connection |
 | --- | --- | --- |
-| **Bangle.js** smartwatch | Heart-rate source + private Yes/No consent screen + buzzer | BLE |
+| **Bangle.js** smartwatch | Private Yes/No consent screen + wrist notifications + buzzer | BLE |
 | **Ohbot** desktop robot | Speech (espeak TTS + lip-sync) and head/eye motion | USB serial |
-| **Laptop** with webcam | Runs the pipeline; webcam does presence + face ID | — |
+| **Laptop** with webcam and microphone | Runs the pipeline; camera or mic senses presence and identity | — |
 
 Tested on **macOS** and **Linux** (the BLE layer, `bleak`, also abstracts
 Windows, but the lab kit runs on macOS/Linux).
@@ -187,35 +203,72 @@ Windows, but the lab kit runs on macOS/Linux).
 
 ```
 .
+├── README.md
+├── requirements.txt            # Laptop deps (opencv, bleak, ohbot, voice) — was interface/requirements.txt
 ├── bangle/
-│   └── consent_app.js          # Runs ON the watch: HR broadcast + Yes/No consent
-├── interface/
-│   ├── requirements.txt        # Laptop deps (opencv, bleak, ohbot)
-│   └── presence/
-│       │   # ── Camera modality ──────────────────────────────────────
-│       ├── demo_cache_memory.py        # ▶ camera app — full pipeline, REMEMBERS decisions
-│       ├── demo_reconsent.py           # camera baseline — ALWAYS re-asks (no memory)
-│       ├── enroll_owner.py             # one-time owner FACE enrollment
-│       │   # ── Voice modality ───────────────────────────────────────
-│       ├── demo_voice_cache_memory.py  # ▶ voice app — same flow, mic instead of camera
-│       ├── enroll_owner_voice.py       # one-time owner VOICE enrollment
-│       ├── voice_id.py                 # Resemblyzer speaker (d-vector) embeddings
-│       │   # ── Shared ───────────────────────────────────────────────
-│       ├── policy.py             # BLE client (HR + ask_consent) + consent memory store
-│       ├── face_id.py            # YuNet detection + SFace face embeddings (auto-downloads)
-│       ├── face_db.py            # Embedding gallery → stable IDs (reused for faces AND voices)
-│       └── owner.py              # Owner template store + matcher (reused for face AND voice)
+│   └── consent_app.js          # Runs ON the watch: Yes/No consent prompt + notify()
 ├── ohbot/
-│   ├── requirements.txt        # Ohbot-only dep (subset of interface/requirements.txt)
+│   ├── requirements.txt        # Ohbot-only dep (subset of requirements.txt)
 │   └── ohbotData/              # Ohbot SDK runtime templates (motors, voice, settings)
-└── docs/
-    └── literature_review.md    # Thesis background reading
+├── docs/
+│   ├── README.md               # Documentation index
+│   ├── codebase_guide.md       # Entry points, modules, state, and current caveats
+│   ├── design_hld.md           # Requirements, consent model, and privacy rationale
+│   ├── technical_hld.md        # Algorithms, interfaces, concurrency, and deployment
+│   ├── algorithm_comparison.md # Benchmark-backed algorithm selection
+│   └── literature_review.md    # Thesis background reading
+└── robot/                      # The Python package — run apps as: python -m robot.apps.<name>
+    ├── __init__.py
+    ├── paths.py                # Centralised state/model paths (robot/state)
+    ├── apps/                   # ▶ Runnable entry points (python -m robot.apps.<name>)
+    │   │   # ── Camera modality (reminder-triggered) ─────────────────
+    │   ├── camera_remember.py      # ▶ camera app — REMEMBERS each bystander's consent
+    │   ├── camera_reask.py         # camera baseline — RE-ASKS every time (no memory)
+    │   ├── enroll_face.py          # one-time owner FACE enrollment
+    │   │   # ── Voice modality (reminder-triggered) ──────────────────
+    │   ├── add_reminder.py         # ▶ add a reminder by voice (Whisper + dateparser)
+    │   ├── mic_remember.py         # ▶ voice app — REMEMBERS consent (cache-memory)
+    │   ├── mic_reask.py            # voice baseline — RE-ASKS every time (no memory)
+    │   └── enroll_voice.py         # one-time owner VOICE enrollment
+    ├── core/                   # Domain + robot I/O + consent
+    │   ├── reminders.py            # reminder store (JSON, time-based)
+    │   ├── sensitivity.py          # AI classifier: is a reminder sensitive? (text embedding + cosine)
+    │   ├── voice_reminder.py       # shared voice engine behind mic_remember / mic_reask
+    │   ├── policy.py               # BLE client (is_connected + ask_consent + notify) + consent memory
+    │   ├── owner.py                # Owner template store + matcher (reused for face AND voice)
+    │   └── robot_io.py             # Ohbot glue + reminder speech — SUPPORT module (imported by voice_reminder)
+    ├── perception/             # Sensing + identity
+    │   ├── face_id.py              # YuNet detection + SFace face embeddings (auto-downloads)
+    │   ├── face_db.py              # Embedding gallery → stable IDs (reused for faces AND voices)
+    │   ├── voice_id.py             # Resemblyzer speaker (d-vector) embeddings
+    │   └── audio_device.py         # mic input-device selection (shared by the voice scripts)
+    ├── bench/                  # Algorithm-comparison benchmark
+    └── state/                  # GITIGNORED runtime data + downloaded ONNX weights
+        ├── reminders.json, face_db.json, voice_db.json, owner_face.json,
+        │   owner_voice.json, consent_cache.json, consent_cache_voice.json
+        └── models/*.onnx           # YuNet + SFace weights, auto-downloaded once
 ```
 
-Generated/local files that are **not** committed (see `.gitignore`): the
-downloaded ONNX models (`interface/presence/models/`), the runtime JSON state
-(`owner_face.json`, `face_db.json`, `consent_cache.json`), and the Ohbot TTS
-output (`ohbotspeech.wav`).
+Generated/local files include the downloaded ONNX models
+(`robot/state/models/`), biometric templates/galleries, consent caches, and
+scheduled reminders (`reminders.json`, which can hold private text) — all of
+which live under `robot/state/` and are gitignored — plus the Ohbot TTS output
+(`ohbotspeech.wav`).
+
+---
+
+## Documentation
+
+For a single page that can be copied into Confluence, use
+[`docs/confluence_system_documentation.md`](docs/confluence_system_documentation.md).
+Use [`docs/README.md`](docs/README.md) as the full documentation index. The
+[`codebase guide`](docs/codebase_guide.md) maps entry points to modules and
+documents runtime JSON schemas and current implementation caveats. The
+[`design HLD`](docs/design_hld.md) captures the privacy and interaction intent;
+the [`technical HLD`](docs/technical_hld.md) covers algorithms, protocols,
+thresholds, and concurrency. Algorithm evidence and reproduction instructions
+live in [`docs/algorithm_comparison.md`](docs/algorithm_comparison.md) and the
+[`benchmark README`](robot/bench/README.md).
 
 ---
 
@@ -226,14 +279,14 @@ output (`ohbotspeech.wav`).
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r interface/requirements.txt
+pip install -r requirements.txt
 ```
 
 This installs `opencv-python`, `bleak` (BLE), and `ohbot`, plus the voice-modality
 deps `sounddevice` (mic) and `resemblyzer` (speaker embeddings — pulls in
 **torch**, so the install is a few hundred MB). The YuNet + SFace face models
 (~37 MB) are **downloaded automatically** on first run into
-`interface/presence/models/`; Resemblyzer's speaker weights ship inside the
+`robot/state/models/`; Resemblyzer's speaker weights ship inside the
 package (no download).
 
 `sounddevice` needs the **PortAudio** system library — bundled in the
@@ -276,8 +329,7 @@ Connect the Ohbot over USB. If your serial port isn't auto-detected, set a hint
 ### Step 1 — Enroll the owner (once)
 
 ```bash
-cd interface/presence
-python enroll_owner.py
+python -m robot.apps.enroll_face
 ```
 
 Sit **alone** in front of the camera and look at it. The script captures ~12 face
@@ -285,45 +337,149 @@ samples, averages them into an owner template (`owner_face.json`), then shows a
 quick live "OWNER / other" similarity check so you can confirm it discriminates
 you from others. Press `q` to finish. Re-run any time to re-enroll.
 
-### Step 2 — Run the robot
+### Step 2 — Add a reminder, then run the robot
+
+Delivery is **reminder-triggered**, so first add a reminder (see
+[Voice reminders](#voice-reminders-schedule-private-content-by-voice) for detail):
 
 ```bash
-cd interface/presence
-python demo_cache_memory.py     # remembers each person's decision
-# or, for the always-ask baseline (never remembers):
-# python demo_reconsent.py
+python -m robot.apps.add_reminder    # say e.g. "remind me about my doctor's appointment in 3 minutes"
 ```
 
-You'll see a camera preview with a live status overlay (face count, BPM, watch
-link, the rolling presence verdict, and the last trial's result). Wear the watch
-snugly so the HRM gets a confident reading. **Press `q` in the camera window to
-quit** — that's the only laptop input.
+Then run the camera app:
 
-When the conditions line up (elevated HR + someone present + watch connected) the
-**watch buzzes and shows the consent prompt**. Tap **Yes** or **No** on the watch:
+```bash
+python -m robot.apps.camera_remember     # remembers each person's decision
+# or, for the always-ask baseline (never remembers):
+# python -m robot.apps.camera_reask
+```
 
-- **Yes** → the Ohbot speaks the deep-breathing suggestion, and the choice is
-  remembered for that person.
-- **No** → the Ohbot says "Hello there.", and that's remembered too.
-- **Same person again** → no prompt; the robot repeats the remembered behaviour.
+You'll see a camera preview with a live overlay (face count, watch link, the next
+reminder's due time, and the last delivery result). **Press `q` in the camera
+window to quit** — that's the only laptop input.
+
+When a reminder becomes due, the robot delivers it based on **who the camera
+sees** (owner presence is the watch BLE link, so a due reminder is held until the
+watch is in range):
+
+- **Non-sensitive reminder** → spoken normally, no consent.
+- **Sensitive + owner alone** (no bystander in view) → spoken.
+- **Sensitive + a bystander in view** → the **watch buzzes and shows the consent
+  prompt**. Tap **Yes** → the Ohbot speaks the reminder (remembered for that
+  person); **No** → the reminder is pushed **privately to the wrist** and the
+  Ohbot only greets (*"Hello there."*).
+- **Same person again** → no prompt; `camera_remember.py` reuses the remembered
+  answer, while `camera_reask.py` re-asks every time.
 
 ### Voice modality (instead of the camera)
 
-To run the microphone-based pipeline, enroll the owner's **voice** once, then run
-the voice demo — the watch consent + memory + Ohbot behaviour is identical:
+The voice equivalent is the **reminder runner** — the same watch consent + memory,
+but it senses bystanders by **microphone** instead of camera. Enroll your voice
+once, then use it exactly like the camera app; see
+[Voice reminders](#voice-reminders-schedule-private-content-by-voice):
 
 ```bash
-cd interface/presence
-python enroll_owner_voice.py    # speak alone for a bit; 'q' in the window to finish
-python demo_voice_cache_memory.py   # NO_OHBOT=1 to run without the robot
+python -m robot.apps.enroll_voice    # speak alone for a bit; 'q' in the window to finish
+python -m robot.apps.mic_remember    # voice, REMEMBERS consent (cache-memory)
+python -m robot.apps.mic_reask       # voice, RE-ASKS every time (re-consent)
+# NO_OHBOT=1 python -m robot.apps.mic_remember   # run without the robot
 ```
 
-On startup the voice demo calibrates the mic to the room (stay quiet for ~1.5 s),
-then shows a small status window with a live level meter. A trial fires when your
-heart rate is elevated, the watch is connected, and **a non-owner voice is
-heard** — at which point the watch prompts exactly as in the camera demo. Press
-`q` in the status window to quit (the first run may trigger a macOS Microphone
-permission prompt for your terminal / IDE).
+### Voice reminders (schedule private content by voice)
+
+You can also ask the robot to **hold a private reminder** — e.g. a doctor's
+appointment — and have it surfaced later under the same consent policy. Add one
+by speaking:
+
+```bash
+python -m robot.apps.add_reminder    # say: "Remind me about my doctor's appointment on July 20th at 3 PM"
+```
+
+It records you, transcribes the command with **Whisper**, extracts the date/time
+with **dateparser**, and classifies whether the reminder is **sensitive** with a
+local AI classifier (see below). The confirm step shows the parse *and* the
+sensitivity label; press `s` to flip the label if the classifier got it wrong,
+then save to `reminders.json`. (Say a *date*, not just a time — "at 9 am" alone
+can misparse; the confirm step also lets you retry.)
+
+**Sensitivity classifier ([`sensitivity.py`](robot/core/sensitivity.py)).**
+Not every reminder is private. "Doctor's appointment" or "Take medication at 8 PM"
+should be gated; "Buy milk" or "Water the plants" can just be said. A
+sentence-transformer embeds the reminder text and compares it (cosine similarity)
+against small labelled example sets for each class — the **same
+embedding-plus-cosine method** the voice (`voice_id.py`) and face (`face_id.py`)
+pipelines use, now applied to text. It runs **fully locally**: the reminder text
+never leaves the device, so the classifier itself doesn't leak what it is trying
+to protect. Borderline cases default to *sensitive* (a needless consent tap is
+cheap; blurting a doctor's appointment aloud is the harm). Tune it by editing the
+example lists or `DECISION_MARGIN`. If `sentence-transformers` isn't installed it
+falls back to a transparent keyword heuristic (and says so).
+
+Then run the reminder runner. It **keeps the microphone off** until a reminder is
+actually due:
+
+```bash
+python -m robot.apps.mic_remember   # NO_OHBOT=1 to use the OS voice instead of the robot
+```
+
+Its pipeline per reminder: poll the clock (no audio) → check the reminder's
+**sensitivity** → confirm the owner is present (watch connected). A
+**non-sensitive** reminder is simply spoken at its time — the mic never opens. A
+**sensitive** one opens a **monitoring window** (default **5 min**, `--lead`)
+ending at the reminder's time: the mic records **continuously** for the whole
+window (no on/off gaps), and the recording is analysed **once, at the due time**.
+Any non-owner voice heard *anywhere* in the window is **remembered**, so it does
+not matter whether they speak at the start or the end. The window **only detects
+who is present**; the consent prompt is **deferred to the due time**, so the watch
+buzzes when the reminder is actually due — not minutes early. The reminder is
+spoken at its scheduled time.
+
+| Reminder | Who's around | What the robot does **at the due time** |
+| --- | --- | --- |
+| Non-sensitive | (not checked) | Speaks it aloud at its time — no presence check, no consent, mic stays off |
+| Sensitive | Owner alone (no other voice heard all window) | Speaks the reminder aloud — no one to overhear |
+| Sensitive | A bystander was heard during the window | A **remembered** bystander reuses their stored **Yes/No** (no prompt); an **unknown** one is **asked on the watch now**: **Yes** → speak aloud; **No / no-reply** → **private note to the wrist** (and a neutral *"Hello there."*) |
+| Sensitive | Owner left during the window | **Holds** — not spoken to an empty room; retried when the owner is back |
+
+The sensitivity label is normally computed once at add time and stored on the
+reminder; a reminder saved before the classifier existed is classified live in
+the runner instead.
+
+**Known limitations (voice-only, on purpose):** the mic is on for the whole
+window (nothing missed in a gap), but a longer recording takes a few seconds to
+embed at the due time; a bystander who is present but **silent** the whole window
+can't be heard (the camera pipeline covers silent presence); all non-owner voices
+in the window are averaged into **one** id, so two different simultaneous
+bystanders merge (fine for owner-plus-one); and "same person" reuse is
+voice-similarity based (`VOICE_SAME_SPEAKER`), so a weak re-match mints a new id
+and re-asks.
+
+**Voice detection (tuned for a distant bystander).** The recording counts as
+containing a voice if **either** ≥ `--min-voiced` of the 100 ms blocks clear
+`--gate` (*sustained* close talking) **or** ≥ 2 blocks exceed `--peak`
+(*bursty/distant* talking, whose average is low but whose syllables peak) — a real
+far-field voice was being missed by a sustained-only test. The analysis logs
+`frac`, the loud-block count, and `block RMS peak/mean`, so a non-detection is
+diagnosable: a **peak near 0** means
+the mic isn't *hearing* the source (a device/level problem — check
+`VOICE_INPUT_DEVICE`/volume; playing a video does **not** inject audio into the
+mic, it must be picked up acoustically), whereas a **peak above the gate that
+still doesn't trigger** just wants lower thresholds. Raise the three knobs to
+ignore louder background media; lower them to catch a fainter bystander.
+
+A reminder that errors during delivery is **left pending and retried** (up to
+`MAX_DELIVERY_ATTEMPTS`), so a transient hiccup doesn't silently lose it. Watch
+notification is fire-and-forget, so this remains a best-effort prototype rather
+than guaranteed delivery. Decisions are remembered per bystander in
+`consent_cache_voice.json` (the voice modality's own consent cache).
+
+> Requires the voice-reminder deps (`openai-whisper`, `dateparser`,
+> `sentence-transformers` — included in
+> [`requirements.txt`](requirements.txt)) and the updated
+> `bangle/consent_app.js` flashed to the watch (the No-path uses its `notify()`
+> function). Whisper downloads its model (~140 MB for `base.en`) into
+> `~/.cache/whisper`, and the sensitivity classifier downloads a ~80 MB MiniLM
+> model to the HuggingFace cache, both on first use.
 
 ---
 
@@ -331,9 +487,10 @@ permission prompt for your terminal / IDE).
 
 | Situation | Channel | Message |
 | --- | --- | --- |
-| Consent request | **Watch** (buzz + Yes/No) | *"I have noticed that someone is present with you. Do you want me to send private reminders in front of them?"* |
-| Consent **Yes** | **Ohbot** (spoken) | *"I noticed your heart rate has been a bit elevated, around `<bpm>`. Would you like to take a few deep breaths together?"* |
-| Consent **No** | **Ohbot** (spoken) | *"Hello there."* |
+| Consent request (bystander present) | **Watch** (buzz + Yes/No) | *"I have noticed that someone is present with you. Do you want me to send private reminders in front of them?"* |
+| Reminder **Yes** / owner alone / non-sensitive | **Ohbot** (spoken) | *"Here is your reminder. `<text>`."* |
+| Reminder **No** / no reply | **Watch** (private note) | *"Reminder: `<text>`"* |
+| Reminder **No** | **Ohbot** (spoken) | *"Hello there."* |
 
 ---
 
@@ -345,29 +502,28 @@ permission prompt for your terminal / IDE).
 | --- | --- | --- |
 | `OHBOT_PORT` | `Pico` | Serial-port hint passed to `ohbot.init()`. |
 | `NO_OHBOT` | unset | Set to `1` to skip the Ohbot entirely and speak via the OS voice (`say` on macOS, `espeak` on Linux). Lets you test the watch consent + memory flow without the robot plugged in. |
+| `VOICE_INPUT_DEVICE` | PortAudio default | Microphone device index or case-insensitive name substring; shared by all voice scripts. |
 
 Example — run without the robot:
 
 ```bash
-NO_OHBOT=1 python demo_cache_memory.py
+NO_OHBOT=1 python -m robot.apps.camera_remember
 ```
 
 ### Tunable thresholds
 
-Defined at the top of [`demo_cache_memory.py`](interface/presence/demo_cache_memory.py)
-and [`face_id.py`](interface/presence/face_id.py):
+Defined at the top of [`camera_remember.py`](robot/apps/camera_remember.py)
+and [`face_id.py`](robot/perception/face_id.py):
 
 | Constant | Value | Meaning |
 | --- | --- | --- |
-| `ELEVATED_BPM` | `100` | BPM above this counts as "elevated". |
-| `MIN_ELEVATED_DWELL_S` | `5.0` | How long BPM must stay elevated before acting. |
-| `HR_STALE_S` | `10.0` | Ignore the cached BPM if the watch hasn't pushed in this long. |
-| `OBSERVATION_WINDOW_S` | `15.0` | Length of the presence sliding window. |
-| `FACE_VISIBLE_FRACTION_HIGH` | `0.7` | ≥ this fraction of frames with a face ⇒ "face in view". |
-| `FACE_VISIBLE_FRACTION_LOW` | `0.3` | ≤ this fraction ⇒ "no faces". |
+| `REMINDER_POLL_S` | `1.0` | How often the camera loop re-reads `reminders.json` for a due reminder. |
 | `CONSENT_TIMEOUT_S` | `30.0` | How long to wait for a watch tap before defaulting to withhold. |
 | `SFACE_COSINE_SAME_PERSON` | `0.363` | Cosine threshold for "same bystander" re-identification. |
 | `SFACE_OWNER_THRESHOLD` | `0.50` | Tighter threshold for matching the enrolled owner. |
+
+(The voice runner adds its own knobs — `--lead`, `--gate`, `--min-voiced`,
+`--peak`; see [Voice reminders](#voice-reminders-schedule-private-content-by-voice).)
 
 ---
 
@@ -376,13 +532,14 @@ and [`face_id.py`](interface/presence/face_id.py):
 Communication is line-oriented over the **Nordic UART Service (NUS)**:
 
 - **Watch → laptop**
-  - `BPM:<n>` — a confident heart-rate sample.
   - `CONSENT:<id>:YES` / `CONSENT:<id>:NO` — the user's answer to prompt `<id>`.
 - **Laptop → watch**
   - `consent("<id>","<message>")\n` — a JS call the watch's REPL evaluates; it
     buzzes, shows the Yes/No prompt, and replies with a `CONSENT:` line. Strings
     are JSON-encoded so quotes/newlines are escaped safely, and writes are chunked
     to ≤20 bytes for the Espruino BLE UART.
+  - `notify("<message>")\n` — a one-way JS call that buzzes and shows a private
+    note with an OK button. It sends no acknowledgement to the laptop.
 
 NUS characteristics: RX (watch→laptop notify) `6e400003-…`, TX (laptop→watch
 write) `6e400002-…`.
@@ -391,40 +548,40 @@ write) `6e400002-…`.
 
 ## Runtime state files
 
-These live next to the code in `interface/presence/` and are gitignored (local,
-per-machine state — not source):
+These live under `robot/state/` as local, per-machine state (gitignored):
 
 | File | Created by | Contents |
 | --- | --- | --- |
 | `models/*.onnx` | `face_id.ensure_models()` | YuNet + SFace weights, auto-downloaded once. |
-| `owner_face.json` | `enroll_owner.py` | Averaged owner **face** embedding + metadata. |
-| `face_db.json` | `demo_cache_memory.py` | Bystander **face** gallery (stable `person_NNN` IDs). |
-| `consent_cache.json` | `demo_cache_memory.py` | Remembered Yes/No decisions (camera), keyed by bystander. |
-| `owner_voice.json` | `enroll_owner_voice.py` | Averaged owner **voice** embedding + metadata. |
-| `voice_db.json` | `demo_voice_cache_memory.py` | Bystander **voice** gallery (stable `person_NNN` IDs). |
-| `consent_cache_voice.json` | `demo_voice_cache_memory.py` | Remembered Yes/No decisions (voice), keyed by bystander. |
+| `owner_face.json` | `enroll_face.py` | Averaged owner **face** embedding + metadata. |
+| `face_db.json` | `camera_remember.py` | Bystander **face** gallery (stable `person_NNN` IDs). |
+| `consent_cache.json` | `camera_remember.py` | Remembered Yes/No decisions (camera), keyed by bystander. |
+| `owner_voice.json` | `enroll_voice.py` | Averaged owner **voice** embedding + metadata. |
+| `voice_db.json` | `mic_remember.py` | Bystander **voice** gallery (stable `person_NNN` IDs). |
+| `consent_cache_voice.json` | `mic_remember.py` | Remembered Yes/No decisions (voice), keyed by bystander. |
+| `reminders.json` | `add_reminder.py` | Scheduled reminders (text + due time + delivered flag + sensitivity label). |
+
+These all live under `robot/state/`, which is gitignored, so the biometric
+templates, consent caches, and `reminders.json` alike stay out of commits. The
+exact JSON schemas and reset implications are documented in
+[`docs/codebase_guide.md`](docs/codebase_guide.md#7-runtime-data-and-schemas).
 
 Delete a `consent_cache*.json` to make the robot "forget" all preferences for that
 modality; delete a `*_db.json` to reset bystander identities; re-run the matching
-`enroll_owner*` script to replace an owner template.
+`enroll_face`/`enroll_voice` script to replace an owner template.
 
 ---
 
 ## Troubleshooting
 
-- **The watch never prompts / nothing happens.** All trigger conditions must hold
-  at once: BPM sustained above `ELEVATED_BPM`, a face reliably in view for the full
-  window, and the watch BLE-connected. The status overlay shows each input
-  (`bpm=…`, `verdict=…`, `watch=OK/OFFLINE`). To exercise the flow **without**
-  raising your heart rate, temporarily force the gate by setting
-  `elevated_stable = True` just after it's computed in
-  [`demo_cache_memory.py`](interface/presence/demo_cache_memory.py) (revert before
-  real use).
+- **The watch never prompts / nothing happens.** The prompt only appears for a
+  **sensitive** reminder that is **due** while a **bystander is present** and the
+  **watch is connected**. Confirm a reminder is actually due (its time has
+  arrived) — the camera overlay shows the next due time, and `mic_remember.py`
+  logs it. A non-sensitive reminder, or the owner alone, is spoken with no prompt.
 - **Watch not found / consent never delivered.** Make sure the **Espruino Web IDE
   is disconnected** — only one BLE master may hold the watch. Confirm
-  `consent_app.js` is running (the watch shows a "HR broadcast" screen with a BPM).
-- **No BPM / "no signal" on the watch.** The HRM ignores low-confidence samples;
-  wear the watch snug and still for a few seconds.
+  `consent_app.js` is running (the watch shows a "Robot linked" screen).
 - **Ohbot init hangs.** The robot is likely not on the expected serial port. Set
   `OHBOT_PORT`, or run with `NO_OHBOT=1` to use the laptop voice instead.
 - **No speech even with the robot.** Ensure **espeak** is installed (the SDK uses

@@ -1,0 +1,451 @@
+"""Re-Consent policy demo: always ask, never remember - reminder-triggered.
+
+Same sensing pipeline as ``camera_remember.py`` (webcam presence, owner-vs-
+bystander via SFace) and the same reminder trigger, but the disclosure decision
+is taken **fresh every time**. There is no consent cache: every due reminder
+with a bystander present triggers a new Yes/No prompt on the watch, even if the
+same person answered a moment ago for a previous reminder.
+
+This is the privacy "Re-Consent" baseline that the cache-memory demo is compared
+against; the only difference is the absence of the stored-decision lookup. The
+bystander is still **recognised** - IDs are minted and logged via the shared
+``face_db.json`` gallery, and the owner is filtered out via ``owner_face.json`` -
+but that identity is used only for logging here; it never short-circuits the
+prompt.
+
+The heart-rate trigger was removed - reminders are now the only trigger. As in
+the main demo, the laptop terminal never takes input: every answer is given on
+the watch, and the only laptop interaction is pressing 'q' in the camera window.
+
+Run:
+    python -m robot.apps.camera_reask
+Press 'q' in the camera window to quit.
+"""
+
+from __future__ import annotations
+
+import datetime
+import os
+import subprocess
+import sys
+import threading
+import time
+import traceback
+
+import cv2
+
+try:
+    from ohbot import ohbot
+except ModuleNotFoundError as exc:
+    raise SystemExit("Missing dependency: install with `pip install ohbot`.") from exc
+
+from robot.perception.face_db import FaceDB
+from robot.perception.face_id import (
+    FaceIdentifier,
+    SFACE_COSINE_SAME_PERSON,
+    SFACE_OWNER_THRESHOLD,
+    ensure_models,
+)
+from robot.core.owner import OwnerStore
+from robot.core.policy import BangleClient
+from robot.core.reminders import Reminder, ReminderStore
+
+
+OHBOT_PORT_HINT = os.environ.get("OHBOT_PORT", "Pico")
+# Set NO_OHBOT=1 to skip Ohbot init/use entirely - the consent flow on the watch
+# still runs and disclose/withhold are spoken via the OS voice.
+NO_OHBOT = os.environ.get("NO_OHBOT") == "1"
+
+if sys.platform == "darwin":
+    _silence_wav = os.path.join(os.path.dirname(ohbot.__file__), "Silence1.wav")
+
+    def _say_speech_macos(addSilence):
+        try:
+            if addSilence:
+                subprocess.run(["afplay", _silence_wav], timeout=5, check=False)
+            subprocess.run(["afplay", "ohbotspeech.wav"], timeout=30, check=False)
+        except subprocess.TimeoutExpired:
+            print("[ohbot] afplay timed out; continuing.")
+        except FileNotFoundError:
+            print("[ohbot] afplay not found; skipping audio.")
+
+    ohbot.saySpeech = _say_speech_macos
+
+
+# Shared state for thread-safe Ohbot access and shutdown coordination.
+shutting_down = threading.Event()
+ohbot_lock = threading.Lock()
+
+
+def _speak_fallback(text: str) -> None:
+    """OS-native TTS fallback when NO_OHBOT=1."""
+
+    if not text:
+        return
+    cmd: list[str] | None = None
+    if sys.platform == "darwin":
+        cmd = ["say", text]
+    elif sys.platform.startswith("linux"):
+        cmd = ["espeak", text]
+    if cmd is None:
+        print(f"[tts] no TTS available on {sys.platform}; would say: {text!r}")
+        return
+    try:
+        subprocess.run(cmd, timeout=30, check=False)
+    except FileNotFoundError:
+        print(f"[tts] {cmd[0]} not found; would say: {text!r}")
+    except subprocess.TimeoutExpired:
+        print("[tts] TTS timed out.")
+
+
+CONSENT_TIMEOUT_S = 30.0
+REMINDER_POLL_S = 1.0     # how often (s) to re-read reminders.json from the loop
+
+PROMPT_MESSAGE = (
+    "I have noticed that someone is present with you. "
+    "Do you want me to send private reminders in front of them?"
+)
+WITHHOLD_LINE = "Hello there."
+REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder. {text}."
+REMINDER_PRIVATE_TEMPLATE = "Reminder: {text}"
+
+# Shared with camera_remember.py - the face identity gallery and the reminder
+# list are global, not policy-specific. There is deliberately NO consent cache.
+from robot.paths import FACE_DB_PATH, OWNER_FACE_PATH, REMINDERS_PATH
+
+
+def deliver_reminder_spoken(text: str) -> None:
+    """Speak a reminder out loud - owner-alone delivery, or a consented Yes."""
+
+    msg = REMINDER_DISCLOSE_TEMPLATE.format(text=text)
+    print(f">>> reminder disclose -> {msg!r}")
+    if NO_OHBOT:
+        print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
+        _speak_fallback(msg)
+        return
+    with ohbot_lock:
+        if shutting_down.is_set():
+            return
+        try:
+            ohbot.move(ohbot.HEADTURN, 5)
+            ohbot.move(ohbot.HEADNOD, 5)
+            ohbot.say(msg, untilDone=True, lipSync=True)
+        except Exception as exc:
+            print(f"[ohbot] reminder disclose failed: {exc}")
+
+
+def behavior_withhold() -> None:
+    """Reminder withheld from disclosure - Ohbot stays neutral."""
+
+    print(f">>> withhold -> {WITHHOLD_LINE!r}")
+    if NO_OHBOT:
+        print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
+        _speak_fallback(WITHHOLD_LINE)
+        return
+    with ohbot_lock:
+        if shutting_down.is_set():
+            return
+        try:
+            ohbot.move(ohbot.HEADTURN, 5)
+            ohbot.say(WITHHOLD_LINE, untilDone=True, lipSync=True)
+        except Exception as exc:
+            print(f"[ohbot] withhold failed: {exc}")
+
+
+def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
+    """Whether a reminder is sensitive (stored at add time, else classified live)."""
+
+    if rem.sensitive is not None:
+        return rem.sensitive, "stored at add time"
+    from robot.core.sensitivity import classify
+
+    res = classify(rem.text)
+    return res.sensitive, f"classified live - {res.backend}: {res.reason}"
+
+
+def identify_people_in_frame(
+    face_identifier: FaceIdentifier,
+    face_db: FaceDB,
+    owner_store: OwnerStore,
+    frame_bgr,
+) -> tuple[str, list[tuple[str, float, bool, bool]], bool]:
+    """Return (bystander_id, per_face_info, owner_detected).
+
+    Same semantics as ``camera_remember.py``'s helper: BLE establishes owner
+    presence in the room, so the camera is free to see only the bystander; any
+    face not matching the owner template is treated as a bystander.
+    """
+
+    faces = face_identifier.detect_and_embed(frame_bgr)
+    faces.sort(key=lambda f: f.area, reverse=True)
+    if not faces:
+        return "", [], False
+
+    owner_scores = [
+        owner_store.matches(face.embedding, threshold=SFACE_OWNER_THRESHOLD)
+        for face in faces
+    ]
+    owner_idx = -1
+    best_sim = SFACE_OWNER_THRESHOLD
+    for i, (is_owner, sim) in enumerate(owner_scores):
+        if is_owner and sim >= best_sim:
+            best_sim = sim
+            owner_idx = i
+
+    per_face: list[tuple[str, float, bool, bool]] = []
+    bystanders: list[str] = []
+    for i, face in enumerate(faces):
+        if i == owner_idx:
+            per_face.append(("owner", owner_scores[i][1], False, True))
+            continue
+        pid, sim, is_new = face_db.identify(face.embedding)
+        per_face.append((pid, sim, is_new, False))
+        bystanders.append(pid)
+
+    return ":".join(sorted(set(bystanders))), per_face, owner_idx >= 0
+
+
+def run_reminder_policy(
+    watch: BangleClient,
+    face_identifier: FaceIdentifier,
+    face_db: FaceDB,
+    owner_store: OwnerStore,
+    reminder: Reminder,
+    frame_bgr,
+    sensitive: bool,
+) -> str:
+    """Deliver one due reminder - ALWAYS re-asking (no consent cache).
+
+    Non-sensitive -> speak it. Sensitive with no bystander in view -> owner alone
+    -> speak it. Sensitive with a bystander in view -> ask the watch fresh every
+    time (the recognised id is only logged, never used to skip the prompt):
+    Yes discloses aloud; No / no-reply pushes the reminder privately to the wrist.
+    """
+
+    text = reminder.text
+    private = REMINDER_PRIVATE_TEMPLATE.format(text=text)
+
+    if not sensitive:
+        print(f"[reminder] {reminder.id}: non-sensitive -> speaking normally.")
+        deliver_reminder_spoken(text)
+        return f"delivered, non-sensitive [{reminder.id}]"
+
+    bystander_id, per_face, owner_detected = identify_people_in_frame(
+        face_identifier, face_db, owner_store, frame_bgr
+    )
+    if owner_store.has_owner() and per_face and not owner_detected:
+        sims = ", ".join(f"sim={sim:.2f}" for _, sim, _, _ in per_face)
+        print(
+            f"[reminder] {reminder.id}: owner not in camera frame (BLE confirms "
+            f"in-room). Treating all faces as bystanders. owner-sim = [{sims}]."
+        )
+    if not bystander_id:
+        print(f"[reminder] {reminder.id}: no bystander in view -> owner alone.")
+        deliver_reminder_spoken(text)
+        return f"delivered, owner alone [{reminder.id}]"
+
+    def _fmt(entry):
+        pid, sim, is_new, is_owner = entry
+        tag = "[OWNER] " if is_owner else ("*" if is_new else "")
+        return f"{tag}{pid} (sim={sim:.2f})"
+
+    print(f"[reminder] {reminder.id}: people in frame: "
+          f"{', '.join(_fmt(e) for e in per_face)} -> log key '{bystander_id}'")
+
+    print(f"[reminder] {reminder.id}: asking the watch (re-consent always re-asks).")
+    answer = watch.ask_consent(PROMPT_MESSAGE, timeout=CONSENT_TIMEOUT_S)
+    if answer is None:
+        print("[reminder] no answer from watch; delivering privately to the wrist.")
+        watch.notify(private)
+        return f"no-reply -> private ({bystander_id}) [{reminder.id}]"
+    if answer:
+        print(f"[reminder] {reminder.id}: watch YES -> disclose aloud.")
+        deliver_reminder_spoken(text)
+        return f"asked YES ({bystander_id}) [{reminder.id}]"
+    print(f"[reminder] {reminder.id}: watch NO -> private note on wrist.")
+    watch.notify(private)
+    behavior_withhold()
+    return f"asked NO ({bystander_id}) [{reminder.id}]"
+
+
+def main() -> None:
+    cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+    if face_cascade.empty():
+        raise SystemExit(f"Could not load face detector from {cascade_path}.")
+
+    print("[startup] opening webcam...", flush=True)
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        raise SystemExit(
+            "Could not open webcam. Close any app using the camera "
+            "(Zoom, Teams, browser tabs) and try again."
+        )
+    print("[startup] webcam open.", flush=True)
+
+    if NO_OHBOT:
+        print("[startup] NO_OHBOT=1 set; skipping Ohbot.", flush=True)
+    else:
+        print(
+            f"[startup] initialising Ohbot (port hint='{OHBOT_PORT_HINT}'). "
+            "If this hangs, the robot is likely not plugged in - rerun "
+            "with NO_OHBOT=1 to skip it.",
+            flush=True,
+        )
+        with ohbot_lock:
+            ohbot.setSynthesizer("espeak")
+            ohbot.init(OHBOT_PORT_HINT)
+            ohbot.reset()
+            ohbot.setVoice("-v en-gb+f3")
+        print("[startup] Ohbot ready.", flush=True)
+
+    print("[startup] preparing face detector + recogniser (YuNet + SFace)...", flush=True)
+    yunet_path, sface_path = ensure_models()
+    face_identifier = FaceIdentifier(yunet_path, sface_path)
+    face_db = FaceDB(FACE_DB_PATH, match_threshold=SFACE_COSINE_SAME_PERSON)
+    print(
+        f"[face] gallery has {face_db.count()} known person(s); "
+        f"new faces auto-IDed at cosine sim < {SFACE_COSINE_SAME_PERSON:.3f}.",
+        flush=True,
+    )
+
+    owner_store = OwnerStore(OWNER_FACE_PATH)
+    if not owner_store.has_owner():
+        raise SystemExit(
+            "[startup] No owner enrolled. Run this first:\n"
+            "    python -m robot.apps.enroll_face\n"
+            "Then re-run this demo."
+        )
+    print(
+        f"[owner] enrolled at {owner_store.enrolled_at()} "
+        f"({owner_store.samples()} sample(s)).",
+        flush=True,
+    )
+
+    print("[startup] starting watch BLE link...", flush=True)
+    watch = BangleClient()
+    if not watch.start():
+        print("[ble] proceeding without watch link; reminders are held until the "
+              "owner (watch) is back in range.", flush=True)
+
+    pending = ReminderStore(REMINDERS_PATH).pending()
+    if pending:
+        print(f"[reminders] {len(pending)} pending; next due {pending[0].remind_at} "
+              f"({pending[0].text!r}).", flush=True)
+    else:
+        print("[reminders] none pending. Add one with add_reminder.py.",
+              flush=True)
+    print(
+        "Camera RE-ASK app running (reminder-triggered; always re-asks, never "
+        "remembers). Press 'q' in the camera window to quit."
+    )
+
+    trial_lock = threading.Lock()
+    trial_state: dict[str, object] = {"in_trial": False, "last_status": "(none)"}
+    last_reminder_poll = 0.0
+    next_reminder_info = "checking..."
+
+    def fire_delivery_async(reminder: Reminder, frame_snapshot, sensitive: bool) -> bool:
+        def worker() -> None:
+            try:
+                status = run_reminder_policy(
+                    watch, face_identifier, face_db, owner_store,
+                    reminder, frame_snapshot, sensitive,
+                )
+            except Exception as exc:
+                traceback.print_exc()
+                status = f"error: {exc}"
+            finally:
+                ReminderStore(REMINDERS_PATH).mark_delivered(reminder.id)
+                with trial_lock:
+                    trial_state["last_status"] = status
+                    trial_state["in_trial"] = False
+
+        with trial_lock:
+            if trial_state["in_trial"]:
+                return False
+            trial_state["in_trial"] = True
+            trial_state["last_status"] = f"delivering {reminder.id}..."
+            threading.Thread(target=worker, daemon=True, name="delivery-worker").start()
+            return True
+
+    try:
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                continue
+
+            now = time.monotonic()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(
+                gray, scaleFactor=1.2, minNeighbors=5, minSize=(60, 60),
+            )
+            count = len(faces)
+            ble_up = watch.is_connected()
+
+            with trial_lock:
+                in_trial = bool(trial_state["in_trial"])
+                last_trial_status = str(trial_state["last_status"])
+
+            if not in_trial and (now - last_reminder_poll) >= REMINDER_POLL_S:
+                last_reminder_poll = now
+                reminder_store = ReminderStore(REMINDERS_PATH)
+                due = reminder_store.due(datetime.datetime.now())
+                pend = reminder_store.pending()
+                next_reminder_info = (
+                    f"next {pend[0].remind_at} ({pend[0].text})" if pend
+                    else "none pending"
+                )
+                if due:
+                    rem = due[0]
+                    if not ble_up:
+                        print(f"[reminder] {rem.id} due but owner not present "
+                              "(watch offline); holding.", flush=True)
+                    else:
+                        sensitive, note = sensitivity_for(rem)
+                        print(f"\n[reminder] {rem.id} due: {rem.text!r} - "
+                              f"{'SENSITIVE' if sensitive else 'non-sensitive'} "
+                              f"({note}). Delivering on worker thread.", flush=True)
+                        fire_delivery_async(rem, frame.copy(), sensitive)
+
+            for (x, y, w, h) in faces:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            line1 = f"faces={count}  watch={'OK' if ble_up else 'OFFLINE'}"
+            line2 = f"reminders: {next_reminder_info}"
+            trial_tag = "[DELIVERING] " if in_trial else ""
+            line3 = f"{trial_tag}last: {last_trial_status}"
+            for i, line in enumerate((line1, line2, line3)):
+                cv2.putText(
+                    frame, line, (20, 40 + i * 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2,
+                )
+            cv2.imshow("Camera - re-ask (reminder-triggered)", frame)
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                shutting_down.set()
+                break
+    finally:
+        shutting_down.set()
+        cap.release()
+        cv2.destroyAllWindows()
+        watch.close()
+        if not NO_OHBOT:
+            acquired = ohbot_lock.acquire(timeout=10.0)
+            if not acquired:
+                print(
+                    "[shutdown] ohbot_lock busy after 10s; skipping reset/close. "
+                    "The serial port will be released by process exit."
+                )
+            try:
+                if acquired:
+                    try:
+                        ohbot.reset()
+                    finally:
+                        ohbot.close()
+            finally:
+                if acquired:
+                    ohbot_lock.release()
+
+
+if __name__ == "__main__":
+    main()

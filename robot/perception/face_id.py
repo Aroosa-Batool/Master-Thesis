@@ -11,7 +11,7 @@ Why this combo:
     FaceNet (Schroff et al. 2015) for the thesis-defensibility story.
 
 Both models live as ONNX files. We auto-download them from the upstream
-opencv_zoo repo into ``interface/presence/models/`` on first use - no
+opencv_zoo repo into ``robot/state/models/`` on first use - no
 pip extras, no compile step. The two files together are ~37 MB and are
 gitignored (see ../../.gitignore).
 """
@@ -29,7 +29,7 @@ import cv2
 import numpy as np
 
 
-MODELS_DIR = Path(__file__).resolve().parent / "models"
+from robot.paths import MODELS_DIR
 
 # Two ONNX files we need. URLs point at a pinned commit so a future
 # upstream rename doesn't break the demo.

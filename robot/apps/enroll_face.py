@@ -2,7 +2,7 @@
 
 Captures the watch-wearer's face from the webcam and writes the
 averaged SFace embedding to ``owner_face.json``. After this runs once,
-``demo_cache_memory.py`` can tell the owner
+``camera_remember.py`` can tell the owner
 apart from bystanders in the camera frame, which is what makes the
 "remember Anna's decision next time Anna is in the room" behavior
 robust (without owner filtering, the cache key would change every
@@ -22,7 +22,7 @@ Capture procedure:
     sanity-check it before exiting.
 
 Run:
-    python interface/presence/enroll_owner.py
+    python -m robot.apps.enroll_face
 
 Press 'q' at any time to abort. Re-run to re-enroll (will overwrite).
 """
@@ -32,16 +32,15 @@ from __future__ import annotations
 import datetime
 import sys
 import time
-from pathlib import Path
 
 import cv2
 import numpy as np
 
-from face_id import FaceIdentifier, SFACE_COSINE_SAME_PERSON, ensure_models
-from owner import OwnerStore
+from robot.perception.face_id import FaceIdentifier, SFACE_COSINE_SAME_PERSON, ensure_models
+from robot.core.owner import OwnerStore
 
 
-OWNER_FACE_PATH = Path(__file__).resolve().parent / "owner_face.json"
+from robot.paths import OWNER_FACE_PATH
 TARGET_SAMPLES = 12
 SAMPLE_INTERVAL_S = 0.30
 # Drop the minimum-confidence face cutoff for enrollment: we want

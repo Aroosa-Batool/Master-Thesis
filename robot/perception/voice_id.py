@@ -9,7 +9,7 @@ keeps the thesis story consistent across the two modalities.
 
 Each ~1.6 s voiced window becomes one embedding; cosine similarity then
 tells whether two windows are the same speaker. The owner's voice is
-enrolled once (``enroll_owner_voice.py``) and every other speaker heard in
+enrolled once (``enroll_voice.py``) and every other speaker heard in
 a trial is treated as a bystander - exactly the owner-vs-bystander split
 the camera pipeline performs per face.
 
@@ -30,7 +30,7 @@ try:
 except ModuleNotFoundError as exc:
     raise SystemExit(
         "Missing dependency: install with `pip install resemblyzer` "
-        "(pulls in torch). See interface/requirements.txt."
+        "(pulls in torch). See requirements.txt."
     ) from exc
 
 
@@ -38,17 +38,19 @@ except ModuleNotFoundError as exc:
 VOICE_SR = 16000
 
 # Cosine-similarity thresholds on the 256-D d-vectors. Resemblyzer
-# embeddings sit higher than SFace's: same-speaker pairs typically score
-# ~0.75+, different speakers well below. These are sane starting points;
-# tune per microphone and room (a close-talking headset scores higher
-# than a far-field laptop mic).
+# embeddings sit higher than SFace's. Tune per microphone and room (a
+# close-talking headset scores higher than a far-field laptop mic).
 #   VOICE_SAME_SPEAKER    - two windows are the same bystander (gallery re-ID)
 #   VOICE_OWNER_THRESHOLD - a window is the enrolled owner
+# VOICE_SAME_SPEAKER was lowered from 0.75 to 0.70 after measuring a laptop
+# mic where ONE speaker's own ~1.6 s windows scored 0.72-0.88 among
+# themselves (occasionally dipping to ~0.75). At 0.75 that split a single
+# person across several IDs, so their consent was never remembered. 0.70
+# keeps a speaker's windows together while still separating different people,
+# who score ~0.5 (well below 0.70).
 # Owner recognition wants to be reliable: a *missed* owner window gets
-# misfiled as a bystander and can fire a spurious prompt, so the owner bar
-# is set no higher than the same-speaker bar (the opposite trade-off to the
-# camera, where a false owner match was the more harmful error).
-VOICE_SAME_SPEAKER = 0.75
+# misfiled as a bystander and can fire a spurious prompt.
+VOICE_SAME_SPEAKER = 0.70
 VOICE_OWNER_THRESHOLD = 0.73
 
 # Ignore preprocessed (VAD-trimmed) audio shorter than this - too little

@@ -1,11 +1,11 @@
-"""One-shot owner *voice* enrollment - the audio analog of ``enroll_owner.py``.
+"""One-shot owner *voice* enrollment - the audio analog of ``enroll_face.py``.
 
 Records the owner speaking alone, turns the speech into Resemblyzer
 d-vector embeddings, averages them, and writes the result to
 ``owner_voice.json`` via the same ``OwnerStore`` the camera pipeline uses.
-After this runs once, ``demo_voice_cache_memory.py`` can tell the owner's
-voice apart from any other speaker it hears, so the consent cache is keyed
-by bystander voices only.
+After this runs once, the voice apps (``mic_remember`` / ``mic_reask``) can
+tell the owner's voice apart from any other speaker it hears, so the consent
+cache is keyed by bystander voices only.
 
 Procedure:
   - Opens the default microphone.
@@ -18,10 +18,10 @@ Procedure:
 A small status window (level meter + sample count) stands in for the
 camera preview; press 'q' there to abort. The laptop terminal is not used
 for any consent decision - only the one-time "overwrite?" guard at the
-very start reads a keystroke, exactly like ``enroll_owner.py``.
+very start reads a keystroke, exactly like ``enroll_face.py``.
 
 Run:
-    python interface/presence/enroll_owner_voice.py
+    python -m robot.apps.enroll_voice
 """
 
 from __future__ import annotations
@@ -31,7 +31,6 @@ import sys
 import threading
 import time
 from collections import deque
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -44,11 +43,12 @@ except (ModuleNotFoundError, OSError) as exc:
         "(needs the PortAudio library; on Linux: `apt install libportaudio2`)."
     ) from exc
 
-from owner import OwnerStore
-from voice_id import VOICE_OWNER_THRESHOLD, VOICE_SR, VoiceIdentifier
+from robot.perception.audio_device import pick_input_device
+from robot.core.owner import OwnerStore
+from robot.perception.voice_id import VOICE_OWNER_THRESHOLD, VOICE_SR, VoiceIdentifier
 
 
-OWNER_VOICE_PATH = Path(__file__).resolve().parent / "owner_voice.json"
+from robot.paths import OWNER_VOICE_PATH
 TARGET_SAMPLES = 20
 # Run the encoder on disjoint chunks of this length so we don't double-
 # count overlapping windows. ~2 s of continuous speech yields one or two
@@ -203,6 +203,9 @@ def main() -> None:
     print("[enroll] loading speaker encoder (first load takes a moment)...", flush=True)
     identifier = VoiceIdentifier()
     mic = _Mic()
+    # Pin an explicit input device (PortAudio's default can be -1 on macOS
+    # even with a working mic). See pick_input_device().
+    sd.default.device = (pick_input_device(), sd.default.device[1])
 
     try:
         with sd.InputStream(

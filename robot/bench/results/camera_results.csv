@@ -1,0 +1,9 @@
+name,stage,ok,init_ms,lat_median_ms,lat_p95_ms,lat_mean_ms,fps,rtf,peak_rss_mb,model_size_mb,embedding_dim,deploy,accuracy,error
+haar,detect,True,11.93,18.009,18.758,17.977,55.53,,111.3,0.89,,builtin (ships with opencv),,
+yunet,detect,True,18.26,5.149,6.290,5.279,194.21,,101.7,0.22,,0.2MB onnx (already shipped),,
+opencv_dnn_ssd,detect,True,12.50,9.467,12.710,9.812,105.63,,138.6,10.20,,cv2.dnn; ~10MB caffemodel download,,
+mediapipe,detect,True,132.21,0.833,0.912,0.843,1200.24,,151.4,0.22,,pip; BlazeFace tflite (Tasks API),,
+hog_people,detect,True,40.59,10.993,12.395,11.002,90.96,,134.4,0.00,,builtin; detects PERSONS not faces,,
+scrfd,detect,True,402.04,91.682,134.939,97.092,10.91,,787.3,16.14,,pip; insightface buffalo_l (~300MB),,
+sface,recognize,True,35.41,7.332,9.140,7.215,136.38,,229.4,36.90,128,38.7MB onnx (already shipped),,
+arcface,recognize,True,458.59,81.011,89.376,81.675,12.34,,1135.9,166.31,512,pip; insightface buffalo_l (~300MB),,

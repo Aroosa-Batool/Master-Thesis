@@ -4,10 +4,10 @@ Provides:
 
 - ``BangleClient``: BLE wrapper around the Bangle.js running
   ``bangle/consent_app.js``. Runs its own asyncio loop on a background
-  thread, streams heart-rate samples, and exposes a thread-safe
-  ``ask_consent(message, timeout)`` that round-trips a Yes/No question
-  to the watch and blocks the caller until the user taps or the timeout
-  elapses.
+  thread, tracks whether the watch is in range (the owner-presence
+  signal), and exposes a thread-safe ``ask_consent(message, timeout)``
+  that round-trips a Yes/No question to the watch and blocks the caller
+  until the user taps or the timeout elapses.
 
 - ``ConsentStore``: small JSON-backed cache mapping
   ``(bystander_id, content_type)`` -> ``"YES" | "NO"``. This is what
@@ -18,15 +18,17 @@ Wire format (line-oriented Nordic UART, served by ``bangle/consent_app.js``):
 
 - Watch -> laptop, line-oriented::
 
-    BPM:<n>
     CONSENT:<id>:YES
     CONSENT:<id>:NO
 
 - Laptop -> watch, line-oriented JS that the watch REPL evaluates::
 
-    consent("p17", "Allow private reminder in front of bystander?")\\n
+    consent("p17", "Do you want me to send private reminders in front of them?")\\n
+    notify("Reminder: doctor's appointment at 3 PM")\\n
 
-Strings are JSON-encoded so quotes/newlines/backslashes are escaped.
+``consent(...)`` round-trips a Yes/No; ``notify(...)`` is one-way (the
+watch just displays the private note and replies nothing). Strings are
+JSON-encoded so quotes/newlines/backslashes are escaped.
 """
 
 from __future__ import annotations
@@ -36,7 +38,6 @@ import json
 import os
 import tempfile
 import threading
-import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -72,8 +73,8 @@ class BangleClient:
     Lifecycle:
         client = BangleClient()
         if client.start():
-            ...                          # main loop reads latest_bpm(),
-                                         # calls ask_consent(...)
+            ...                          # main loop calls is_connected()
+                                         # and ask_consent(...)
         client.close()
 
     All public methods are safe to call from the main thread.
@@ -85,8 +86,6 @@ class BangleClient:
         self._ready = threading.Event()
         self._stop = threading.Event()
         self._lock = threading.Lock()
-        self._bpm = 0
-        self._bpm_ts = 0.0
         # _pending is only touched from the BLE loop thread.
         self._pending: dict[str, asyncio.Future[bool]] = {}
         self._next_id = 0
@@ -103,10 +102,6 @@ class BangleClient:
 
     def close(self) -> None:
         self._stop.set()
-
-    def latest_bpm(self) -> tuple[int, float]:
-        with self._lock:
-            return self._bpm, self._bpm_ts
 
     def is_connected(self) -> bool:
         """Best-effort 'is the watch in BLE range right now' check.
@@ -152,6 +147,23 @@ class BangleClient:
         except Exception as exc:
             print(f"[ble] ask_consent failed: {exc}")
             return None
+
+    def notify(self, message: str) -> None:
+        """Fire-and-forget: show a private message on the watch's screen.
+
+        Unlike ``ask_consent`` this expects no reply - it just pushes text
+        to the wrist. Used to deliver a reminder privately when the owner
+        declines disclosing it out loud in front of a bystander, so the
+        owner still gets the information privately. A no-op if the BLE link
+        is not up; the message is best-effort and never blocks the caller.
+        """
+
+        if self._loop is None or self._client is None:
+            return
+        try:
+            asyncio.run_coroutine_threadsafe(self._notify(message), self._loop)
+        except Exception as exc:
+            print(f"[ble] notify failed: {exc}")
 
     # --- private -------------------------------------------------------------
 
@@ -223,7 +235,7 @@ class BangleClient:
         # connect and our echo(0) re-applying). The watch script also
         # avoids printing console.log to the UART for the same reason,
         # but defense-in-depth here means a leaked ">" prefix doesn't
-        # cause us to silently drop a BPM/CONSENT frame.
+        # cause us to silently drop a CONSENT frame.
         cleaned = line.lstrip(">").strip()
         # Drop pure REPL chatter outright - "=undefined" is what the
         # REPL prints after evaluating a void expression, and a bare
@@ -231,15 +243,6 @@ class BangleClient:
         if not cleaned or cleaned == "=undefined":
             return
 
-        if cleaned.startswith("BPM:"):
-            try:
-                bpm = int(cleaned[4:])
-            except ValueError:
-                return
-            with self._lock:
-                self._bpm = bpm
-                self._bpm_ts = time.monotonic()
-            return
         if cleaned.startswith("CONSENT:"):
             # "CONSENT:<id>:YES" or "CONSENT:<id>:NO"
             parts = cleaned.split(":", 2)
@@ -330,6 +333,28 @@ class BangleClient:
                 f"[ble] consent prompt {prompt_id} cancelled - BLE link closed."
             )
             return None
+
+    async def _notify(self, message: str) -> None:
+        if self._client is None:
+            return
+        # One-way sibling of _ask: the watch's notify(msg) shows the text
+        # and sends nothing back, so there is no pending Future to track.
+        # Same 20-byte chunked, response=False write as _ask (see there for
+        # the macOS CoreBluetooth 20-byte cap / writeWithoutResponse
+        # rationale). Leading "\n" flushes any stale partial line on the
+        # watch REPL before our notify(...) call, exactly as _ask does.
+        payload = f"\nnotify({json.dumps(message)});\n"
+        data = payload.encode("utf-8")
+        chunk_size = 20
+        inter_chunk_delay_s = 0.005
+        try:
+            chunks = [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+            for i, chunk in enumerate(chunks):
+                await self._client.write_gatt_char(NUS_TX_UUID, chunk, response=False)
+                if i < len(chunks) - 1:
+                    await asyncio.sleep(inter_chunk_delay_s)
+        except Exception as exc:
+            print(f"[ble] notify write failed: {exc}")
 
 
 # ---------------------------------------------------------------------------
