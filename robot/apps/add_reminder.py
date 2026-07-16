@@ -46,8 +46,9 @@ SR = 16000
 from robot.paths import REMINDERS_PATH
 
 # Lead-ins we strip from the transcript so the stored text is just the
-# subject ("doctor's appointment on July 20th at 3 PM"), not the command
-# wrapper ("remind me to ...").
+# subject ("doctor's appointment"), not the command wrapper ("remind me
+# to ..."). The date/time phrase itself is stripped separately (clean_text),
+# so the schedule is never read back during delivery.
 _LEADIN_RE = re.compile(
     r"^\s*(please\s+)?"
     r"(hey\s+robot[,.]?\s+)?"
@@ -103,13 +104,50 @@ def parse_datetime(transcript: str) -> tuple[str, datetime.datetime] | None:
     return matched_text, dt
 
 
-def clean_text(transcript: str) -> str:
-    """Strip the command wrapper so the stored text is just the subject."""
+# Connective / temporal words that can be left stranded at the cut boundary
+# once the date/time phrase is removed (e.g. "doctor's appointment after |6
+# minutes" -> "... after"). Articles (a/an/the) are left alone so we never
+# mangle a subject that legitimately starts with one.
+_DANGLING = {
+    "on", "at", "by", "in", "into", "after", "before", "within", "around",
+    "about", "this", "next", "coming", "for", "of", "to", "from", "till",
+    "until",
+}
+
+
+def _strip_dangling(text: str) -> str:
+    """Drop temporal connectives / bare punctuation stranded at either end."""
+
+    def _drop(w: str) -> bool:
+        core = w.strip(",.;:-–—!?").lower()
+        return core == "" or core in _DANGLING
+
+    words = text.split()
+    while words and _drop(words[-1]):
+        words.pop()
+    while words and _drop(words[0]):
+        words.pop(0)
+    return " ".join(words)
+
+
+def clean_text(transcript: str, time_phrase: str | None = None) -> str:
+    """Strip the command wrapper *and* the date/time phrase, leaving just the
+    subject ("Doctor's appointment") - never the schedule ("... after 6
+    minutes"). Delivery then says "Here is your reminder for <subject>" with no
+    time read aloud. ``time_phrase`` is the span dateparser matched.
+    """
 
     text = _LEADIN_RE.sub("", transcript, count=1).strip()
-    text = text.rstrip(".").strip()
+    if time_phrase:
+        # Remove the matched date/time span, then tidy any connective left
+        # dangling where it used to be ("... appointment after" / "to call mom").
+        text = re.sub(re.escape(time_phrase), " ", text, count=1, flags=re.IGNORECASE)
+        text = _strip_dangling(text)
+    text = re.sub(r"\s+", " ", text).strip(" ,.;:-").strip()
     if not text:
-        text = transcript.strip().rstrip(".")
+        # Everything looked like a time - fall back to the wrapper-stripped text.
+        wrapper_stripped = _LEADIN_RE.sub("", transcript, count=1).strip().rstrip(".")
+        text = wrapper_stripped or transcript.strip().rstrip(".")
     return text[:1].upper() + text[1:] if text else text
 
 
@@ -218,8 +256,8 @@ def main() -> None:
                 return
             continue
 
-        _, dt = parsed
-        text = clean_text(transcript)
+        matched_text, dt = parsed
+        text = clean_text(transcript, matched_text)
         sens = classifier.classify(text)
         if confirm_and_save(store, text, dt, sens) == "retry":
             continue

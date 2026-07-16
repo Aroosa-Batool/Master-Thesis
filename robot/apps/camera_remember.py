@@ -136,7 +136,7 @@ PROMPT_MESSAGE = (
 WITHHOLD_LINE = "Hello there."
 # Reminder content. Spoken aloud on a Yes or when the owner is alone; pushed
 # privately to the wrist on a No.
-REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder. {text}."
+REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder for {text}."
 REMINDER_PRIVATE_TEMPLATE = "Reminder: {text}"
 
 

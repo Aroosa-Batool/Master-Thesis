@@ -106,7 +106,7 @@ PROMPT_MESSAGE = (
     "Do you want me to send private reminders in front of them?"
 )
 WITHHOLD_LINE = "Hello there."
-REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder. {text}."
+REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder for {text}."
 REMINDER_PRIVATE_TEMPLATE = "Reminder: {text}"
 
 # Shared with camera_remember.py - the face identity gallery and the reminder
