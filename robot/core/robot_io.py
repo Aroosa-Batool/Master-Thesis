@@ -36,6 +36,9 @@ except ModuleNotFoundError as exc:
 from robot.perception.face_db import FaceDB
 from robot.core.owner import OwnerStore
 from robot.perception.voice_id import VOICE_OWNER_THRESHOLD, VoiceIdentifier
+from robot.core.logsetup import logcall, get_logger
+
+log = get_logger(__name__)
 
 
 OHBOT_PORT_HINT = os.environ.get("OHBOT_PORT", "Pico")
@@ -47,6 +50,7 @@ NO_OHBOT = os.environ.get("NO_OHBOT") == "1"
 if sys.platform == "darwin":
     _silence_wav = os.path.join(os.path.dirname(ohbot.__file__), "Silence1.wav")
 
+    @logcall
     def _say_speech_macos(addSilence):
         try:
             if addSilence:
@@ -65,6 +69,7 @@ shutting_down = threading.Event()
 ohbot_lock = threading.Lock()
 
 
+@logcall
 def _speak_fallback(text: str) -> None:
     """OS-native TTS fallback when NO_OHBOT=1."""
 
@@ -112,10 +117,12 @@ REMINDER_DISCLOSE_TEMPLATE = "Here is your reminder for {text}."
 REMINDER_PRIVATE_TEMPLATE = "Reminder: {text}"
 
 
+@logcall
 def behavior_withhold() -> None:
     """Reminder withheld from disclosure - Ohbot stays neutral."""
 
     print(f">>> withhold -> {WITHHOLD_LINE!r}")
+    log.info("reminder withheld from disclosure", extra={"event": "withheld"})
     if NO_OHBOT:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(WITHHOLD_LINE)
@@ -130,11 +137,13 @@ def behavior_withhold() -> None:
             print(f"[ohbot] withhold failed: {exc}")
 
 
+@logcall
 def deliver_reminder_spoken(text: str) -> None:
     """Speak a reminder out loud - owner-alone delivery, or a consented Yes."""
 
     msg = REMINDER_DISCLOSE_TEMPLATE.format(text=text)
     print(f">>> reminder disclose -> {msg!r}")
+    log.info("reminder disclosed aloud", extra={"event": "delivered"})
     if NO_OHBOT:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(msg)
@@ -150,6 +159,7 @@ def deliver_reminder_spoken(text: str) -> None:
             print(f"[ohbot] reminder disclose failed: {exc}")
 
 
+@logcall
 def identify_bystander_averaged(
     voice_identifier: VoiceIdentifier,
     voice_db: FaceDB,
@@ -188,4 +198,6 @@ def identify_bystander_averaged(
         return "", 0.0, False, owner_detected, 0
     mean_emb = np.mean(np.stack(bystander_embs, axis=0), axis=0)
     pid, sim, is_new = voice_db.identify(mean_emb)
+    log.info("bystander %s (sim=%.2f, new=%s)", pid, sim, is_new,
+             extra={"event": "new_person" if is_new else "identified"})
     return pid, sim, is_new, owner_detected, len(bystander_embs)

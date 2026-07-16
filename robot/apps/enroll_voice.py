@@ -27,6 +27,7 @@ Run:
 from __future__ import annotations
 
 import datetime
+import logging
 import sys
 import threading
 import time
@@ -46,9 +47,13 @@ except (ModuleNotFoundError, OSError) as exc:
 from robot.perception.audio_device import pick_input_device
 from robot.core.owner import OwnerStore
 from robot.perception.voice_id import VOICE_OWNER_THRESHOLD, VOICE_SR, VoiceIdentifier
+from robot.core.logsetup import setup_logging, logcall, get_logger
 
 
 from robot.paths import OWNER_VOICE_PATH
+
+log = get_logger(__name__)
+
 TARGET_SAMPLES = 20
 # Run the encoder on disjoint chunks of this length so we don't double-
 # count overlapping windows. ~2 s of continuous speech yields one or two
@@ -57,6 +62,7 @@ PROCESS_CHUNK_S = 2.0
 BLOCK_FRAMES = int(VOICE_SR * 0.1)  # 100 ms mic callback blocks
 
 
+@logcall(level=logging.DEBUG)
 def _make_hud(rms: float, gate: float, lines: list[tuple[str, tuple[int, int, int]]]):
     """Render the level meter + status lines into a small BGR image."""
 
@@ -76,11 +82,13 @@ def _make_hud(rms: float, gate: float, lines: list[tuple[str, tuple[int, int, in
 class _Mic:
     """Background mic capture into a thread-safe block queue."""
 
+    @logcall
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._blocks: deque[np.ndarray] = deque()
         self.cur_rms = 0.0
 
+    @logcall(level=logging.DEBUG)
     def callback(self, indata, frames, time_info, status) -> None:  # noqa: ARG002
         x = indata[:, 0].copy()
         rms = float(np.sqrt(np.mean(x ** 2))) if len(x) else 0.0
@@ -88,6 +96,7 @@ class _Mic:
             self.cur_rms = rms
             self._blocks.append(x)
 
+    @logcall(level=logging.DEBUG)
     def drain(self) -> np.ndarray:
         with self._lock:
             if not self._blocks:
@@ -97,6 +106,7 @@ class _Mic:
             return chunk
 
 
+@logcall
 def capture_owner_samples(
     identifier: VoiceIdentifier, mic: _Mic
 ) -> list[np.ndarray]:
@@ -111,6 +121,8 @@ def capture_owner_samples(
         f"{TARGET_SAMPLES} samples are captured.",
         flush=True,
     )
+    log.info("owner voice capture started (target %d samples)", TARGET_SAMPLES,
+             extra={"event": "capture_started"})
     while len(samples) < TARGET_SAMPLES:
         new = mic.drain()
         if len(new):
@@ -122,6 +134,8 @@ def capture_owner_samples(
                     f"[enroll] captured sample {len(samples)}/{TARGET_SAMPLES}",
                     flush=True,
                 )
+                log.info("captured sample %d/%d", len(samples), TARGET_SAMPLES,
+                         extra={"event": "sample_captured"})
                 if len(samples) >= TARGET_SAMPLES:
                     break
             pending = np.zeros(0, dtype=np.float32)
@@ -143,6 +157,7 @@ def capture_owner_samples(
     return samples
 
 
+@logcall
 def verify_loop(identifier: VoiceIdentifier, mic: _Mic, store: OwnerStore) -> None:
     """Show live similarity of whatever is heard to the saved owner print."""
 
@@ -181,7 +196,9 @@ def verify_loop(identifier: VoiceIdentifier, mic: _Mic, store: OwnerStore) -> No
             return
 
 
+@logcall
 def main() -> None:
+    setup_logging(run_name="enroll_voice")
     store = OwnerStore(OWNER_VOICE_PATH)
     if store.has_owner():
         print(
@@ -227,6 +244,8 @@ def main() -> None:
                 f"[enroll] wrote {OWNER_VOICE_PATH} ({len(samples)} samples).",
                 flush=True,
             )
+            log.info("owner enrolled with %d samples", len(samples),
+                     extra={"event": "owner_enrolled"})
 
             verify_loop(identifier, mic, store)
     finally:

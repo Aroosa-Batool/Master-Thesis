@@ -35,16 +35,21 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 import tempfile
 import threading
 from dataclasses import dataclass
 from pathlib import Path
 
+from robot.core.logsetup import logcall, get_logger
+
 try:
     from bleak import BleakClient, BleakScanner
 except ModuleNotFoundError as exc:
     raise SystemExit("Missing dependency: install with `pip install bleak`.") from exc
+
+log = get_logger(__name__)
 
 
 # Nordic UART:
@@ -55,9 +60,11 @@ NUS_TX_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
 
 class _LineBuffer:
+    @logcall(level=logging.DEBUG)
     def __init__(self) -> None:
         self._buf = ""
 
+    @logcall(level=logging.DEBUG)
     def feed(self, data: bytes) -> list[str]:
         self._buf += data.decode("utf-8", errors="replace")
         lines: list[str] = []
@@ -80,6 +87,7 @@ class BangleClient:
     All public methods are safe to call from the main thread.
     """
 
+    @logcall
     def __init__(self) -> None:
         self._loop: asyncio.AbstractEventLoop | None = None
         self._client: BleakClient | None = None
@@ -92,6 +100,7 @@ class BangleClient:
 
     # --- public, thread-safe -------------------------------------------------
 
+    @logcall
     def start(self, timeout: float = 20.0) -> bool:
         """Connect to the watch. Returns True iff the link came up."""
 
@@ -100,9 +109,11 @@ class BangleClient:
             return False
         return self._client is not None
 
+    @logcall(level=logging.DEBUG)
     def close(self) -> None:
         self._stop.set()
 
+    @logcall(level=logging.DEBUG)
     def is_connected(self) -> bool:
         """Best-effort 'is the watch in BLE range right now' check.
 
@@ -128,6 +139,7 @@ class BangleClient:
         except Exception:
             return False
 
+    @logcall
     def ask_consent(self, message: str, timeout: float = 30.0) -> bool | None:
         """Send ``message`` to the watch and block until Yes/No or timeout.
 
@@ -148,6 +160,7 @@ class BangleClient:
             print(f"[ble] ask_consent failed: {exc}")
             return None
 
+    @logcall
     def notify(self, message: str) -> None:
         """Fire-and-forget: show a private message on the watch's screen.
 
@@ -167,11 +180,13 @@ class BangleClient:
 
     # --- private -------------------------------------------------------------
 
+    @logcall(level=logging.DEBUG)
     def _fresh_id(self) -> str:
         with self._lock:
             self._next_id += 1
             return f"p{self._next_id}"
 
+    @logcall
     def _run(self) -> None:
         try:
             asyncio.run(self._main())
@@ -179,6 +194,7 @@ class BangleClient:
             print(f"[ble] loop crashed: {exc}")
             self._ready.set()
 
+    @logcall
     async def _main(self) -> None:
         self._loop = asyncio.get_running_loop()
         print("[ble] scanning for Bangle.js...")
@@ -229,6 +245,7 @@ class BangleClient:
             self._pending.clear()
             self._client = None
 
+    @logcall
     def _handle_line(self, line: str) -> None:
         # Defensive: Espruino's REPL emits ">" prompts that can leak
         # onto the UART (especially during the brief window between BLE
@@ -261,6 +278,7 @@ class BangleClient:
         # silently dropping the line.
         print(f"[ble] watch> {cleaned}", flush=True)
 
+    @logcall
     async def _ask(self, prompt_id: str, message: str, timeout: float) -> bool | None:
         assert self._client is not None
         loop = asyncio.get_running_loop()
@@ -334,6 +352,7 @@ class BangleClient:
             )
             return None
 
+    @logcall
     async def _notify(self, message: str) -> None:
         if self._client is None:
             return
@@ -380,6 +399,7 @@ class ConsentStore:
     half a JSON file on disk.
     """
 
+    @logcall
     def __init__(self, path: Path) -> None:
         self._path = path
         self._lock = threading.Lock()
@@ -391,20 +411,27 @@ class ConsentStore:
                 print(f"[cache] could not read {path}: {exc}; starting fresh.")
                 self._data = {}
 
+    @logcall
     def get(self, key: ConsentKey) -> bool | None:
         with self._lock:
             v = self._data.get(key.bystander_id, {}).get(key.content_type)
+        if v is not None:
+            log.info("consent cache hit %s/%s -> %s", key.bystander_id,
+                     key.content_type, v, extra={"event": "consent_cache_hit"})
         if v == "YES":
             return True
         if v == "NO":
             return False
         return None
 
+    @logcall
     def put(self, key: ConsentKey, value: bool) -> None:
         with self._lock:
             self._data.setdefault(key.bystander_id, {})[key.content_type] = (
                 "YES" if value else "NO"
             )
+            log.info("stored consent %s/%s = %s", key.bystander_id,
+                     key.content_type, value, extra={"event": "consent_stored"})
             payload = json.dumps(self._data, indent=2)
             self._path.parent.mkdir(parents=True, exist_ok=True)
             # Atomic write: same-directory temp file then os.replace so
@@ -431,6 +458,7 @@ class ConsentStore:
             except Exception as exc:
                 print(f"[cache] could not write {self._path}: {exc}")
 
+    @logcall(level=logging.DEBUG)
     def dump(self) -> dict[str, dict[str, str]]:
         with self._lock:
             return {k: dict(v) for k, v in self._data.items()}

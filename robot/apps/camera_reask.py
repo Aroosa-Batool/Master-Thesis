@@ -49,6 +49,9 @@ from robot.perception.face_id import (
 from robot.core.owner import OwnerStore
 from robot.core.policy import BangleClient
 from robot.core.reminders import Reminder, ReminderStore
+from robot.core.logsetup import setup_logging, logcall, get_logger
+
+log = get_logger(__name__)
 
 
 OHBOT_PORT_HINT = os.environ.get("OHBOT_PORT", "Pico")
@@ -59,6 +62,7 @@ NO_OHBOT = os.environ.get("NO_OHBOT") == "1"
 if sys.platform == "darwin":
     _silence_wav = os.path.join(os.path.dirname(ohbot.__file__), "Silence1.wav")
 
+    @logcall
     def _say_speech_macos(addSilence):
         try:
             if addSilence:
@@ -77,6 +81,7 @@ shutting_down = threading.Event()
 ohbot_lock = threading.Lock()
 
 
+@logcall
 def _speak_fallback(text: str) -> None:
     """OS-native TTS fallback when NO_OHBOT=1."""
 
@@ -114,11 +119,13 @@ REMINDER_PRIVATE_TEMPLATE = "Reminder: {text}"
 from robot.paths import FACE_DB_PATH, OWNER_FACE_PATH, REMINDERS_PATH
 
 
+@logcall
 def deliver_reminder_spoken(text: str) -> None:
     """Speak a reminder out loud - owner-alone delivery, or a consented Yes."""
 
     msg = REMINDER_DISCLOSE_TEMPLATE.format(text=text)
     print(f">>> reminder disclose -> {msg!r}")
+    log.info("reminder disclosed aloud: %r", msg, extra={"event": "delivered"})
     if NO_OHBOT:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(msg)
@@ -134,10 +141,12 @@ def deliver_reminder_spoken(text: str) -> None:
             print(f"[ohbot] reminder disclose failed: {exc}")
 
 
+@logcall
 def behavior_withhold() -> None:
     """Reminder withheld from disclosure - Ohbot stays neutral."""
 
     print(f">>> withhold -> {WITHHOLD_LINE!r}")
+    log.info("reminder withheld; neutral greeting only", extra={"event": "withheld"})
     if NO_OHBOT:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(WITHHOLD_LINE)
@@ -152,6 +161,7 @@ def behavior_withhold() -> None:
             print(f"[ohbot] withhold failed: {exc}")
 
 
+@logcall
 def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
     """Whether a reminder is sensitive (stored at add time, else classified live)."""
 
@@ -163,6 +173,7 @@ def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
     return res.sensitive, f"classified live - {res.backend}: {res.reason}"
 
 
+@logcall
 def identify_people_in_frame(
     face_identifier: FaceIdentifier,
     face_db: FaceDB,
@@ -205,6 +216,7 @@ def identify_people_in_frame(
     return ":".join(sorted(set(bystanders))), per_face, owner_idx >= 0
 
 
+@logcall
 def run_reminder_policy(
     watch: BangleClient,
     face_identifier: FaceIdentifier,
@@ -226,10 +238,14 @@ def run_reminder_policy(
     private = REMINDER_PRIVATE_TEMPLATE.format(text=text)
 
     if not sensitive:
+        print("[info-status] Not sensitive - skipping the who-is-around check and "
+              "disclosing to the owner now.")
         print(f"[reminder] {reminder.id}: non-sensitive -> speaking normally.")
         deliver_reminder_spoken(text)
         return f"delivered, non-sensitive [{reminder.id}]"
 
+    print("[info-status] Sensitive - checking the camera to see whether the owner "
+          "is alone or with someone else...")
     bystander_id, per_face, owner_detected = identify_people_in_frame(
         face_identifier, face_db, owner_store, frame_bgr
     )
@@ -240,7 +256,11 @@ def run_reminder_policy(
             f"in-room). Treating all faces as bystanders. owner-sim = [{sims}]."
         )
     if not bystander_id:
+        print("[info-status] The owner is alone - no other face in view, so I can "
+              "say the reminder out loud.")
         print(f"[reminder] {reminder.id}: no bystander in view -> owner alone.")
+        log.info("reminder %s: no bystander in view -> owner alone", reminder.id,
+                 extra={"event": "no_presence"})
         deliver_reminder_spoken(text)
         return f"delivered, owner alone [{reminder.id}]"
 
@@ -249,26 +269,56 @@ def run_reminder_policy(
         tag = "[OWNER] " if is_owner else ("*" if is_new else "")
         return f"{tag}{pid} (sim={sim:.2f})"
 
+    print("[info-status] I saw someone with the owner.")
+    for pid, sim, is_new, is_owner in per_face:
+        if is_owner:
+            continue
+        if is_new:
+            print(f"[info-status] I have not seen this person before. I turned their "
+                  f"face into a numeric embedding (a faceprint) and gave them the "
+                  f"anonymous id {pid}. I do NOT keep the image or any personal data "
+                  "- only the embedding.")
+        else:
+            print(f"[info-status] I recognise this person as {pid}: their faceprint "
+                  f"matches a stored one (cosine similarity {sim:.2f} >= threshold "
+                  f"{SFACE_COSINE_SAME_PERSON:.2f}).")
     print(f"[reminder] {reminder.id}: people in frame: "
           f"{', '.join(_fmt(e) for e in per_face)} -> log key '{bystander_id}'")
+    log.info("reminder %s: bystander(s) in view -> key %r", reminder.id, bystander_id,
+             extra={"event": "bystander_detected"})
 
+    print("[info-status] Re-ask policy: I ask the owner every time and never save "
+          "the answer.")
+    print("[info-status] Asking the owner on the watch: may I say this reminder out "
+          "loud in front of this person?")
     print(f"[reminder] {reminder.id}: asking the watch (re-consent always re-asks).")
+    log.info("reminder %s: re-consent -> asking watch", reminder.id,
+             extra={"event": "consent_asked"})
     answer = watch.ask_consent(PROMPT_MESSAGE, timeout=CONSENT_TIMEOUT_S)
+    log.info("reminder %s: watch consent answer = %s", reminder.id, answer,
+             extra={"event": "consent_answer"})
     if answer is None:
+        print("[info-status] No answer from the watch - to stay safe I will NOT say "
+              "it aloud; sending it privately.")
         print("[reminder] no answer from watch; delivering privately to the wrist.")
         watch.notify(private)
         return f"no-reply -> private ({bystander_id}) [{reminder.id}]"
     if answer:
+        print("[info-status] The owner said YES - saying the reminder out loud.")
         print(f"[reminder] {reminder.id}: watch YES -> disclose aloud.")
         deliver_reminder_spoken(text)
         return f"asked YES ({bystander_id}) [{reminder.id}]"
+    print("[info-status] The owner said NO - sending the reminder privately to the "
+          "watch and greeting neutrally.")
     print(f"[reminder] {reminder.id}: watch NO -> private note on wrist.")
     watch.notify(private)
     behavior_withhold()
     return f"asked NO ({bystander_id}) [{reminder.id}]"
 
 
+@logcall
 def main() -> None:
+    setup_logging(run_name="camera_reask")
     cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     face_cascade = cv2.CascadeClassifier(cascade_path)
     if face_cascade.empty():
@@ -398,14 +448,29 @@ def main() -> None:
                 )
                 if due:
                     rem = due[0]
+                    print(f"\n[info-status] Reminder found: {rem.text!r} "
+                          f"(scheduled {rem.remind_at}).", flush=True)
+                    print("[info-status] Checking if the owner is in the room "
+                          "(via the watch's Bluetooth link)...", flush=True)
                     if not ble_up:
+                        print("[info-status] The owner is not in the room yet - "
+                              "holding the reminder until they are back.", flush=True)
                         print(f"[reminder] {rem.id} due but owner not present "
                               "(watch offline); holding.", flush=True)
                     else:
+                        print("[info-status] The owner is in the room.", flush=True)
                         sensitive, note = sensitivity_for(rem)
-                        print(f"\n[reminder] {rem.id} due: {rem.text!r} - "
+                        print(f"[reminder] {rem.id} due: {rem.text!r} - "
                               f"{'SENSITIVE' if sensitive else 'non-sensitive'} "
                               f"({note}). Delivering on worker thread.", flush=True)
+                        print("[info-status] " + (
+                            "This reminder is SENSITIVE - I must check who is around "
+                            "before saying it out loud." if sensitive else
+                            "This reminder is NOT sensitive - it is safe to say out "
+                            "loud even if someone else is nearby."), flush=True)
+                        log.info("reminder %s due: %r (%s)", rem.id, rem.text,
+                                 "sensitive" if sensitive else "non-sensitive",
+                                 extra={"event": "reminder_due"})
                         fire_delivery_async(rem, frame.copy(), sensitive)
 
             for (x, y, w, h) in faces:

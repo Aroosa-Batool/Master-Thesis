@@ -30,6 +30,7 @@ Press 'q' at any time to abort. Re-run to re-enroll (will overwrite).
 from __future__ import annotations
 
 import datetime
+import logging
 import sys
 import time
 
@@ -38,9 +39,13 @@ import numpy as np
 
 from robot.perception.face_id import FaceIdentifier, SFACE_COSINE_SAME_PERSON, ensure_models
 from robot.core.owner import OwnerStore
+from robot.core.logsetup import setup_logging, logcall, get_logger
 
 
 from robot.paths import OWNER_FACE_PATH
+
+log = get_logger(__name__)
+
 TARGET_SAMPLES = 12
 SAMPLE_INTERVAL_S = 0.30
 # Drop the minimum-confidence face cutoff for enrollment: we want
@@ -52,6 +57,7 @@ MIN_FACE_SCORE = 0.9
 MIN_FACE_AREA_FRAC = 0.01
 
 
+@logcall(level=logging.DEBUG)
 def draw_status(
     frame: np.ndarray,
     lines: list[tuple[str, tuple[int, int, int]]],
@@ -68,6 +74,7 @@ def draw_status(
         )
 
 
+@logcall
 def capture_owner_samples(
     cap: cv2.VideoCapture,
     identifier: FaceIdentifier,
@@ -77,6 +84,8 @@ def capture_owner_samples(
     Returns an empty list if the user aborts with 'q'.
     """
 
+    log.info("owner face capture started (target %d samples)", TARGET_SAMPLES,
+             extra={"event": "capture_started"})
     samples: list[np.ndarray] = []
     last_sample_at: float = 0.0
     last_face_count: int = 0
@@ -105,6 +114,9 @@ def capture_owner_samples(
                 f"(face score={eligible_face.confidence:.2f})",
                 flush=True,
             )
+            log.info("captured sample %d/%d (face score=%.2f)", len(samples),
+                     TARGET_SAMPLES, eligible_face.confidence,
+                     extra={"event": "sample_captured"})
 
         # HUD overlay
         for face in faces:
@@ -150,6 +162,7 @@ def capture_owner_samples(
     return samples
 
 
+@logcall
 def verify_loop(
     cap: cv2.VideoCapture,
     identifier: FaceIdentifier,
@@ -203,7 +216,9 @@ def verify_loop(
             return
 
 
+@logcall
 def main() -> None:
+    setup_logging(run_name="enroll_face")
     print("[enroll] preparing face detector + recogniser (YuNet + SFace)...", flush=True)
     yunet, sface = ensure_models()
     identifier = FaceIdentifier(yunet, sface)
@@ -247,6 +262,8 @@ def main() -> None:
             f"[enroll] wrote {OWNER_FACE_PATH} ({len(samples)} samples).",
             flush=True,
         )
+        log.info("owner enrolled with %d samples", len(samples),
+                 extra={"event": "owner_enrolled"})
 
         verify_loop(cap, identifier, store)
     finally:

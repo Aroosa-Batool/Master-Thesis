@@ -56,6 +56,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import logging
 import sys
 import time
 
@@ -86,6 +87,10 @@ from robot.perception.voice_id import (
 # so every reminder is delivered by exactly the same consent policy.
 import robot.core.robot_io as demo
 
+from robot.core.logsetup import setup_logging, logcall, get_logger
+
+log = get_logger(__name__)
+
 
 # Inside the monitoring window the mic records CONTINUOUSLY (no on/off sampling),
 # so a bystander who speaks at ANY instant is captured - nothing is missed in a
@@ -100,6 +105,10 @@ DEFAULT_POLL_S = 2.0
 # progress lines (during a continuous recording).
 HEARTBEAT_S = 30.0
 LISTEN_HEARTBEAT_S = 20.0
+# How much of the just-captured audio each progress line samples for its live
+# readout - the dual voiced/peak detector run over the most recent few seconds,
+# so the operator can see in real time whether a voice is actually being heard.
+RECENT_WINDOW_S = 4.0
 
 # A reminder whose delivery raises is left PENDING and retried (a transient mic /
 # BLE / embedding hiccup must not silently lose it). This caps the retries so a
@@ -139,6 +148,7 @@ PEAK_RMS = DEFAULT_PEAK_RMS          # overridden from --peak in main()
 PEAK_MIN_BLOCKS = 2                  # >= this many loud blocks => a real voice
 
 
+@logcall
 def init_ohbot() -> None:
     """Bring up the shared Ohbot the same way the demo does (or skip it)."""
 
@@ -160,6 +170,7 @@ def init_ohbot() -> None:
     print("[startup] Ohbot ready.", flush=True)
 
 
+@logcall
 def close_ohbot() -> None:
     if demo.NO_OHBOT:
         return
@@ -170,6 +181,7 @@ def close_ohbot() -> None:
             demo.ohbot.close()
 
 
+@logcall
 def record_until(remind_at: datetime.datetime, rem_id: str) -> np.ndarray:
     """Record the mic CONTINUOUSLY until ``remind_at``; return the mono buffer.
 
@@ -197,19 +209,32 @@ def record_until(remind_at: datetime.datetime, rem_id: str) -> np.ndarray:
         elapsed = record_s - max(_seconds_until(remind_at), 0.0)
         if elapsed >= next_beat:
             filled = min(len(buf), int(elapsed * VOICE_SR))
-            lo = max(0, filled - int(2 * VOICE_SR))     # last ~2 s captured so far
+            lo = max(0, filled - int(RECENT_WINDOW_S * VOICE_SR))   # last few s so far
             recent = buf[lo:filled, 0]
+            # Run the SAME dual detector live over the recent window so the line
+            # shows whether a voice is currently being heard (a real-time hint;
+            # the binding decision is still made over the WHOLE window at due time).
+            frac, peak, mean, loud, hot = presence_metrics(recent)
+            to_due = int(max(_seconds_until(remind_at), 0.0))
             print(f"[monitor] {rem_id}: listening... {int(elapsed)}s/{int(record_s)}s "
-                  f"(recent RMS {_rms(recent):.3f}).", flush=True)
+                  f"| last {int(RECENT_WINDOW_S)}s: RMS mean {mean:.3f} peak {peak:.3f}, "
+                  f"{frac:.0%} voiced, {loud} loud>{PEAK_RMS:.3f} "
+                  f"-> {'VOICE' if hot else 'quiet'} | {to_due}s to due.", flush=True)
+            log.info("progress %ds/%ds recent=%s mean=%.3f peak=%.3f voiced=%.0f%% "
+                     "loud=%d to_due=%ds", int(elapsed), int(record_s),
+                     "voice" if hot else "quiet", mean, peak, frac * 100, loud, to_due,
+                     extra={"event": "listening_progress"})
             next_beat += LISTEN_HEARTBEAT_S
     sd.wait()   # ensure the full record_s is captured (matters for past-due fallback)
     return buf[:, 0].copy()
 
 
+@logcall(level=logging.DEBUG)
 def _rms(block: np.ndarray) -> float:
     return float(np.sqrt(np.mean(block ** 2))) if len(block) else 0.0
 
 
+@logcall(level=logging.DEBUG)
 def presence_metrics(audio: np.ndarray) -> tuple[float, float, float, int, bool]:
     """Per-sample energy metrics + the dual voiced/peak presence decision.
 
@@ -232,6 +257,7 @@ def presence_metrics(audio: np.ndarray) -> tuple[float, float, float, int, bool]
     return frac, max(rmss), sum(rmss) / n, loud, detected
 
 
+@logcall
 def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
     """Whether a due reminder is sensitive, plus a note on where that came from.
 
@@ -249,6 +275,7 @@ def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
     return res.sensitive, f"classified live - {res.backend}: {res.reason}"
 
 
+@logcall
 def analyse_presence(audio, voice_identifier, voice_db, owner_store, rem_id) -> str | None:
     """Analyse the whole recording: log energy metrics, then identify a bystander.
 
@@ -278,17 +305,32 @@ def analyse_presence(audio, voice_identifier, voice_db, owner_store, rem_id) -> 
         print(f"[monitor] {rem_id}:   only the owner was heard; no bystander.",
               flush=True)
         return None
+    print("[info-status] I heard someone else here with the owner.", flush=True)
+    if is_new:
+        print("[info-status] I have not heard this person before. I turned their "
+              f"voice into a numeric embedding (a voiceprint) and gave them the "
+              f"anonymous id {bid}. I do NOT keep their raw audio or any personal "
+              "data - only the embedding.", flush=True)
+    else:
+        print(f"[info-status] I recognise this person as {bid}: their voiceprint "
+              f"matches a stored one (cosine similarity {sim:.2f} >= threshold "
+              f"{VOICE_SAME_SPEAKER:.2f}), so it is the same person as before.",
+              flush=True)
     print(f"[monitor] {rem_id}: bystander {bid} present "
           f"({'NEW id' if is_new else 'matched existing'}, sim={sim:.2f}, {n_by} "
           "voiced window(s) averaged) - remembered; will decide / ask at the due "
           "time.", flush=True)
+    log.info("bystander %s present (new=%s, sim=%.2f)", bid, is_new, sim,
+             extra={"event": "bystander_detected"})
     return bid
 
 
+@logcall(level=logging.DEBUG)
 def _seconds_until(when: datetime.datetime) -> float:
     return (when - datetime.datetime.now()).total_seconds()
 
 
+@logcall
 def wait_until(when: datetime.datetime, poll: float) -> None:
     """Idle-sleep (mic off) until ``when``, in small steps so Ctrl-C stays live."""
 
@@ -299,6 +341,7 @@ def wait_until(when: datetime.datetime, poll: float) -> None:
         time.sleep(min(poll, left))
 
 
+@logcall
 def monitor_and_deliver(
     rem: Reminder,
     remind_at: datetime.datetime,
@@ -354,12 +397,18 @@ def monitor_and_deliver(
     if not watch.is_connected():
         print(f"[monitor] {rem.id}: owner not present at delivery time (left during "
               "the window) -> holding until they are back in range.", flush=True)
+        log.info("owner left during window; holding %s", rem.id,
+                 extra={"event": "owner_left"})
         return None
 
     # No bystander was ever heard -> owner is alone -> disclose.
     if bystander is None:
+        print("[info-status] The owner is alone - no other voice was heard, so I "
+              "can say the reminder out loud.", flush=True)
         print(f"[monitor] {rem.id}: no one heard across the window -> owner alone.",
               flush=True)
+        log.info("no bystander across window; owner alone %s", rem.id,
+                 extra={"event": "no_presence"})
         demo.deliver_reminder_spoken(text)
         return f"reminder delivered, owner alone (window quiet) [{rem.id}]"
 
@@ -369,39 +418,72 @@ def monitor_and_deliver(
     # recognised, but only for logging, never to skip the prompt.
     key = ConsentKey(bystander_id=bystander, content_type=demo.REMINDER_CONTENT_TYPE)
     if consent_store is not None:
+        print(f"[info-status] Checking my memory for the owner's saved preference "
+              f"about {bystander}...", flush=True)
         cached = consent_store.get(key)
         if cached is True:
+            print(f"[info-status] The owner has already allowed disclosure in front "
+                  f"of {bystander} - reusing that saved YES; no need to ask again.",
+                  flush=True)
+            log.info("reusing stored YES for bystander %s (%s)", bystander, rem.id,
+                     extra={"event": "consent_cache_hit"})
             print(f"[monitor] {rem.id}: remembered YES for {bystander} -> disclose.",
                   flush=True)
             demo.deliver_reminder_spoken(text)
             return f"reminder disclosed, bystander {bystander} (remembered YES) [{rem.id}]"
         if cached is False:
+            print(f"[info-status] The owner previously chose NOT to disclose in "
+                  f"front of {bystander} - reusing that saved NO; sending it "
+                  "privately to the watch instead.", flush=True)
+            log.info("reusing stored NO for bystander %s (%s)", bystander, rem.id,
+                     extra={"event": "consent_cache_hit"})
             print(f"[monitor] {rem.id}: remembered NO for {bystander} -> private note.",
                   flush=True)
             watch.notify(private)
             demo.behavior_withhold()
             return f"reminder withheld -> private, bystander {bystander} (remembered NO) [{rem.id}]"
+        print(f"[info-status] I have no saved preference for {bystander} yet - I will "
+              "ask the owner.", flush=True)
+    else:
+        print("[info-status] Re-ask policy: I ask the owner every time and never "
+              "save the answer.", flush=True)
 
     # Ask the watch: the first time for this bystander (remember mode) or every
     # time (re-ask mode).
     remembered = " (remembered)" if consent_store is not None else ""
+    print("[info-status] Asking the owner on the watch: may I say this reminder out "
+          "loud in front of this person?", flush=True)
     print(f"[monitor] {rem.id}: bystander {bystander} present and reminder is due; "
           "asking on the watch for consent...", flush=True)
+    log.info("asking watch for consent (%s, bystander %s)", rem.id, bystander,
+             extra={"event": "consent_asked"})
     ans = watch.ask_consent(demo.PROMPT_MESSAGE, timeout=demo.CONSENT_TIMEOUT_S)
     if ans is None:
         # A non-answer is never stored (a non-decision); safe non-disclosing default.
+        print("[info-status] No answer from the watch - to stay safe I will NOT say "
+              "it aloud; sending it privately. (A non-answer is not saved.)",
+              flush=True)
         print(f"[monitor] {rem.id}: no watch answer -> private note (not stored).",
               flush=True)
+        log.info("no watch answer for %s", rem.id, extra={"event": "consent_timeout"})
         watch.notify(private)
         demo.behavior_withhold()
         return f"reminder no-reply -> private, bystander {bystander} [{rem.id}]"
+    log.info("watch answered %s for %s (bystander %s)", "YES" if ans else "NO",
+             rem.id, bystander, extra={"event": "consent_answer"})
     if consent_store is not None:
+        print(f"[info-status] Saving the owner's answer about {bystander} so I do "
+              "not have to ask again next time.", flush=True)
         consent_store.put(key, ans)
     if ans:
+        print("[info-status] The owner said YES - saying the reminder out loud.",
+              flush=True)
         print(f"[monitor] {rem.id}: watch said YES for {bystander}{remembered} -> "
               "disclose.", flush=True)
         demo.deliver_reminder_spoken(text)
         return f"reminder asked YES, bystander {bystander} [{rem.id}]"
+    print("[info-status] The owner said NO - sending the reminder privately to the "
+          "watch and greeting neutrally.", flush=True)
     print(f"[monitor] {rem.id}: watch said NO for {bystander}{remembered} -> "
           "private note.", flush=True)
     watch.notify(private)
@@ -409,6 +491,7 @@ def monitor_and_deliver(
     return f"reminder asked NO, bystander {bystander} [{rem.id}]"
 
 
+@logcall
 def run(remember: bool) -> None:
     """Run the voice reminder loop.
 
@@ -420,6 +503,7 @@ def run(remember: bool) -> None:
     ``robot.apps.mic_reask``); this is the shared engine behind them.
     """
 
+    setup_logging(run_name="voice_reminder")
     ap = argparse.ArgumentParser(
         description="Time-triggered reminder delivery (mic stays off until due)."
     )
@@ -515,6 +599,8 @@ def run(remember: bool) -> None:
                     pend = reminder_store.pending()
                     nxt = f"next due {pend[0].remind_at} ({pend[0].text!r})" if pend \
                         else "none pending"
+                    print("[info-status] Looking for reminders that are due...",
+                          flush=True)
                     print(f"[waiting] {nxt}; mic off.", flush=True)
                     last_heartbeat = now
                 time.sleep(args.poll)
@@ -522,9 +608,13 @@ def run(remember: bool) -> None:
 
             rem = due[0]
             remind_at = rem.remind_at_dt
-            print(f"\n[reminder] {rem.id} approaching (scheduled {rem.remind_at}, "
+            print(f"\n[info-status] Reminder found: {rem.text!r} "
+                  f"(scheduled for {rem.remind_at}).", flush=True)
+            print(f"[reminder] {rem.id} approaching (scheduled {rem.remind_at}, "
                   f"~{int(max(_seconds_until(remind_at), 0))}s until due): "
                   f"{rem.text!r}", flush=True)
+            log.info("reminder %s due (%r)", rem.id, rem.text,
+                     extra={"event": "reminder_due"})
 
             # AI sensitivity check: it decides HOW this reminder is delivered.
             # Non-sensitive (an errand) -> speak it at its time, no presence check
@@ -534,16 +624,26 @@ def run(remember: bool) -> None:
             print(f"[reminder] {rem.id}: sensitivity = "
                   f"{'SENSITIVE' if sensitive else 'NON-SENSITIVE'} ({sens_note}).",
                   flush=True)
+            print("[info-status] " + (
+                "This reminder is SENSITIVE - I must check who is around before "
+                "saying it out loud." if sensitive else
+                "This reminder is NOT sensitive - it is safe to say out loud even "
+                "if someone else is nearby."), flush=True)
 
             # Is the owner present? BLE link up == owner in ~same room. A reminder
             # is for the owner, so we hold it (either path) until they are back in
             # range rather than announcing it to an empty room. Checked as the
             # window opens; a brief BLE flap mid-window is tolerated.
+            print("[info-status] Checking if the owner is in the room "
+                  "(via the watch's Bluetooth link)...", flush=True)
             if not watch.is_connected():
+                print("[info-status] The owner is not in the room yet - I will hold "
+                      "the reminder until they are back.", flush=True)
                 print("[reminder] owner not present (watch offline). Holding the "
                       "reminder until the owner is back in range...", flush=True)
                 time.sleep(max(args.poll, 3.0))
                 continue
+            print("[info-status] The owner is in the room.", flush=True)
 
             try:
                 if not sensitive:
@@ -558,12 +658,17 @@ def run(remember: bool) -> None:
                               "holding until back in range.", flush=True)
                         status = None
                     else:
+                        print("[info-status] Not sensitive - skipping the who-is-"
+                              "around check and disclosing to the owner now.",
+                              flush=True)
                         print(f"[reminder] {rem.id}: non-sensitive -> speaking "
                               "normally (no consent needed; mic stayed off).",
                               flush=True)
                         demo.deliver_reminder_spoken(rem.text)
                         status = f"reminder delivered, non-sensitive [{rem.id}]"
                 else:
+                    print("[info-status] Sensitive - listening to check whether the "
+                          "owner is alone or with someone else...", flush=True)
                     # Sensitive: record the window continuously, remember any
                     # bystander, then decide/ask at the due time. Returns None to
                     # HOLD (owner absent at the moment of delivery).

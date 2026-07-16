@@ -21,9 +21,12 @@ second or two.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 import numpy as np
+
+from robot.core.logsetup import logcall, get_logger
 
 try:
     from resemblyzer import VoiceEncoder, preprocess_wav
@@ -32,6 +35,8 @@ except ModuleNotFoundError as exc:
         "Missing dependency: install with `pip install resemblyzer` "
         "(pulls in torch). See requirements.txt."
     ) from exc
+
+log = get_logger(__name__)
 
 
 # Resemblyzer works internally at 16 kHz mono.
@@ -79,10 +84,14 @@ class VoiceIdentifier:
     no internal lock (the torch model is used read-only).
     """
 
+    @logcall
     def __init__(self) -> None:
         # Loads the bundled GE2E weights onto CPU (or CUDA if present).
         self._encoder = VoiceEncoder(verbose=True)
+        log.info("voice encoder (GE2E d-vector) loaded",
+                 extra={"event": "model_loaded"})
 
+    @logcall(level=logging.DEBUG)
     def embed(
         self, audio: np.ndarray, source_sr: int = VOICE_SR
     ) -> np.ndarray | None:
@@ -99,6 +108,7 @@ class VoiceIdentifier:
         emb = self._encoder.embed_utterance(wav)
         return np.asarray(emb, dtype=np.float32).flatten()
 
+    @logcall(level=logging.DEBUG)
     def segment_and_embed(
         self, audio: np.ndarray, source_sr: int = VOICE_SR
     ) -> list[DetectedVoice]:

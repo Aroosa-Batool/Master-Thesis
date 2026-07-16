@@ -17,12 +17,16 @@ Run:
 Dependencies (see requirements.txt): openai-whisper, dateparser.
 Whisper downloads its model (~74 MB for base.en) into ~/.cache/whisper on
 first use.
+
+Structured run logs (function entry/exit + timing) are written as CSV to
+``robot/state/logs/add_reminder_<timestamp>.csv`` - see ``robot.core.logsetup``.
 """
 
 from __future__ import annotations
 
 import argparse
 import datetime
+import logging
 import re
 import subprocess
 import sys
@@ -40,10 +44,13 @@ except (ModuleNotFoundError, OSError) as exc:
 from robot.perception.audio_device import pick_input_device
 from robot.core.reminders import ReminderStore
 from robot.core.sensitivity import SensitivityResult, get_classifier
+from robot.core.logsetup import setup_logging, logcall, get_logger
 
 # Whisper works at 16 kHz mono, same as the rest of the voice stack.
 SR = 16000
 from robot.paths import REMINDERS_PATH
+
+log = get_logger(__name__)
 
 # Lead-ins we strip from the transcript so the stored text is just the
 # subject ("doctor's appointment"), not the command wrapper ("remind me
@@ -59,6 +66,7 @@ _LEADIN_RE = re.compile(
 )
 
 
+@logcall
 def record(seconds: float) -> np.ndarray:
     """Capture ``seconds`` of mono 16 kHz audio from the default mic."""
 
@@ -71,6 +79,7 @@ def record(seconds: float) -> np.ndarray:
     return audio[:, 0].copy()
 
 
+@logcall
 def transcribe(model, audio: np.ndarray) -> str:
     """Whisper transcription of a float32 16 kHz buffer -> stripped text."""
 
@@ -79,6 +88,7 @@ def transcribe(model, audio: np.ndarray) -> str:
     return str(result.get("text", "")).strip()
 
 
+@logcall
 def parse_datetime(transcript: str) -> tuple[str, datetime.datetime] | None:
     """Find the date/time in ``transcript``; returns (matched_text, dt).
 
@@ -115,6 +125,7 @@ _DANGLING = {
 }
 
 
+@logcall(level=logging.DEBUG)
 def _strip_dangling(text: str) -> str:
     """Drop temporal connectives / bare punctuation stranded at either end."""
 
@@ -130,6 +141,7 @@ def _strip_dangling(text: str) -> str:
     return " ".join(words)
 
 
+@logcall
 def clean_text(transcript: str, time_phrase: str | None = None) -> str:
     """Strip the command wrapper *and* the date/time phrase, leaving just the
     subject ("Doctor's appointment") - never the schedule ("... after 6
@@ -151,6 +163,7 @@ def clean_text(transcript: str, time_phrase: str | None = None) -> str:
     return text[:1].upper() + text[1:] if text else text
 
 
+@logcall
 def confirm_and_save(
     store: ReminderStore,
     text: str,
@@ -184,12 +197,16 @@ def confirm_and_save(
             reply = "q"
         if reply.startswith("s"):
             sensitive = not sensitive
+            log.info("sensitivity toggled to %s by operator", sensitive,
+                     extra={"event": "sensitivity_override"})
             continue
         if reply.startswith("y"):
             rem = store.add(text, dt, sensitive=sensitive)
             tag = "sensitive" if sensitive else "non-sensitive"
             print(f"[reminder] saved {rem.id} ({tag}): {text!r} due {pretty}.",
                   flush=True)
+            log.info("saved reminder %s (%s) due %s", rem.id, tag, pretty,
+                     extra={"event": "reminder_saved"})
             _speak_confirmation(f"Okay, I will remind you about {text} on {pretty}.")
             return "saved"
         if reply.startswith("r"):
@@ -198,6 +215,7 @@ def confirm_and_save(
         return "quit"
 
 
+@logcall
 def _speak_confirmation(text: str) -> None:
     """Best-effort spoken confirmation via the OS voice (no Ohbot needed)."""
 
@@ -214,7 +232,9 @@ def _speak_confirmation(text: str) -> None:
         pass
 
 
+@logcall
 def main() -> None:
+    setup_logging(run_name="add_reminder")
     ap = argparse.ArgumentParser(description="Add a reminder by voice.")
     ap.add_argument("--seconds", type=float, default=8.0,
                     help="recording length (default 8s)")
@@ -232,6 +252,7 @@ def main() -> None:
 
     print(f"[startup] loading Whisper model '{args.model}' "
           "(first run downloads it)...", flush=True)
+    log.info("loading Whisper model %r", args.model, extra={"event": "startup"})
     model = whisper.load_model(args.model)
     # Sensitivity classifier: decides whether a reminder is presence-gated
     # (health/finance/personal) or safe to speak freely. Built once here.
@@ -243,15 +264,19 @@ def main() -> None:
         transcript = transcribe(model, audio)
         if not transcript:
             print("[reminder] heard nothing. Try again (speak clearly).", flush=True)
+            log.info("empty transcript", extra={"event": "transcript_empty"})
             if not _again():
                 return
             continue
         print(f"[reminder] transcript: {transcript!r}", flush=True)
+        log.info("transcript: %s", transcript, extra={"event": "transcript"})
 
         parsed = parse_datetime(transcript)
         if parsed is None:
             print("[reminder] couldn't find a date/time in that. Say something "
                   "like 'doctor's appointment on July 20th at 3 PM'.", flush=True)
+            log.info("no date/time found in %r", transcript,
+                     extra={"event": "parse_failed"})
             if not _again():
                 return
             continue
@@ -259,11 +284,15 @@ def main() -> None:
         matched_text, dt = parsed
         text = clean_text(transcript, matched_text)
         sens = classifier.classify(text)
+        log.info("subject=%r when=%s sensitive=%s (%s)", text,
+                 dt.isoformat(timespec="minutes"), sens.sensitive, sens.backend,
+                 extra={"event": "parsed"})
         if confirm_and_save(store, text, dt, sens) == "retry":
             continue
         return
 
 
+@logcall(level=logging.DEBUG)
 def _again() -> bool:
     try:
         return input("Record again? [y/N]: ").strip().lower().startswith("y")

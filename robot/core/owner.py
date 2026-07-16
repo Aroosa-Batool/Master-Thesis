@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import tempfile
 import threading
@@ -25,7 +26,12 @@ from pathlib import Path
 
 import numpy as np
 
+from robot.core.logsetup import logcall, get_logger
 
+log = get_logger(__name__)
+
+
+@logcall(level=logging.DEBUG)
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
     denom = float(np.linalg.norm(a)) * float(np.linalg.norm(b))
     if denom <= 1e-12:
@@ -41,6 +47,7 @@ class OwnerStore:
     enrollment script is the only writer.
     """
 
+    @logcall
     def __init__(self, path: Path) -> None:
         self._path = path
         self._lock = threading.Lock()
@@ -51,18 +58,22 @@ class OwnerStore:
 
     # --- public --------------------------------------------------------------
 
+    @logcall(level=logging.DEBUG)
     def has_owner(self) -> bool:
         with self._lock:
             return self._embedding is not None
 
+    @logcall(level=logging.DEBUG)
     def samples(self) -> int:
         with self._lock:
             return self._samples
 
+    @logcall(level=logging.DEBUG)
     def enrolled_at(self) -> str:
         with self._lock:
             return self._enrolled_at
 
+    @logcall
     def matches(
         self, embedding: np.ndarray, threshold: float
     ) -> tuple[bool, float]:
@@ -78,8 +89,11 @@ class OwnerStore:
                 return False, 0.0
             emb = np.asarray(embedding, dtype=np.float32).flatten()
             sim = _cosine(emb, self._embedding)
+        log.info("owner match sim=%.3f threshold=%.3f -> %s", sim, threshold,
+                 sim >= threshold, extra={"event": "owner_match"})
         return (sim >= threshold), sim
 
+    @logcall
     def save(
         self, embedding: np.ndarray, samples: int, enrolled_at: str
     ) -> None:
@@ -95,7 +109,10 @@ class OwnerStore:
             self._samples = int(samples)
             self._enrolled_at = enrolled_at
             self._save_locked()
+            log.info("owner enrolled: %d samples at %s", int(samples),
+                     enrolled_at, extra={"event": "owner_enrolled"})
 
+    @logcall
     def clear(self) -> None:
         with self._lock:
             self._embedding = None
@@ -108,6 +125,7 @@ class OwnerStore:
 
     # --- private -------------------------------------------------------------
 
+    @logcall
     def _load(self) -> None:
         if not self._path.exists():
             return
@@ -125,6 +143,7 @@ class OwnerStore:
             )
             self._embedding = None
 
+    @logcall
     def _save_locked(self) -> None:
         assert self._embedding is not None
         payload = json.dumps(

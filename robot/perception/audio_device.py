@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import os
 
+from robot.core.logsetup import logcall, get_logger
+
 try:
     import sounddevice as sd
 except (ModuleNotFoundError, OSError) as exc:
@@ -21,7 +23,10 @@ except (ModuleNotFoundError, OSError) as exc:
         "(needs the PortAudio library; on Linux: `apt install libportaudio2`)."
     ) from exc
 
+log = get_logger(__name__)
 
+
+@logcall
 def pick_input_device() -> int:
     """Return a valid input-device index for ``sd.InputStream``.
 
@@ -48,6 +53,8 @@ def pick_input_device() -> int:
     except (TypeError, ValueError):
         default_in = -1
     if default_in >= 0:
+        log.info("using default input device %d", default_in,
+                 extra={"event": "device_selected"})
         return default_in
     for i, d in enumerate(devices):
         if d["max_input_channels"] > 0:
@@ -56,5 +63,7 @@ def pick_input_device() -> int:
                 f"({d['name']!r}). Override with VOICE_INPUT_DEVICE.",
                 flush=True,
             )
+            log.info("selected fallback input device %d (%r)", i, d["name"],
+                     extra={"event": "device_selected"})
             return i
     raise SystemExit("[audio] no input-capable audio device found.")

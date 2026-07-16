@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import tempfile
 import threading
@@ -27,6 +28,10 @@ from pathlib import Path
 
 import numpy as np
 
+from robot.core.logsetup import logcall, get_logger
+
+log = get_logger(__name__)
+
 
 @dataclass
 class _Record:
@@ -34,15 +39,18 @@ class _Record:
     embedding: np.ndarray  # float32, shape (D,)
 
 
+@logcall(level=logging.DEBUG)
 def _encode_embedding(emb: np.ndarray) -> str:
     return base64.b64encode(np.ascontiguousarray(emb, dtype=np.float32).tobytes()).decode("ascii")
 
 
+@logcall(level=logging.DEBUG)
 def _decode_embedding(s: str) -> np.ndarray:
     raw = base64.b64decode(s.encode("ascii"))
     return np.frombuffer(raw, dtype=np.float32).copy()
 
 
+@logcall(level=logging.DEBUG)
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
     """Cosine similarity. SFace embeddings are L2-normalised, but we
     do the full computation here so this works with any embedding."""
@@ -62,6 +70,7 @@ class FaceDB:
     half-written JSON if the process is killed mid-write.
     """
 
+    @logcall
     def __init__(self, path: Path, match_threshold: float) -> None:
         self._path = path
         self._lock = threading.Lock()
@@ -72,6 +81,7 @@ class FaceDB:
 
     # --- public --------------------------------------------------------------
 
+    @logcall
     def identify(self, embedding: np.ndarray) -> tuple[str, float, bool]:
         """Return ``(person_id, similarity, is_new)`` for an embedding.
 
@@ -101,8 +111,11 @@ class FaceDB:
             self._records.append(_Record(person_id=new_id, embedding=emb.copy()))
             self._save_locked()
             sim_for_caller = best_sim if best_sim >= 0 else 0.0
+            log.info("new person %s added to gallery (best prior sim %.3f)",
+                     new_id, sim_for_caller, extra={"event": "new_person"})
             return new_id, sim_for_caller, True
 
+    @logcall(level=logging.DEBUG)
     def labels_for_frame(
         self, embeddings: list[np.ndarray]
     ) -> list[tuple[str, float, bool]]:
@@ -110,17 +123,20 @@ class FaceDB:
 
         return [self.identify(e) for e in embeddings]
 
+    @logcall
     def count(self) -> int:
         with self._lock:
             return len(self._records)
 
     # --- private -------------------------------------------------------------
 
+    @logcall
     def _mint_id_locked(self) -> str:
         new_id = f"person_{self._next_id:03d}"
         self._next_id += 1
         return new_id
 
+    @logcall
     def _load(self) -> None:
         if not self._path.exists():
             return
@@ -141,6 +157,8 @@ class FaceDB:
                         embedding=_decode_embedding(entry["embedding"]),
                     )
                 )
+            log.info("gallery loaded: %d people from %s",
+                     len(self._records), self._path, extra={"event": "db_loaded"})
         except Exception as exc:
             print(
                 f"[face_db] {self._path} is malformed: {exc}; starting fresh.",
@@ -149,6 +167,7 @@ class FaceDB:
             self._records = []
             self._next_id = 1
 
+    @logcall
     def _save_locked(self) -> None:
         # caller holds self._lock
         data = {

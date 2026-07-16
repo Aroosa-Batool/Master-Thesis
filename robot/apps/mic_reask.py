@@ -15,6 +15,8 @@ Run:
 """
 
 from robot.core.voice_reminder import run
+from robot.core.logsetup import setup_logging
 
 if __name__ == "__main__":
+    setup_logging(run_name="mic_reask")
     run(remember=False)

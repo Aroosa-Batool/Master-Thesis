@@ -18,6 +18,7 @@ gitignored (see ../../.gitignore).
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import urllib.error
@@ -29,7 +30,10 @@ import cv2
 import numpy as np
 
 
+from robot.core.logsetup import logcall, get_logger
 from robot.paths import MODELS_DIR
+
+log = get_logger(__name__)
 
 # Two ONNX files we need. URLs point at a pinned commit so a future
 # upstream rename doesn't break the demo.
@@ -71,6 +75,7 @@ class DetectedFace:
         return int(self.bbox[2] * self.bbox[3])
 
 
+@logcall
 def _download(url: str, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
@@ -107,6 +112,7 @@ def _download(url: str, dest: Path) -> None:
         ) from exc
 
 
+@logcall
 def ensure_models() -> tuple[Path, Path]:
     """Returns the on-disk paths of the YuNet and SFace ONNX models.
 
@@ -146,6 +152,7 @@ class FaceIdentifier:
     ``trial_lock`` + ``in_trial``), so no extra lock here.
     """
 
+    @logcall
     def __init__(
         self,
         yunet_path: Path,
@@ -164,7 +171,10 @@ class FaceIdentifier:
             top_k,
         )
         self._recognizer = cv2.FaceRecognizerSF.create(str(sface_path), "")
+        log.info("face models loaded (YuNet detector + SFace recognizer)",
+                 extra={"event": "model_loaded"})
 
+    @logcall(level=logging.DEBUG)
     def detect_and_embed(self, frame_bgr: np.ndarray) -> list[DetectedFace]:
         """Run detection + embedding on a single BGR frame."""
 

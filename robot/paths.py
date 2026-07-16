@@ -15,6 +15,7 @@ from pathlib import Path
 # This file is robot/paths.py, so its parent is the robot/ package root.
 STATE_DIR = Path(__file__).resolve().parent / "state"
 MODELS_DIR = STATE_DIR / "models"          # YuNet + SFace ONNX (auto-downloaded)
+LOGS_DIR = STATE_DIR / "logs"              # per-run structured CSV logs (robot.core.logsetup)
 
 # Shared across modalities
 REMINDERS_PATH = STATE_DIR / "reminders.json"

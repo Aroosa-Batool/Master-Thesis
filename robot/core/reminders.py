@@ -21,11 +21,16 @@ from __future__ import annotations
 
 import datetime
 import json
+import logging
 import os
 import tempfile
 import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
+from robot.core.logsetup import logcall, get_logger
+
+log = get_logger(__name__)
 
 
 @dataclass
@@ -48,6 +53,7 @@ class Reminder:
     def remind_at_dt(self) -> datetime.datetime:
         return datetime.datetime.fromisoformat(self.remind_at)
 
+    @logcall(level=logging.DEBUG)
     def is_due(self, now: datetime.datetime) -> bool:
         """True if this reminder is undelivered and its time has arrived."""
 
@@ -63,6 +69,7 @@ class ReminderStore:
     can never leave half a JSON file on disk (same approach as ConsentStore).
     """
 
+    @logcall
     def __init__(self, path: Path) -> None:
         self._path = path
         self._lock = threading.Lock()
@@ -80,6 +87,7 @@ class ReminderStore:
                 self._items = {}
                 self._next = 1
 
+    @logcall
     def add(
         self,
         text: str,
@@ -97,8 +105,11 @@ class ReminderStore:
             )
             self._items[rid] = rem
             self._write()
+            log.info("added reminder %s (sensitive=%s) due %s", rem.id,
+                     sensitive, rem.remind_at, extra={"event": "reminder_added"})
             return rem
 
+    @logcall
     def due(self, now: datetime.datetime) -> list[Reminder]:
         """Undelivered reminders whose time has arrived, earliest first."""
 
@@ -106,6 +117,7 @@ class ReminderStore:
             due = [r for r in self._items.values() if r.is_due(now)]
         return sorted(due, key=lambda r: r.remind_at)
 
+    @logcall
     def pending(self) -> list[Reminder]:
         """All undelivered reminders (due or not), earliest first."""
 
@@ -113,19 +125,24 @@ class ReminderStore:
             pend = [r for r in self._items.values() if not r.delivered]
         return sorted(pend, key=lambda r: r.remind_at)
 
+    @logcall
     def mark_delivered(self, rid: str) -> None:
         with self._lock:
             r = self._items.get(rid)
             if r is not None and not r.delivered:
                 r.delivered = True
                 self._write()
+                log.info("marked reminder %s delivered", rid,
+                         extra={"event": "reminder_delivered_marked"})
 
+    @logcall(level=logging.DEBUG)
     def all(self) -> list[Reminder]:
         with self._lock:
             return sorted(self._items.values(), key=lambda r: r.remind_at)
 
     # --- private -------------------------------------------------------------
 
+    @logcall
     def _write(self) -> None:
         """Atomic whole-file write. Caller must hold ``self._lock``."""
 

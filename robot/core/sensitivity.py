@@ -43,6 +43,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from robot.core.logsetup import setup_logging, logcall, get_logger
+
+log = get_logger(__name__)
+
 
 # The sentence-transformer to embed reminder text. ~80 MB, downloads to the
 # HuggingFace cache on first use, then runs offline on CPU in a few ms.
@@ -166,6 +170,7 @@ class SensitivityClassifier:
     heuristic if the sentence-transformer can't be imported or loaded.
     """
 
+    @logcall
     def __init__(self) -> None:
         self._model = None
         self._sens_emb = None
@@ -183,6 +188,7 @@ class SensitivityClassifier:
                 flush=True,
             )
 
+    @logcall
     def _load_model(self) -> None:
         from sentence_transformers import SentenceTransformer  # heavy import
 
@@ -206,6 +212,7 @@ class SensitivityClassifier:
         )
         print("[sensitivity] text encoder ready.", flush=True)
 
+    @logcall
     def classify(self, text: str) -> SensitivityResult:
         """Classify one reminder string. Empty/blank text -> sensitive."""
 
@@ -220,6 +227,7 @@ class SensitivityClassifier:
 
     # --- backends ------------------------------------------------------------
 
+    @logcall
     def _classify_embedding(self, text: str) -> SensitivityResult:
         import numpy as np
 
@@ -253,8 +261,12 @@ class SensitivityClassifier:
             reason = (f"better matched by everyday example "
                       f"{NONSENSITIVE_EXAMPLES[n_i]!r} (cos {n_best:.2f} vs "
                       f"sensitive {s_best:.2f})")
+        log.info("classified %r -> %s (margin %+.3f)", text,
+                 "sensitive" if sensitive else "non-sensitive", margin,
+                 extra={"event": "sensitivity_result"})
         return SensitivityResult(sensitive, margin, "embedding", reason)
 
+    @logcall
     def _classify_keyword(self, text: str) -> SensitivityResult:
         m = _SENSITIVE_RE.search(text)
         if m:
@@ -269,6 +281,7 @@ class SensitivityClassifier:
 _CLASSIFIER: SensitivityClassifier | None = None
 
 
+@logcall
 def get_classifier() -> SensitivityClassifier:
     """Return the process-wide classifier, building it on first call."""
 
@@ -278,6 +291,7 @@ def get_classifier() -> SensitivityClassifier:
     return _CLASSIFIER
 
 
+@logcall
 def classify(text: str) -> SensitivityResult:
     """Convenience: classify ``text`` with the shared classifier."""
 
@@ -285,6 +299,7 @@ def classify(text: str) -> SensitivityResult:
 
 
 if __name__ == "__main__":
+    setup_logging(run_name="sensitivity")
     # Quick self-test / tuning aid: `python -m robot.core.sensitivity`
     clf = get_classifier()
     print(f"[sensitivity] backend = {clf.backend}\n")
