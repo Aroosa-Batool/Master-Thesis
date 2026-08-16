@@ -31,9 +31,11 @@ for a reminder scheduled at time T, the app wakes at T-420s (7 min). For a
 SENSITIVE reminder the mic then records continuously for 300s (5 min), so it
 stops at ~T-120s (2 min); the recording is analysed right after the mic closes
 and is never retained. In both-sensor mode a mic miss triggers the head-mounted
-camera scan, scheduled late in the remaining interval so the freshest practical
-look at the room finishes close to T. Delivery (and any watch consent prompt)
-happens at T, never early.
+camera scan, which opens right away and paces its slow head sweep across the
+whole remaining interval (~T-120s -> ~T-5s), dwelling at each position - so the
+room is watched until just before the reminder and the last look is the
+freshest practical one. Delivery (and any watch consent prompt) happens at T,
+never early.
 
 The four combinations map onto the EXISTING engines - this launcher adds no new
 sensing, consent, or delivery logic:
@@ -196,10 +198,11 @@ def summary_lines(cfg: AppConfig) -> list[str]:
                          "(voice-only limit)")
     else:
         sensors_line = ("microphone first, then camera - the head-mounted camera "
-                        "opens only for a brief scan if the mic heard no "
-                        "bystander voice; never both at once. A preview window "
-                        "shows what the camera sees for exactly that scan and "
-                        "closes with the device (CAMERA_PREVIEW=0 to hide it)")
+                        "opens only if the mic heard no bystander voice, and its "
+                        "slow head sweep then fills the rest of the pre-reminder "
+                        "window; never both at once. A preview window shows what "
+                        "the camera sees for exactly that scan and closes with "
+                        "the device (CAMERA_PREVIEW=0 to hide it)")
         fallback_line = ("an inconclusive camera check withholds the reminder "
                          "(private note to the wrist) - it never counts as "
                          "'owner alone'")
@@ -208,8 +211,9 @@ def summary_lines(cfg: AppConfig) -> list[str]:
         f"[config] sensors          : {sensors_line}",
         f"[config] timing           : wake at T-{lead:g}s; for a sensitive "
         f"reminder the mic records {rec:g}s (T-{lead:g}s -> T-{stop:g}s), the "
-        f"audio is analysed as soon as the mic closes (and never retained), and "
-        f"delivery/consent happen at T",
+        f"audio is analysed as soon as the mic closes (and never retained), a "
+        f"mic miss hands the remaining ~{stop:g}s to the paced camera sweep, "
+        f"and delivery/consent happen at T",
         f"[config] fallback         : {fallback_line}",
         "[config] these choices are not saved; the next interactive run asks "
         "again.",

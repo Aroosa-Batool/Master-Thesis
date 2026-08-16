@@ -62,16 +62,18 @@ DEFAULT_POSITIONS: tuple[float, ...] = (2.0, 5.0, 8.0)
 
 # Seconds to let the servo travel and the picture stop shaking before a frame
 # from the new position is trusted. The Ohbot SDK's move() returns immediately
-# and reports no completion, so this is a wait, not a poll.
-DEFAULT_SETTLE_S = 0.9
+# and reports no completion, so this is a wait, not a poll. Sized for SCAN_SPEED
+# below: a slower move takes longer to arrive.
+DEFAULT_SETTLE_S = 1.5
 
 # How long to wait for a fresh frame once the head has settled, before giving up
 # on that position and moving on (a stalled camera must not strand a delivery).
 DEFAULT_FRAME_TIMEOUT_S = 2.0
 
-# Ohbot move speed (0-10). Slower than the default 3 looks deliberate rather
-# than twitchy, and shakes the head-mounted camera less on arrival.
-SCAN_SPEED = 2
+# Ohbot move speed (0-10, lower = slower). 1 is the slowest deliberate turn the
+# SDK offers: it reads as "looking around" rather than twitching, and shakes the
+# head-mounted camera least on arrival.
+SCAN_SPEED = 1
 
 
 @dataclass(frozen=True)
@@ -234,9 +236,34 @@ class HeadScanner:
         except Exception as exc:  # noqa: BLE001 - debugging must never break a run
             print(f"[scan] could not write debug frame: {exc}", flush=True)
 
+    def _dwell(self, seconds: float) -> None:
+        """Hold the current gaze for ``seconds``, waking early on abort."""
+
+        end = time.monotonic() + seconds
+        while not self._aborted():
+            left = end - time.monotonic()
+            if left <= 0:
+                return
+            time.sleep(min(0.25, left))
+
     @logcall
-    def scan(self, fallback_frame: np.ndarray | None = None) -> list[ScanShot]:
+    def scan(
+        self,
+        fallback_frame: np.ndarray | None = None,
+        *,
+        finish_by: float | None = None,
+    ) -> list[ScanShot]:
         """Sweep the head and return what was seen at each position.
+
+        ``finish_by`` (a ``time.monotonic()`` moment) paces the sweep: the time
+        until then is split evenly across the positions and the head DWELLS at
+        each one before its frame is taken, so a sweep given two minutes takes
+        two minutes - a slow, visible look around the room - and the last frame
+        lands just before the deadline (the freshest practical view). Each
+        position's frame is captured at the END of its dwell, so a bystander who
+        walks in mid-sweep is still seen. Without ``finish_by`` the sweep runs
+        at its natural pace (settle, grab a frame, move on), as the standalone
+        camera apps use it.
 
         Returns a single straight-ahead shot when there is no robot to move.
         Never raises for a missed frame: a position that yields nothing is
@@ -256,13 +283,23 @@ class HeadScanner:
         shots: list[ScanShot] = []
         self._latest.start()
         try:
-            for position in self._positions:
+            for index, position in enumerate(self._positions):
                 if self._aborted():
                     break
                 self._status(f"looking at head position {position:g}/10")
                 print(f"[scan] turning head to {position:g}/10 ...", flush=True)
                 self._move_head(position)
                 time.sleep(self._settle_s)
+                if finish_by is not None:
+                    # Even split of the time left over the positions still to be
+                    # captured (this one included), so the final frame is taken
+                    # right at the deadline rather than the sweep rushing.
+                    hold = (finish_by - time.monotonic()) / (len(self._positions) - index)
+                    if hold > 0:
+                        self._status(f"watching head position {position:g}/10")
+                        print(f"[scan] holding at {position:g}/10 for ~{hold:.0f}s "
+                              "before taking this position's look.", flush=True)
+                        self._dwell(hold)
                 if self._aborted():
                     break
                 # Only a frame captured after the head stopped shows this

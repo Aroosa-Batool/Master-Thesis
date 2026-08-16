@@ -2,14 +2,15 @@
 
 Covers the mic-first/camera-second priority, the camera opening only in
 both-sensor mode after a mic miss, the fail-safe handling of an inconclusive
-camera check, the fresh-scan scheduling, the fusion consent-cache namespace,
-and camera cleanup / head recentering on success and failure.
+camera check, the sweep pacing across the pre-reminder window, the fusion
+consent-cache namespace, and camera cleanup / head recentering on success and
+failure.
 """
 
 from __future__ import annotations
 
-import datetime
 import threading
+import time
 
 import numpy as np
 import pytest
@@ -36,7 +37,7 @@ def test_mic_hit_skips_the_camera(monkeypatch):
     found, conclusive = fr.sense_presence(
         rem, rem.remind_at_dt, None, None, None,
         object(), object(), object(),        # camera stage IS available
-        record_s=1.0, poll_s=0.05,
+        record_s=1.0,
     )
     assert found is not None and found.modality == fr.MODALITY_MIC
     assert conclusive is True
@@ -52,7 +53,7 @@ def test_mic_miss_invokes_camera_only_in_both_sensor_mode(monkeypatch):
     # Mic-only (no face stack): the camera stage is skipped entirely.
     found, conclusive = fr.sense_presence(
         rem, rem.remind_at_dt, None, None, None, None, None, None,
-        record_s=1.0, poll_s=0.05,
+        record_s=1.0,
     )
     assert (found, conclusive) == (None, True)
     assert not camera_spy.called
@@ -61,24 +62,38 @@ def test_mic_miss_invokes_camera_only_in_both_sensor_mode(monkeypatch):
     found, conclusive = fr.sense_presence(
         rem, rem.remind_at_dt, None, None, None,
         object(), object(), object(),
-        record_s=1.0, poll_s=0.05,
+        record_s=1.0,
     )
     assert (found, conclusive) == (None, True)
     assert camera_spy.called
 
 
-def test_camera_scan_is_delayed_to_finish_close_to_due_time(monkeypatch):
+def test_camera_sweep_is_paced_to_end_just_before_the_due_time(monkeypatch):
     monkeypatch.setattr(fr, "check_mic", lambda *a, **k: None)
-    monkeypatch.setattr(fr, "check_camera", lambda *a, **k: (None, True))
-    monkeypatch.setattr(fr, "_camera_stage_budget_s", lambda: 10.0)
-    wait_spy = Spy()
-    monkeypatch.setattr(vr, "wait_until", wait_spy)
+    camera_spy = Spy(result=(None, True))
+    monkeypatch.setattr(fr, "check_camera", camera_spy)
     rem = make_reminder(due_in_s=60.0)
+    before = time.monotonic()
     fr.sense_presence(rem, rem.remind_at_dt, None, None, None,
-                      object(), object(), object(), record_s=1.0, poll_s=0.05)
-    assert wait_spy.called
-    target = wait_spy.calls[0][0][0]
-    assert target == rem.remind_at_dt - datetime.timedelta(seconds=10.0)
+                      object(), object(), object(), record_s=1.0)
+    after = time.monotonic()
+    finish_by = camera_spy.calls[0][0][4]
+    # The sweep deadline lands SCAN_MARGIN_S before the due time (60s away).
+    assert finish_by is not None
+    expected = 60.0 - fr.SCAN_MARGIN_S
+    assert before + expected - 1.0 <= finish_by <= after + expected + 1.0
+
+
+def test_camera_sweep_is_unpaced_when_the_due_time_has_passed(monkeypatch):
+    # Legacy mode: the mic records right up to T, so the camera runs after it
+    # with no window left - the sweep must run at its natural pace, not dwell.
+    monkeypatch.setattr(fr, "check_mic", lambda *a, **k: None)
+    camera_spy = Spy(result=(None, True))
+    monkeypatch.setattr(fr, "check_camera", camera_spy)
+    rem = make_reminder(due_in_s=0.0)
+    fr.sense_presence(rem, rem.remind_at_dt, None, None, None,
+                      object(), object(), object(), record_s=1.0)
+    assert camera_spy.calls[0][0][4] is None
 
 
 # ---------------------------------------------- inconclusive camera checks ----
@@ -101,7 +116,7 @@ def test_no_usable_frame_is_inconclusive(monkeypatch):
                                           "enabled": False})()
             return self
 
-        def run_scan(self):
+        def run_scan(self, finish_by=None):
             return []
 
         def __exit__(self, *exc):
@@ -291,7 +306,7 @@ def _preview_session(monkeypatch, cap, shots, preview="1"):
     monkeypatch.setattr(fr.cv2, "waitKey", lambda delay: -1)
     monkeypatch.setattr(fr.cv2, "destroyWindow", lambda name: None)
 
-    def scan(_self):
+    def scan(_self, finish_by=None):
         # Stand in for a real sweep: it outlives at least one captured frame.
         assert cap.captured.wait(5.0), "capture loop never read a frame"
         return shots
@@ -326,7 +341,7 @@ def test_a_sweep_failure_still_reaches_the_caller(monkeypatch):
     cap = PreviewCap()
     monkeypatch.setattr(fr, "open_camera", lambda *a, **k: cap)
 
-    def boom(_self):
+    def boom(_self, finish_by=None):
         raise RuntimeError("sweep died on the worker thread")
 
     with pytest.raises(RuntimeError):
@@ -363,6 +378,19 @@ def test_head_recenters_after_a_successful_sweep():
     shots = scanner.scan()
     assert [s.position for s in shots] == [2.0, 5.0, 8.0]
     assert moves[-1] == HEAD_CENTRE                  # faced forward again
+
+
+def test_sweep_with_finish_by_dwells_to_fill_the_window():
+    moves: list[float] = []
+    scanner = HeadScanner(StubLatest(), moves.append,
+                          positions=(2.0, 5.0, 8.0), settle_s=0.0,
+                          frame_timeout_s=0.1)
+    start = time.monotonic()
+    shots = scanner.scan(finish_by=start + 0.9)
+    elapsed = time.monotonic() - start
+    assert [s.position for s in shots] == [2.0, 5.0, 8.0]
+    assert elapsed >= 0.8      # the sweep filled the window instead of rushing
+    assert moves[-1] == HEAD_CENTRE
 
 
 def test_head_recenters_even_when_the_sweep_fails():

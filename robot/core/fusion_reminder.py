@@ -26,13 +26,16 @@ until a sensitive reminder is actually due:
      present - "human voice" being enforced by a neural VAD, so a grinder, fan or
      vacuum is loud but is not a person;
   6. SENSOR 2, the CAMERA - only reached when the mic heard nobody but the owner
-     (or silence). The camera is opened for a few seconds, the robot turns its
-     head through the sweep positions to look around the room, everyone seen is
-     identified, and the camera is closed again. A preview window opens with the
-     device and closes with it (``CAMERA_PREVIEW=0`` to suppress), so the time
-     the camera is actually recording is visible rather than merely claimed.
-     This stage catches the case the mic structurally cannot: a bystander who is
-     present but never speaks;
+     (or silence). The camera opens and the robot turns its head slowly through
+     the sweep positions to look around the room, DWELLING at each one so the
+     sweep spans the whole interval left before the due time (with the unified
+     app's timing: mic T-7min -> T-2min, camera T-2min -> ~T). Each position's
+     frame is taken at the end of its dwell, everyone seen is identified, and
+     the camera is closed again. A preview window opens with the device and
+     closes with it (``CAMERA_PREVIEW=0`` to suppress), so the time the camera
+     is actually recording is visible rather than merely claimed. This stage
+     catches the case the mic structurally cannot: a bystander who is present
+     but never speaks;
   7. NOBODY FOUND by either sensor -> the owner is alone -> the sensitive
      information is revealed aloud;
   8. A BYSTANDER FOUND by either sensor -> only NOW is the decision taken. In
@@ -70,9 +73,11 @@ Limitations, stated plainly:
     face on Tuesday is two different consent keys, so in REMEMBER mode they are
     asked about once per modality. Linking the two would need a joint
     audio-visual embedding, which this prototype does not have.
-  - The camera double-check runs AFTER the due time (the mic window ends there),
-    so a reminder that reaches stage 2 is spoken a few seconds late - the cost of
-    the sweep. A mic hit costs nothing extra.
+  - In LEGACY mode (one ``--lead`` for both wake-up and recording) the mic
+    window ends at the due time, so the camera double-check runs after it and a
+    reminder that reaches stage 2 is spoken a few seconds late - the cost of
+    the sweep. A mic hit costs nothing extra. (The unified app's split timing
+    avoids this: its sweep ends just before T.)
   - A silent bystander who is also out of every head-sweep position is still
     missed; presence sensing is best-effort, and the disclosure gate is only as
     good as the sensors.
@@ -85,8 +90,8 @@ Run (via the thin app wrappers):
 
 The unified ``robot.apps.reminder_app`` drives this same engine programmatically
 via :class:`FusionReminderConfig` / :func:`run_config` with the split timing
-(wake at T-7 min, mic T-7 -> T-2 min, camera fallback scheduled to finish close
-to T) and ``camera_fail_safe=True`` (an inconclusive camera check withholds
+(wake at T-7 min, mic T-7 -> T-2 min, camera sweep paced across T-2 min -> ~T)
+and ``camera_fail_safe=True`` (an inconclusive camera check withholds
 privately instead of counting as "owner alone").
 """
 
@@ -122,13 +127,10 @@ from robot.core import voice_reminder as vr
 import robot.core.robot_io as demo
 
 from robot.core.head_scan import (
-    DEFAULT_FRAME_TIMEOUT_S,
     SCAN_SPEED,
     HeadScanner,
     LatestFrame,
     ScanShot,
-    _positions_from_env,
-    _settle_from_env,
 )
 from robot.core.logsetup import get_logger, logcall, setup_logging
 from robot.core import presentation_telemetry as telemetry
@@ -176,13 +178,11 @@ CONSENT_ID_PREFIX = {MODALITY_MIC: "voice", MODALITY_CAMERA: "face"}
 # itself is bounded by head_scan's own per-position frame timeout.
 CAMERA_GRAB_IDLE_S = 0.01
 
-# Budget estimate for the whole camera stage (open + warm up the device, then
-# sweep the head and grab a frame per position). Used ONLY to schedule the
-# fallback scan: when the mic window closes early (the unified app records
-# T-7min -> T-2min), the scan is delayed so it finishes close to the reminder's
-# time - the freshest practical look at the room - instead of running minutes
-# early and going stale. Overestimating just starts the scan a little earlier.
-CAMERA_OPEN_BUDGET_S = 8.0     # device open + auto-exposure warm-up, typical
+# When the mic window closes early (the unified app records T-7min -> T-2min),
+# the camera stage opens IMMEDIATELY and the sweep is paced to fill the whole
+# remaining interval: the head dwells at each position so the sweep ends - and
+# its freshest frame is taken - this many seconds before the reminder's time,
+# leaving room for identification before delivery at T.
 SCAN_MARGIN_S = 5.0            # identification + slack
 
 # Live preview while the camera stage runs. The single-modality camera apps keep
@@ -205,15 +205,6 @@ def _preview_enabled() -> bool:
     """Whether the camera stage should show what it sees (CAMERA_PREVIEW=0 off)."""
 
     return os.environ.get(CAMERA_PREVIEW_ENV) != "0"
-
-
-@logcall
-def _camera_stage_budget_s() -> float:
-    """Estimated seconds the camera stage needs, from open to identified."""
-
-    positions = _positions_from_env()
-    per_position = _settle_from_env() + DEFAULT_FRAME_TIMEOUT_S
-    return CAMERA_OPEN_BUDGET_S + len(positions) * per_position + SCAN_MARGIN_S
 
 
 @dataclass
@@ -324,8 +315,11 @@ class _CameraSession:
               flush=True)
         log.info("camera released", extra={"event": "camera_closed"})
 
-    def run_scan(self) -> list[ScanShot]:
+    def run_scan(self, finish_by: float | None = None) -> list[ScanShot]:
         """Sweep the head on a worker while this thread captures and previews.
+
+        ``finish_by`` is handed to :meth:`HeadScanner.scan`, which paces the
+        sweep (dwelling at each position) so it ends at that moment.
 
         Returns what :meth:`HeadScanner.scan` returned; an exception raised
         inside the sweep is re-raised here, so the caller sees it exactly as if
@@ -337,7 +331,7 @@ class _CameraSession:
 
         def worker() -> None:
             try:
-                result["shots"] = self.scanner.scan()
+                result["shots"] = self.scanner.scan(finish_by=finish_by)
             except BaseException as exc:      # noqa: BLE001 - re-raised below
                 result["exc"] = exc
             finally:
@@ -489,6 +483,7 @@ def check_camera(
     face_identifier: FaceIdentifier,
     face_db: FaceDB,
     owner_face: OwnerStore,
+    finish_by: float | None = None,
 ) -> tuple[Bystander | None, bool]:
     """SENSOR 2 - open the camera, look around the room; who is visible?
 
@@ -496,7 +491,9 @@ def check_camera(
     through its positions (``HeadScanner``), clusters and identifies everyone seen
     across the sweep (``identify_people_in_frames`` - which is what stops one
     person photographed at two head positions becoming two ids), and closes the
-    camera again. The camera is released and the head re-centred in every path,
+    camera again. ``finish_by`` (a ``time.monotonic()`` moment) makes the sweep
+    dwell at each position so it spans the time until then, instead of finishing
+    in a few seconds. The camera is released and the head re-centred in every path,
     success or failure (the session context manager + the scanner's ``finally``).
 
     Returns ``(bystander, conclusive)``:
@@ -527,7 +524,7 @@ def check_camera(
     # kill the whole reminder loop. KeyboardInterrupt still propagates.
     try:
         with _CameraSession(face_identifier) as cam:
-            shots = cam.run_scan()
+            shots = cam.run_scan(finish_by)
             swept = cam.scanner.enabled
         if not shots:
             print("[scan] WARNING: no usable view captured - the double-check saw "
@@ -602,7 +599,6 @@ def sense_presence(
     owner_face: OwnerStore | None,
     *,
     record_s: float | None = None,
-    poll_s: float = vr.DEFAULT_POLL_S,
 ) -> tuple[Bystander | None, bool]:
     """Run the sensors in ``SENSOR_PRIORITY`` order and stop at the first hit.
 
@@ -612,9 +608,10 @@ def sense_presence(
     a mic-only pipeline for comparison.
 
     When the mic window closes before the due time (an explicit ``record_s``, as
-    the unified app uses), the camera stage is DELAYED so the sweep finishes as
-    close to the due time as its estimated budget allows - the freshest practical
-    look at the room, instead of a scan minutes early that could go stale.
+    the unified app uses), the camera stage starts IMMEDIATELY and its head
+    sweep is paced to fill the whole remaining interval, ending just before the
+    due time - so the room is watched for the full window and the last frame is
+    the freshest practical look.
 
     Returns ``(bystander, conclusive)``; ``conclusive=False`` means the LAST
     sensor consulted could not actually verify the room (camera failure) - see
@@ -631,18 +628,23 @@ def sense_presence(
                 print("[fusion] camera double-check disabled (--no-camera); going on "
                       "the mic result alone.", flush=True)
                 continue
-            # Use the remaining pre-reminder interval: start the scan only when
-            # its estimated budget just fits before the due time. If the due
-            # time is closer than the budget (or already past), scan right away.
-            budget = _camera_stage_budget_s()
-            scan_at = remind_at - datetime.timedelta(seconds=budget)
-            if (scan_at - datetime.datetime.now()).total_seconds() > 0:
-                print(f"[fusion] {rem.id}: waiting until ~{scan_at:%H:%M:%S} "
-                      f"(T-{int(budget)}s) so the camera look is as fresh as "
-                      "possible; both sensors stay off meanwhile.", flush=True)
-                vr.wait_until(scan_at, poll_s)
+            # Use the WHOLE remaining pre-reminder interval: open the camera
+            # now and pace the head sweep so it ends SCAN_MARGIN_S before the
+            # due time - a slow, visible look around the room whose last frame
+            # is the freshest practical view. If the due time is closer than
+            # the margin (or already past, as in legacy mode where the mic
+            # records right up to T), the sweep just runs at its natural pace.
+            window_s = (remind_at - datetime.datetime.now()).total_seconds() \
+                - SCAN_MARGIN_S
+            finish_by = None
+            if window_s > 0:
+                finish_by = time.monotonic() + window_s
+                print(f"[fusion] {rem.id}: scanning the room with the camera "
+                      f"for the next ~{int(window_s)}s (until just before the "
+                      "reminder's time), dwelling at each head position.",
+                      flush=True)
             found, conclusive = check_camera(rem, face_identifier, face_db,
-                                             owner_face)
+                                             owner_face, finish_by)
         else:                                   # pragma: no cover - guarded by the tuple
             continue
         if found is not None:
@@ -858,7 +860,7 @@ def monitor_and_deliver(
     bystander, conclusive = sense_presence(
         rem, remind_at, voice_identifier, voice_db, owner_voice,
         face_identifier, face_db, owner_face,
-        record_s=record_s, poll_s=poll_s,
+        record_s=record_s,
     )
     # Idle (both sensors off) until the reminder is actually due; a no-op in
     # legacy mode, where the mic window itself ends at the due time.
