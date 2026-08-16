@@ -21,12 +21,14 @@ second or two.
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 
 import numpy as np
 
 from robot.core.logsetup import logcall, get_logger
+from robot.paths import VOICE_MEAN_PATH
 
 try:
     from resemblyzer import VoiceEncoder, preprocess_wav
@@ -63,6 +65,40 @@ VOICE_OWNER_THRESHOLD = 0.73
 _MIN_VOICED_S = 0.6
 
 
+def load_voice_mean() -> np.ndarray | None:
+    """The cohort "mean voice" d-vector used to CENTER embeddings, or None.
+
+    Built by ``python -m robot.bench.voice_similarity --save-mean`` from several
+    DIFFERENT voices. Resemblyzer's raw d-vectors all sit in a narrow cone, so
+    the cosine between two DIFFERENT speakers is biased high - which makes a new
+    bystander look like an existing gallery entry. Subtracting this average-voice
+    vector before cosine decorrelates them and widens the same-vs-different gap.
+    Absent file -> centering is off (raw behaviour), so this is fully backward
+    compatible; the pipeline only centers once a mean has been calibrated.
+    """
+
+    if not VOICE_MEAN_PATH.exists():
+        return None
+    try:
+        data = json.loads(VOICE_MEAN_PATH.read_text())
+        mean = np.asarray(data["mean"], dtype=np.float32).flatten()
+        return mean if mean.size else None
+    except Exception as exc:
+        print(f"[voice_id] could not read {VOICE_MEAN_PATH}: {exc}; centering off.",
+              flush=True)
+        return None
+
+
+def center_embedding(emb: np.ndarray, mean: np.ndarray | None) -> np.ndarray:
+    """Subtract the cohort mean and re-normalise (no-op if ``mean`` is None)."""
+
+    if mean is None or mean.shape != emb.shape:
+        return emb
+    centered = emb - mean
+    norm = float(np.linalg.norm(centered))
+    return (centered / norm).astype(np.float32) if norm > 1e-9 else emb
+
+
 @dataclass
 class DetectedVoice:
     """One voiced window extracted from an audio buffer."""
@@ -85,11 +121,22 @@ class VoiceIdentifier:
     """
 
     @logcall
-    def __init__(self) -> None:
+    def __init__(self, center: bool = True) -> None:
         # Loads the bundled GE2E weights onto CPU (or CUDA if present).
         self._encoder = VoiceEncoder(verbose=True)
-        log.info("voice encoder (GE2E d-vector) loaded",
+        # Optional cohort-mean centering (see load_voice_mean). Off until a
+        # voice_mean.json is calibrated, so default behaviour is unchanged.
+        self._mean = load_voice_mean() if center else None
+        state = "on" if self._mean is not None else "off (no voice_mean.json)"
+        log.info("voice encoder (GE2E d-vector) loaded; centering %s", state,
                  extra={"event": "model_loaded"})
+        if self._mean is not None:
+            print(f"[voice_id] d-vector centering ON (using {VOICE_MEAN_PATH.name}).",
+                  flush=True)
+
+    @logcall(level=logging.DEBUG)
+    def _center(self, emb: np.ndarray) -> np.ndarray:
+        return center_embedding(emb, self._mean)
 
     @logcall(level=logging.DEBUG)
     def embed(
@@ -106,7 +153,7 @@ class VoiceIdentifier:
         if len(wav) < int(_MIN_VOICED_S * VOICE_SR):
             return None
         emb = self._encoder.embed_utterance(wav)
-        return np.asarray(emb, dtype=np.float32).flatten()
+        return self._center(np.asarray(emb, dtype=np.float32).flatten())
 
     @logcall(level=logging.DEBUG)
     def segment_and_embed(
@@ -136,7 +183,7 @@ class VoiceIdentifier:
         for emb, sl in zip(partials, slices):
             out.append(
                 DetectedVoice(
-                    embedding=np.asarray(emb, dtype=np.float32).flatten(),
+                    embedding=self._center(np.asarray(emb, dtype=np.float32).flatten()),
                     start_s=sl.start / VOICE_SR,
                     stop_s=sl.stop / VOICE_SR,
                 )

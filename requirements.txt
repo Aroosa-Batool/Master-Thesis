@@ -31,6 +31,13 @@ resemblyzer>=0.1.3,<0.2
 # import time, which setuptools removed in 81.0. Pin below that so
 # `import webrtcvad` works (fresh Python 3.13 venvs also ship no setuptools).
 setuptools<81
+# Neural voice-activity detection (robot/perception/speech_vad.py): decides
+# whether a sound is a HUMAN VOICE at all, which the RMS energy gate cannot.
+# Without it a grinder / fan / vacuum is loud, is not the owner, and so gets
+# filed as a bystander - resemblyzer's own webrtcvad(mode 3) does NOT catch this
+# (measured: it keeps 99.8% of pure broadband noise as "speech"). Weights ship
+# inside the package, so there is no download and no network use at run time.
+silero-vad>=5,<7
 
 # --- Voice reminders (robot/apps/add_reminder.py: "ask the robot to add a reminder") ---
 # Speech-to-text for the spoken "add a reminder" command. Uses torch (already
@@ -46,5 +53,11 @@ dateparser>=1.2,<2
 # which gates whether it needs presence + watch consent before being spoken.
 # Reuses the resemblyzer torch install; downloads a small (~80 MB) MiniLM model
 # to the HuggingFace cache on first run, then runs offline on CPU. Optional:
-# sensitivity.py falls back to a keyword heuristic if it is not installed.
+# sentence-transformers falls back to a keyword heuristic if it is not installed.
 sentence-transformers>=2.2,<6
+
+# --- Development / tests (tests/) ---
+# The hardware-free test suite (run with `python -m pytest tests/`). Uses
+# mocks/fakes throughout, so no microphone, camera, watch, Ohbot, model
+# download, or network is needed to run it.
+pytest>=8

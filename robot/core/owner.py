@@ -3,7 +3,7 @@
 The "owner" is the watch wearer - the person the consent prompts on
 the Bangle.js are addressed to. They are enrolled once via
 ``enroll_face.py`` and recognised in every subsequent trial frame so
-``identify_people_in_frame`` can drop them from the cache key, leaving
+``perception.presence.identify_people_in_frames`` can drop them from the cache key, leaving
 only the bystanders. This is what makes "remember Anna's decision the
 next time Anna is in the room" actually work - the owner is always in
 the room, so without this filter the cache key would change every

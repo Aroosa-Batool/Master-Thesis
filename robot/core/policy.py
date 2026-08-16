@@ -58,6 +58,11 @@ log = get_logger(__name__)
 NUS_RX_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 NUS_TX_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
+# Seconds between reconnect attempts once the watch was not found or the link
+# dropped. The runners HOLD reminders while the watch is out of range, so the
+# retry only needs to beat a person walking back into the room, not be instant.
+RECONNECT_DELAY_S = 5.0
+
 
 class _LineBuffer:
     @logcall(level=logging.DEBUG)
@@ -196,54 +201,87 @@ class BangleClient:
 
     @logcall
     async def _main(self) -> None:
+        """Scan/connect loop: keeps retrying until ``close()`` is called.
+
+        The watch is both the owner-presence signal and the consent channel, so
+        a missing or dropped link must not be terminal: the runners HOLD
+        reminders while ``is_connected()`` is False, and this loop keeps
+        scanning in the background so a watch that comes (back) into range is
+        picked up again without restarting the app.
+        """
+
         self._loop = asyncio.get_running_loop()
-        print("[ble] scanning for Bangle.js...")
-        device = await BleakScanner.find_device_by_filter(
-            lambda d, adv: bool(d.name and "bangle" in d.name.lower()),
-            timeout=15.0,
-        )
-        if device is None:
-            print("[ble] watch not found. Demo will run without prompts.")
-            self._ready.set()
-            return
-
-        print(f"[ble] connecting to {device.name} ({device.address})...")
-        buffer = _LineBuffer()
-
-        def on_uart(_sender: int, data: bytearray) -> None:
-            for line in buffer.feed(bytes(data)):
-                self._handle_line(line)
-
-        try:
-            async with BleakClient(device) as client:
-                self._client = client
-                await client.start_notify(NUS_RX_UUID, on_uart)
-                print("[ble] subscribed; watch is online.")
+        first_scan = True
+        while not self._stop.is_set():
+            if first_scan:
+                print("[ble] scanning for Bangle.js...")
+            device = await BleakScanner.find_device_by_filter(
+                lambda d, adv: bool(d.name and "bangle" in d.name.lower()),
+                timeout=15.0,
+            )
+            if self._stop.is_set():
+                break
+            if device is None:
+                if first_scan:
+                    print("[ble] watch not found. Will keep scanning for it; "
+                          "reminders are held while it is out of range.")
+                    first_scan = False
                 self._ready.set()
-                while not self._stop.is_set():
-                    await asyncio.sleep(0.5)
-                try:
-                    await client.stop_notify(NUS_RX_UUID)
-                except Exception:
-                    pass
-        finally:
-            # Fast-fail any consent prompts still waiting on a reply so the
-            # worker thread that called ask_consent() isn't blocked on a
-            # Future no one will resolve. We use CancelledError instead of
-            # set_result(False) so the caller can distinguish "BLE link
-            # dropped" from "user tapped No" - otherwise a mid-prompt
-            # disconnect would silently cache a NO decision for the
-            # bystander, polluting the cache with a non-decision.
-            for pid, fut in list(self._pending.items()):
-                if not fut.done():
+                await asyncio.sleep(RECONNECT_DELAY_S)
+                continue
+            first_scan = False
+
+            print(f"[ble] connecting to {device.name} ({device.address})...")
+            buffer = _LineBuffer()
+
+            def on_uart(_sender: int, data: bytearray) -> None:
+                for line in buffer.feed(bytes(data)):
+                    self._handle_line(line)
+
+            try:
+                async with BleakClient(device) as client:
+                    self._client = client
+                    await client.start_notify(NUS_RX_UUID, on_uart)
+                    print("[ble] subscribed; watch is online.")
+                    self._ready.set()
+                    # Leave this inner loop when asked to stop OR when the link
+                    # drops, so a dropped link falls through to a rescan instead
+                    # of idling forever on a dead client.
+                    while not self._stop.is_set() and client.is_connected:
+                        await asyncio.sleep(0.5)
                     try:
-                        fut.set_exception(
-                            asyncio.CancelledError("BLE link closed")
-                        )
+                        await client.stop_notify(NUS_RX_UUID)
                     except Exception:
                         pass
-            self._pending.clear()
-            self._client = None
+            except Exception as exc:
+                print(f"[ble] connection failed/lost: {exc}")
+                log.warning("BLE connection failed/lost: %s", exc,
+                            extra={"event": "ble_lost"})
+            finally:
+                # Fast-fail any consent prompts still waiting on a reply so the
+                # worker thread that called ask_consent() isn't blocked on a
+                # Future no one will resolve. We use CancelledError instead of
+                # set_result(False) so the caller can distinguish "BLE link
+                # dropped" from "user tapped No" - otherwise a mid-prompt
+                # disconnect would silently cache a NO decision for the
+                # bystander, polluting the cache with a non-decision.
+                for pid, fut in list(self._pending.items()):
+                    if not fut.done():
+                        try:
+                            fut.set_exception(
+                                asyncio.CancelledError("BLE link closed")
+                            )
+                        except Exception:
+                            pass
+                self._pending.clear()
+                self._client = None
+                self._ready.set()
+
+            if not self._stop.is_set():
+                print("[ble] watch link is down; scanning again "
+                      f"in {RECONNECT_DELAY_S:g}s (reminders are held "
+                      "meanwhile)...")
+                await asyncio.sleep(RECONNECT_DELAY_S)
 
     @logcall
     def _handle_line(self, line: str) -> None:

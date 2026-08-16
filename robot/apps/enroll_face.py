@@ -31,15 +31,18 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
 import sys
 import time
 
 import cv2
 import numpy as np
 
+from robot.perception.camera_device import open_camera
 from robot.perception.face_id import FaceIdentifier, SFACE_COSINE_SAME_PERSON, ensure_models
 from robot.core.owner import OwnerStore
 from robot.core.logsetup import setup_logging, logcall, get_logger
+from robot.core import presentation_telemetry as telemetry
 
 
 from robot.paths import OWNER_FACE_PATH
@@ -55,6 +58,7 @@ MIN_FACE_SCORE = 0.9
 # Reject samples whose largest face is smaller than this fraction of
 # the frame area - enforces "sit close to the camera, look at it".
 MIN_FACE_AREA_FRAC = 0.01
+UI_JOB = os.environ.get("THESIS_UI_JOB") == "1"
 
 
 @logcall(level=logging.DEBUG)
@@ -150,9 +154,15 @@ def capture_owner_samples(
                 ("'q' to abort", (200, 200, 200)),
             ],
         )
-        cv2.imshow("Owner enrollment", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            return []
+        telemetry.frame(frame, max_fps=6.0)
+        telemetry.emit(
+            "job_progress", progress=len(samples) / TARGET_SAMPLES,
+            detail=f"Face samples: {len(samples)}/{TARGET_SAMPLES}",
+        )
+        if not UI_JOB:
+            cv2.imshow("Owner enrollment", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                return []
 
     print(
         f"[enroll] captured {len(samples)} samples; "
@@ -179,6 +189,7 @@ def verify_loop(
         "in, then press 'q' to exit.",
         flush=True,
     )
+    verify_started = time.monotonic()
     while True:
         ok, frame = cap.read()
         if not ok:
@@ -211,9 +222,13 @@ def verify_loop(
                 ("'q' to exit", (200, 200, 200)),
             ],
         )
-        cv2.imshow("Owner enrollment", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        telemetry.frame(frame, max_fps=6.0)
+        if UI_JOB and time.monotonic() - verify_started >= 8.0:
             return
+        if not UI_JOB:
+            cv2.imshow("Owner enrollment", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                return
 
 
 @logcall
@@ -230,23 +245,26 @@ def main() -> None:
             f"(samples={store.samples()}, at={store.enrolled_at()}).",
             flush=True,
         )
-        try:
-            reply = input(
-                "Type 'yes' to OVERWRITE the existing enrollment, "
-                "anything else to cancel: "
-            ).strip().lower()
-        except EOFError:
-            reply = ""
+        if UI_JOB:
+            reply = "yes" if os.environ.get("THESIS_UI_OVERWRITE") == "1" else ""
+        else:
+            try:
+                reply = input(
+                    "Type 'yes' to OVERWRITE the existing enrollment, "
+                    "anything else to cancel: "
+                ).strip().lower()
+            except EOFError:
+                reply = ""
         if reply != "yes":
             print("[enroll] cancelled; existing enrollment kept.", flush=True)
             return
 
     print("[enroll] opening webcam...", flush=True)
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        raise SystemExit(
-            "Could not open webcam. Close any app using the camera and try again."
-        )
+    # Enrol through the SAME camera the apps will recognise you with: lens and
+    # mounting height change the embedding enough to matter at the owner
+    # threshold, so a built-in-camera enrollment ages badly on the head camera.
+    cap = open_camera()
+    telemetry.sensor("camera", True)
 
     try:
         samples = capture_owner_samples(cap, identifier)
@@ -266,8 +284,11 @@ def main() -> None:
                  extra={"event": "owner_enrolled"})
 
         verify_loop(cap, identifier, store)
+        telemetry.emit("job_result", result="Face enrollment and verification complete")
     finally:
         cap.release()
+        telemetry.sensor("camera", False)
+        telemetry.clear_frame()
         cv2.destroyAllWindows()
 
 

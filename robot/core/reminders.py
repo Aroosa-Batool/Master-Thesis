@@ -93,14 +93,18 @@ class ReminderStore:
         text: str,
         remind_at: datetime.datetime,
         sensitive: bool | None = None,
+        *,
+        timespec: str = "minutes",
     ) -> Reminder:
+        if timespec not in {"minutes", "seconds"}:
+            raise ValueError("timespec must be 'minutes' or 'seconds'")
         with self._lock:
             rid = f"rem_{self._next:03d}"
             self._next += 1
             rem = Reminder(
                 id=rid,
                 text=text,
-                remind_at=remind_at.isoformat(timespec="minutes"),
+                remind_at=remind_at.isoformat(timespec=timespec),
                 sensitive=sensitive,
             )
             self._items[rid] = rem

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
 import sys
 import threading
 import time
@@ -48,6 +49,7 @@ from robot.perception.audio_device import pick_input_device
 from robot.core.owner import OwnerStore
 from robot.perception.voice_id import VOICE_OWNER_THRESHOLD, VOICE_SR, VoiceIdentifier
 from robot.core.logsetup import setup_logging, logcall, get_logger
+from robot.core import presentation_telemetry as telemetry
 
 
 from robot.paths import OWNER_VOICE_PATH
@@ -60,6 +62,7 @@ TARGET_SAMPLES = 20
 # voiced-window embeddings.
 PROCESS_CHUNK_S = 2.0
 BLOCK_FRAMES = int(VOICE_SR * 0.1)  # 100 ms mic callback blocks
+UI_JOB = os.environ.get("THESIS_UI_JOB") == "1"
 
 
 @logcall(level=logging.DEBUG)
@@ -149,9 +152,17 @@ def capture_owner_samples(
                 ("'q' to abort", (200, 200, 200)),
             ],
         )
-        cv2.imshow("Owner voice enrollment", hud)
-        if cv2.waitKey(20) & 0xFF == ord("q"):
-            return []
+        telemetry.metric("microphone_level", mic.cur_rms)
+        telemetry.emit(
+            "job_progress", progress=len(samples) / TARGET_SAMPLES,
+            detail=f"Voice samples: {len(samples)}/{TARGET_SAMPLES}",
+        )
+        if not UI_JOB:
+            cv2.imshow("Owner voice enrollment", hud)
+            if cv2.waitKey(20) & 0xFF == ord("q"):
+                return []
+        else:
+            time.sleep(0.02)
 
     print(f"[enroll] captured {len(samples)} samples.", flush=True)
     return samples
@@ -170,6 +181,7 @@ def verify_loop(identifier: VoiceIdentifier, mic: _Mic, store: OwnerStore) -> No
     chunk_target = int(PROCESS_CHUNK_S * VOICE_SR)
     last_label = "(listening...)"
     last_color = (200, 200, 200)
+    verify_started = time.monotonic()
     while True:
         new = mic.drain()
         if len(new):
@@ -191,9 +203,15 @@ def verify_loop(identifier: VoiceIdentifier, mic: _Mic, store: OwnerStore) -> No
                 ("'q' to exit", (200, 200, 200)),
             ],
         )
-        cv2.imshow("Owner voice enrollment", hud)
-        if cv2.waitKey(20) & 0xFF == ord("q"):
+        telemetry.metric("microphone_level", mic.cur_rms, label=last_label)
+        if UI_JOB and time.monotonic() - verify_started >= 8.0:
             return
+        if not UI_JOB:
+            cv2.imshow("Owner voice enrollment", hud)
+            if cv2.waitKey(20) & 0xFF == ord("q"):
+                return
+        else:
+            time.sleep(0.02)
 
 
 @logcall
@@ -206,13 +224,16 @@ def main() -> None:
             f"(samples={store.samples()}, at={store.enrolled_at()}).",
             flush=True,
         )
-        try:
-            reply = input(
-                "Type 'yes' to OVERWRITE the existing enrollment, "
-                "anything else to cancel: "
-            ).strip().lower()
-        except EOFError:
-            reply = ""
+        if UI_JOB:
+            reply = "yes" if os.environ.get("THESIS_UI_OVERWRITE") == "1" else ""
+        else:
+            try:
+                reply = input(
+                    "Type 'yes' to OVERWRITE the existing enrollment, "
+                    "anything else to cancel: "
+                ).strip().lower()
+            except EOFError:
+                reply = ""
         if reply != "yes":
             print("[enroll] cancelled; existing enrollment kept.", flush=True)
             return
@@ -232,6 +253,7 @@ def main() -> None:
             blocksize=BLOCK_FRAMES,
             callback=mic.callback,
         ):
+            telemetry.sensor("microphone", True)
             samples = capture_owner_samples(identifier, mic)
             if not samples:
                 print("[enroll] aborted; no enrollment written.", flush=True)
@@ -248,7 +270,9 @@ def main() -> None:
                      extra={"event": "owner_enrolled"})
 
             verify_loop(identifier, mic, store)
+            telemetry.emit("job_result", result="Voice enrollment and verification complete")
     finally:
+        telemetry.sensor("microphone", False)
         cv2.destroyAllWindows()
 
 

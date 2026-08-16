@@ -22,6 +22,7 @@ spoken aloud and not typed on the laptop.
 ## Table of contents
 
 - [What it does](#what-it-does)
+- [The unified app: `reminder_app`](#the-unified-app-one-interactive-entry-point)
 - [How it works](#how-it-works)
 - [Hardware](#hardware)
 - [Repository layout](#repository-layout)
@@ -102,6 +103,196 @@ baseline the cache-memory policy is compared against. That contrast now exists i
 
 ---
 
+## The fused pipeline: one app that uses **both** sensors, in priority order
+
+The four apps above each commit to a single sensor. Two further apps **fuse**
+them into one pipeline that escalates from the cheaper sensor to the more
+invasive one, and only reveals the sensitive information when **neither** found
+anyone:
+
+| | **Mic → camera** (fused) |
+| --- | --- |
+| **Remembers** preference (cache-memory) | [`fusion_remember`](robot/apps/fusion_remember.py) |
+| **Re-asks** every time (re-consent) | [`fusion_reask`](robot/apps/fusion_reask.py) |
+
+Both are thin wrappers over the shared engine
+[`robot/core/fusion_reminder.py`](robot/core/fusion_reminder.py), which
+**composes the existing standalone pieces unchanged** — the mic window and its
+analysis from `voice_reminder.py`, the head sweep from `head_scan.py`, the face
+clustering from `presence.py`, the speech/consent behaviours from `robot_io.py`.
+The four single-modality apps are untouched and behave exactly as before.
+
+What one sensitive reminder does, in order:
+
+1. **Wake up ~5 min early** (`--lead`, default 300 s) by polling the clock —
+   mic off, camera closed.
+2. **Is the reminder sensitive?** Non-sensitive → just speak it at its time; no
+   sensor ever opens.
+3. **Is the owner present?** The watch's BLE link. If not, hold the reminder —
+   no sensor is opened on an empty room.
+4. **Sensor 1 — the mic.** Record *continuously* until the due time, then analyse
+   the whole window once. A non-owner voice anywhere in it ⇒ bystander present.
+5. **Sensor 2 — the camera**, reached **only** if the mic heard nobody but the
+   owner. Open the webcam, sweep the head, identify everyone seen, close the
+   camera. This catches the mic's one blind spot: a bystander who never speaks.
+6. **Nobody found by either** ⇒ the owner is alone ⇒ **reveal the reminder aloud**.
+7. **Someone found** ⇒ decide: `fusion_remember` reuses that person's stored
+   Yes/No (asking once if it has none); `fusion_reask` asks the watch every time.
+   Yes → aloud; No / no-reply → privately to the wrist.
+
+**Why that priority.** The mic answers the question during the 5 minutes the
+reminder is ripening anyway, and needs nothing pointed anywhere. The camera is
+slower and more invasive (it opens a video device and physically turns the
+robot's head), so it runs only as a *double-check*. In the common owner-alone
+case the camera never opens at all.
+
+Consent decisions go in their **own** cache (`consent_cache_fusion.json`) under a
+modality-prefixed key — `voice:person_001` / `face:person_001` — because those are
+different people from different galleries. The galleries and owner enrollments
+themselves are the shared ones, so the fused apps need **both**
+`enroll_voice` and `enroll_face`.
+
+> **Known limit — no cross-modal identity.** The same human recognised by voice
+> on Monday and by face on Tuesday is two consent keys, so `fusion_remember` asks
+> about them once per modality. Linking the two would need a joint audio-visual
+> embedding, which this prototype does not have.
+
+```bash
+python -m robot.apps.fusion_remember               # mic → camera, remembers consent
+python -m robot.apps.fusion_reask                  # mic → camera, re-asks every time
+python -m robot.apps.fusion_remember --no-camera   # mic-only ablation
+NO_OHBOT=1 python -m robot.apps.fusion_remember    # OS voice, no robot
+```
+
+---
+
+## The unified app: one interactive entry point
+
+The **primary** way to run reminder delivery is the unified app, which selects
+among the same engines interactively:
+
+```bash
+python -m robot.apps.reminder_app
+```
+
+**Before any model is loaded, any device is opened, or the BLE scan starts**, it
+asks two questions:
+
+1. *"Should I remember your disclosure decisions for recognized bystanders?
+   [yes/no]"* — **yes** selects the existing cache-memory policy (a bystander's
+   explicit Yes/No watch answer is stored and reused); **no** selects the
+   re-consent policy (the watch is asked on every applicable reminder; nothing is
+   ever stored). This governs **only** the reuse of explicit Yes/No watch
+   answers — it does not store raw audio, video, reminder configuration, or
+   unanswered prompts.
+2. *"Which sensors should I use?"* — **1** microphone only; **2** microphone
+   first, then camera if no bystander voice is detected (the existing fused
+   mic→camera pipeline — the two sensors are never open simultaneously).
+
+Invalid answers re-prompt; `Ctrl-C` or EOF during the questions exits cleanly
+with nothing initialised. The answers are **not persisted** — the next
+interactive run asks again. A concise configuration summary is printed before
+anything starts.
+
+The four combinations map onto the existing engines (no new sensing/consent
+logic):
+
+| | **mic** | **both** |
+| --- | --- | --- |
+| **remember** | voice engine + `consent_cache_voice.json` | fused engine + `consent_cache_fusion.json` |
+| **reask** | voice engine, no consent store | fused engine, no consent store |
+
+**CLI overrides** answer a question ahead of time; only unanswered questions are
+asked:
+
+```bash
+python -m robot.apps.reminder_app --policy remember --sensors mic
+python -m robot.apps.reminder_app --policy reask --sensors both
+python -m robot.apps.reminder_app --sensors both                  # asks only Q1
+python -m robot.apps.reminder_app --monitor-lead 420 --listen-duration 300
+```
+
+**Timing (the T−7 → T−2 microphone window).** For a reminder scheduled at
+time T, with the defaults (`--monitor-lead 420`, `--listen-duration 300`):
+
+- **T−7 min** — wake, classify sensitivity, confirm the owner is present (watch
+  BLE). If the watch is not connected, **hold**: no mic, no camera, no speech;
+  the BLE client keeps rescanning in the background.
+- **T−7 min → T−2 min** — for a **sensitive** reminder, the mic records
+  **continuously for exactly 5 minutes** (energy gate → Silero VAD → speaker
+  embedding → owner subtraction → voice gallery, all the existing pipeline).
+- **~T−2 min** — the mic closes and the recording is analysed immediately; raw
+  audio is never retained. A non-owner voice ⇒ that identity is the bystander
+  and the camera is never opened.
+- **mic miss, both-sensor mode** — the head-mounted camera opens **only for a
+  brief head scan**, scheduled late in the remaining interval so the freshest
+  practical scan finishes close to T; the head re-centres and the camera is
+  released in every path. In mic-only mode a silent window simply counts as
+  "no audible bystander" (the documented voice-only limit).
+- **T** — owner presence is reconfirmed (if the owner left, the reminder stays
+  pending and stale presence results are discarded), then: no bystander →
+  speak; bystander → apply the selected consent policy **on the watch** (never
+  in the terminal). Yes → speak aloud; No / timeout / disconnect → private note
+  to the wrist + neutral greeting, and non-answers are never cached.
+- A **non-sensitive** reminder keeps both sensors off the whole time and is
+  simply spoken at T (owner presence still confirmed).
+
+**Privacy-safe failure behaviour.** A failed camera open, missing frame, failed
+head scan, unusable audio, or failed identity analysis is **never** interpreted
+as "the owner is alone". In the unified app the fused engine runs **fail-safe**:
+an inconclusive camera check withholds the sensitive reminder and delivers it
+privately to the wrist. (The legacy `fusion_*` apps keep their documented
+fail-open behaviour so the study conditions are unchanged.) A delivery that
+keeps erroring is retried a bounded number of times and, on giving up, sent
+privately to the watch rather than lost silently — never spoken aloud.
+
+**Required enrollments** (checked at startup, with the exact command printed
+when missing): mic-only mode needs `python -m robot.apps.enroll_voice`;
+both-sensor mode needs `enroll_voice` **and** `python -m robot.apps.enroll_face`.
+Mic-only mode never loads face models or touches the camera; both-sensor mode
+prepares the face models at startup but keeps the camera closed until a
+fallback scan is actually needed. All the usual environment switches apply
+(`VOICE_INPUT_DEVICE`, `CAMERA_DEVICE`, `CAMERA_RES`, `NO_OHBOT`, `OHBOT_PORT`,
+`HEAD_SCAN*`, `SPEECH_VAD`).
+
+---
+
+## Thesis Presentation Workstation
+
+The easiest way to prepare and present the system is the local, offline browser
+workstation:
+
+```bash
+python -m robot.apps.presentation_ui
+```
+
+On macOS, double-click **`Start Thesis UI.command`** in the repository root. It
+uses `.venv/bin/python`, chooses a free loopback port, and opens the browser.
+The server binds only to `127.0.0.1`; no cloud UI, database, or frontend package
+installation is involved.
+
+The workstation has four tabs:
+
+- **Presentation** — presenter-controlled, hardware-free scenarios plus the real
+  reminder pipeline. The live view shows every privacy stage, mic/camera state,
+  microphone level, watch/identity outcome, robot head position, and an annotated
+  robot-eye stream while the camera is actually open. Frames are held in memory
+  only and cleared when the camera closes.
+- **Setup** — readiness checks, explicit device tests, browser-visible face/voice
+  enrollment, voice or typed reminder creation, and a review step before saving.
+- **Algorithms** — the selected algorithms, thresholds and embedding dimensions,
+  charts of bundled/local benchmark CSV files, and isolated benchmark controls.
+- **Evaluation Data** — consent-aware capture of labelled face images and voice
+  clips for EER/robustness comparisons. This is the only workstation mode that
+  intentionally saves raw media, under the existing gitignored eval-data folder.
+
+For a short live presentation choose **Quick presentation** (T−90 s, 45 s of
+microphone listening). The normal **Research timing** remains T−420/300 s. Live
+consent decisions continue to come exclusively from the Bangle.js watch; the UI
+never supplies a Yes/No answer to the research engine.
+
+---
+
 ## Sensing modalities — camera and voice
 
 "Is someone present with the user, and who are they?" can be answered two ways.
@@ -166,9 +357,11 @@ The laptop runs the orchestration ("intermediate layer"). Each piece:
   sensitive reminders are presence-gated.
 - **Presence sensing.** When a sensitive reminder is due, the robot checks who
   else is around. In the **camera** demo every frame runs a fast Haar detector for
-  a face count, and YuNet+SFace identify who is in view at delivery time. In the
-  **voice** runner the mic records the window before the reminder and Resemblyzer
-  identifies any other speaker.
+  a face count, and at delivery time the robot **turns its head** through a short
+  sweep — the camera is mounted on the head, so this is how it sees past the
+  owner's seat — running YuNet+SFace on the view at each position. Anyone seen
+  at *any* position counts as present. In the **voice** runner the mic records
+  the window before the reminder and Resemblyzer identifies any other speaker.
 - **Owner vs. bystander.** *Owner presence in the room* is taken from the **BLE
   link**: while the watch is connected (Bangle.js reaches ~10 m ≈ "same room"),
   the owner is assumed present even if not on camera / not talking — so a due
@@ -192,7 +385,8 @@ The laptop runs the orchestration ("intermediate layer"). Each piece:
 | --- | --- | --- |
 | **Bangle.js** smartwatch | Private Yes/No consent screen + wrist notifications + buzzer | BLE |
 | **Ohbot** desktop robot | Speech (espeak TTS + lip-sync) and head/eye motion | USB serial |
-| **Laptop** with webcam and microphone | Runs the pipeline; camera or mic senses presence and identity | — |
+| **USB webcam on the Ohbot's head** | The robot's eye — sees from the robot's viewpoint, not the laptop's | USB |
+| **Laptop** with microphone | Runs the pipeline; camera or mic senses presence and identity | — |
 
 Tested on **macOS** and **Linux** (the BLE layer, `bleak`, also abstracts
 Windows, but the lab kit runs on macOS/Linux).
@@ -225,23 +419,37 @@ Windows, but the lab kit runs on macOS/Linux).
     │   ├── camera_remember.py      # ▶ camera app — REMEMBERS each bystander's consent
     │   ├── camera_reask.py         # camera baseline — RE-ASKS every time (no memory)
     │   ├── enroll_face.py          # one-time owner FACE enrollment
+    │   ├── list_cameras.py         # which camera the apps use (+ --preview to confirm)
     │   │   # ── Voice modality (reminder-triggered) ──────────────────
     │   ├── add_reminder.py         # ▶ add a reminder by voice (Whisper + dateparser)
     │   ├── mic_remember.py         # ▶ voice app — REMEMBERS consent (cache-memory)
     │   ├── mic_reask.py            # voice baseline — RE-ASKS every time (no memory)
-    │   └── enroll_voice.py         # one-time owner VOICE enrollment
+    │   ├── enroll_voice.py         # one-time owner VOICE enrollment
+    │   │   # ── Fused modality: mic first, camera as a double-check ────
+    │   ├── fusion_remember.py      # ▶ fused app — REMEMBERS consent (cache-memory)
+    │   ├── fusion_reask.py         # fused baseline — RE-ASKS every time (no memory)
+    │   │   # ── Unified interactive app (asks policy + sensors at startup) ──
+    │   ├── reminder_app.py         # ▶ ONE entry point → the four conditions above
+    │   ├── presentation_ui.py      # ▶ local presentation/setup/benchmark server
+    │   └── presentation_worker.py  # isolated device/evaluation workers
+    ├── ui/                     # Offline vanilla HTML/CSS/JS presentation client
     ├── core/                   # Domain + robot I/O + consent
     │   ├── reminders.py            # reminder store (JSON, time-based)
     │   ├── sensitivity.py          # AI classifier: is a reminder sensitive? (text embedding + cosine)
     │   ├── voice_reminder.py       # shared voice engine behind mic_remember / mic_reask
+    │   ├── fusion_reminder.py      # shared mic→camera engine behind the two fusion apps
     │   ├── policy.py               # BLE client (is_connected + ask_consent + notify) + consent memory
     │   ├── owner.py                # Owner template store + matcher (reused for face AND voice)
+    │   ├── head_scan.py            # head sweep — look around the room before disclosing
     │   └── robot_io.py             # Ohbot glue + reminder speech — SUPPORT module (imported by voice_reminder)
     ├── perception/             # Sensing + identity
     │   ├── face_id.py              # YuNet detection + SFace face embeddings (auto-downloads)
     │   ├── face_db.py              # Embedding gallery → stable IDs (reused for faces AND voices)
-    │   ├── voice_id.py             # Resemblyzer speaker (d-vector) embeddings
-    │   └── audio_device.py         # mic input-device selection (shared by the voice scripts)
+    │   ├── presence.py             # who is in view across a head sweep (merges repeat sightings)
+    │   ├── voice_id.py             # Resemblyzer speaker (d-vector) embeddings — WHOSE voice?
+    │   ├── speech_vad.py           # Silero neural VAD — is it a HUMAN VOICE at all?
+    │   ├── audio_device.py         # mic input-device selection (shared by the voice scripts)
+    │   └── camera_device.py        # camera selection — prefers the head-mounted USB webcam
     ├── bench/                  # Algorithm-comparison benchmark
     └── state/                  # GITIGNORED runtime data + downloaded ONNX weights
         ├── reminders.json, face_db.json, voice_db.json, owner_face.json,
@@ -295,6 +503,25 @@ macOS/Windows wheels; on Debian/Ubuntu install it with
 can skip the voice deps (`sounddevice`, `resemblyzer`) and the camera scripts
 still work.
 
+### 1b. Run the tests (optional, no hardware needed)
+
+The automated tests are **hardware-free**: every microphone, camera, watch,
+Ohbot, and model interaction is mocked, so they run on any machine with the
+Python deps installed — no device, no downloads, no network:
+
+```bash
+python -m pytest tests/
+```
+
+They cover the unified app's startup questions and CLI flags, the T−7/5-minute
+recording timeline, sensors staying off for non-sensitive reminders, the
+mic→camera escalation, consent reuse vs re-ask, timeout non-caching, owner-
+absence holds, privacy-safe failure behaviour, and camera cleanup/head
+recentering. The Ohbot SDK is loaded lazily, so collecting the suite never opens
+a serial port. Presentation tests additionally cover guided navigation,
+telemetry/frame lifecycle, reminder validation, benchmark parsing, and
+evaluation-dataset summaries.
+
 ### 2. Speech engine (espeak)
 
 The Ohbot SDK is configured to synthesize speech with **espeak**, so the espeak
@@ -326,11 +553,109 @@ Connect the Ohbot over USB. If your serial port isn't auto-detected, set a hint
 
 ## Running a session
 
+### Step 0 — Check which camera is in use (once per setup)
+
+The robot's eye is the **USB webcam mounted on the Ohbot's head**, not the
+laptop's built-in camera. The camera scripts pick it automatically — the first
+camera that is neither built-in nor a phone acting as a Continuity Camera — and
+print which one they opened:
+
+```bash
+python -m robot.apps.list_cameras
+```
+
+```
+Cameras (index order = OpenCV capture index):
+  [0] HDR webcam   <- external
+  [1] MacBook Air Camera   (built-in)
+The camera apps will use: 0 ('HDR webcam', external)
+```
+
+Note that the index is **not** the position in any list macOS prints: OpenCV
+sorts cameras by unique ID, which on this machine puts the USB webcam
+(`0x1140…`) ahead of the built-in camera (`6C707041-…`). Always take the index
+from this command rather than from `system_profiler`.
+
+Confirm by eye that it really is the head camera, then close the window with `q`:
+
+```bash
+python -m robot.apps.list_cameras --preview 0
+```
+
+> **⚠ Verify the index by eye — the name↔index map is a best-effort guess.**
+> macOS gives no API that maps an OpenCV index back to a device, so this listing
+> infers it. That inference has been observed **reordering between two runs
+> seconds apart** as Continuity Cameras (a phone) came and went. The *names* are
+> real; the *index* beside a name may not be. `--preview` is the only ground
+> truth, because only you can see which physical camera lights up.
+
+### The apps use the external camera *only*
+
+Choosing automatically, the apps will use **only an external camera** — never the
+laptop's built-in one, never a phone acting as a Continuity Camera. This is a
+correctness rule, not a preference. The robot's eye is the webcam **mounted on
+its head**: it is what the head sweep aims, and what sees past the owner's seat.
+The built-in camera watches whoever sits at the laptop and *stays still while the
+head turns*, so every sweep position returns the same picture — it would answer
+"is a bystander present?" from the wrong view of the room, and that is the one
+question the disclosure gate exists to ask.
+
+So when the head camera delivers no frames, the apps **fail loudly** rather than
+quietly degrading to the laptop camera:
+
+```
+[camera] the external camera 0 ('HDR webcam', external) opened but delivered NO
+         FRAME in 5s (tried twice).
+The camera reports as connected but is not producing video. Try, in order:
+  1. Unplug and replug it - directly into the Mac, not through a hub (a hub that
+     cannot supply enough power gives exactly this symptom).
+  2. Close anything else using a camera (Zoom, Teams, Photo Booth, browser tabs)
+     and check it in Photo Booth.
+  3. Restart the USB camera daemon:
+       sudo killall -9 UVCAssistant VDCAssistant cameracaptured
+
+The built-in and phone cameras were NOT used instead: ...
+```
+
+If **several external** cameras are attached and the chosen one is silent, the
+others are tried before giving up — that stays automatic, because they are all
+head-camera candidates.
+
+**Overriding.** `CAMERA_DEVICE` is an explicit human choice and therefore beats
+the external-only rule, so the built-in camera is still available when you
+deliberately ask for it (handy for testing away from the robot):
+
+```bash
+CAMERA_DEVICE=0 python -m robot.apps.fusion_remember          # pin by index
+CAMERA_DEVICE="MacBook" python -m robot.apps.camera_remember  # force the built-in camera
+```
+
+A pinned camera is never silently swapped for another either — it fails with a
+message. Pinning a known-good index is also *faster*, since it skips the two
+5-second attempts on a dead one (~15 s → ~1.3 s here).
+
+**When the head camera is broken, the better fallback is the mic**, not another
+camera — the fused app runs its whole voice stage without any camera:
+
+```bash
+python -m robot.apps.fusion_remember --no-camera
+```
+
+If the preview is black, the head camera's lens cover is closed or it is facing
+the robot — the apps warn about this at startup, because no face is ever
+detected in an all-black frame.
+
 ### Step 1 — Enroll the owner (once)
 
 ```bash
 python -m robot.apps.enroll_face
 ```
+
+> **Enroll through the camera you will run with.** The owner template is matched
+> at a tight threshold (`SFACE_OWNER_THRESHOLD = 0.50`), and a different lens and
+> mounting height shift the embedding — so after mounting or swapping the head
+> camera, re-run this step rather than reusing an enrollment made on the
+> built-in camera.
 
 Sit **alone** in front of the camera and look at it. The script captures ~12 face
 samples, averages them into an owner template (`owner_face.json`), then shows a
@@ -355,16 +680,26 @@ python -m robot.apps.camera_remember     # remembers each person's decision
 ```
 
 You'll see a camera preview with a live overlay (face count, watch link, the next
-reminder's due time, and the last delivery result). **Press `q` in the camera
-window to quit** — that's the only laptop input.
+reminder's due time, and the last delivery result). Two keys work in the camera
+window — the only laptop input:
+
+| Key | Effect |
+| --- | --- |
+| `q` | Quit. |
+| `t` | Fire a **test reminder** immediately: a made-up sensitive one that runs the whole delivery path (head sweep → identify → consent → speak or withhold). Nothing is written to `reminders.json`, and it skips the watch-in-range hold, so you can rehearse the behaviour with no reminder scheduled and the Bangle.js switched off. Press it again to repeat. Change the wording with `TEST_REMINDER_TEXT`. |
 
 When a reminder becomes due, the robot delivers it based on **who the camera
 sees** (owner presence is the watch BLE link, so a due reminder is held until the
 watch is in range):
 
 - **Non-sensitive reminder** → spoken normally, no consent.
-- **Sensitive + owner alone** (no bystander in view) → spoken.
-- **Sensitive + a bystander in view** → the **watch buzzes and shows the consent
+- **Sensitive** → the robot first **looks around**: it turns its head left,
+  centre and right (~4 s), takes a still at each position once the head has
+  stopped moving, and identifies everyone across all three views. A person seen
+  from two positions is merged into one bystander, so the consent key stays
+  stable. It then faces forward again.
+- **Sensitive + owner alone** (nobody found anywhere in the sweep) → spoken.
+- **Sensitive + a bystander found** → the **watch buzzes and shows the consent
   prompt**. Tap **Yes** → the Ohbot speaks the reminder (remembered for that
   person); **No** → the reminder is pushed **privately to the wrist** and the
   Ohbot only greets (*"Hello there."*).
@@ -454,18 +789,60 @@ bystanders merge (fine for owner-plus-one); and "same person" reuse is
 voice-similarity based (`VOICE_SAME_SPEAKER`), so a weak re-match mints a new id
 and re-asks.
 
-**Voice detection (tuned for a distant bystander).** The recording counts as
-containing a voice if **either** ≥ `--min-voiced` of the 100 ms blocks clear
-`--gate` (*sustained* close talking) **or** ≥ 2 blocks exceed `--peak`
-(*bursty/distant* talking, whose average is low but whose syllables peak) — a real
-far-field voice was being missed by a sustained-only test. The analysis logs
-`frac`, the loud-block count, and `block RMS peak/mean`, so a non-detection is
-diagnosable: a **peak near 0** means
+**Voice detection: two gates, and both must pass.**
+
+**Gate 1 — energy (is there any *sound*?).** Cheap, so a quiet window is
+dismissed without running a model. The recording counts as containing sound if
+**either** ≥ `--min-voiced` of the 100 ms blocks clear `--gate` (*sustained*
+close talking) **or** ≥ 2 blocks exceed `--peak` (*bursty/distant* talking, whose
+average is low but whose syllables peak) — a real far-field voice was being missed
+by a sustained-only test. The analysis logs `frac`, the loud-block count, and
+`block RMS peak/mean`, so a non-detection is diagnosable: a **peak near 0** means
 the mic isn't *hearing* the source (a device/level problem — check
 `VOICE_INPUT_DEVICE`/volume; playing a video does **not** inject audio into the
 mic, it must be picked up acoustically), whereas a **peak above the gate that
-still doesn't trigger** just wants lower thresholds. Raise the three knobs to
-ignore louder background media; lower them to catch a fainter bystander.
+still doesn't trigger** just wants lower thresholds.
+
+**Gate 2 — speech (is any of that sound a *human voice*?).**
+[`speech_vad.py`](robot/perception/speech_vad.py) runs **Silero VAD**, a small
+pretrained neural detector that classifies 32 ms chunks by *content*, not
+loudness. Only the speech samples are passed on to be embedded, so the voiceprint
+that reaches the gallery is built from a human voice and nothing else.
+
+This gate is not optional polish — without it the pipeline had **no test for "is
+this speech at all"**, only for "is this the owner", so *any* loud non-owner sound
+was filed as a bystander and silently withheld the owner's reminder. Resemblyzer's
+own preprocessing does not catch it either: it trims with `webrtcvad` mode 3,
+which (measured here) keeps **99.8 % of pure broadband noise** as "speech".
+Measured on the same signals, through the real `analyse_presence`:
+
+| Signal | Gate 1 (energy) | Gate 2 (Silero) | Verdict |
+| --- | --- | --- | --- |
+| A person talking | SOUND | 4.90 s of 5 s | **bystander** ✔ |
+| Person talking + grinder | SOUND | 4.80 s | **bystander** ✔ |
+| Coffee grinder | SOUND | 0.00 s | not a person ✔ |
+| Fan / vacuum | SOUND | 0.00 s | not a person ✔ |
+| Blender (harsh + whine) | SOUND | 0.00 s | not a person ✔ |
+| Door slam (impulse) | quiet | — | not a person ✔ |
+
+The "person + grinder" row matters as much as the noise rows: the gate must not
+throw away a real bystander who is talking in a noisy kitchen, and it doesn't —
+it recovers the speech and discards the noise around it. Cost is negligible
+(~0.02 s to load, ~0.8 s to score a full 5-minute window), and the weights ship
+**inside the pip package**, so there is no download and no network use at run time.
+
+`--min-speech` sets how many seconds of human speech are needed before a sound
+counts as a person (default 0.6 s — below that, Resemblyzer couldn't build a
+trustworthy voiceprint anyway). Raise the gate-1 knobs to ignore louder background
+media; lower them to catch a fainter bystander.
+
+```bash
+SPEECH_VAD=energy python -m robot.apps.mic_remember   # legacy energy-only, for A/B
+```
+
+> `SPEECH_VAD=energy` restores the pre-fix behaviour (**a grinder is detected as
+> `person_001`**). It exists only so the two can be compared on the same
+> recording; it prints a warning and is named in the CSV logs.
 
 A reminder that errors during delivery is **left pending and retried** (up to
 `MAX_DELIVERY_ATTEMPTS`), so a transient hiccup doesn't silently lose it. Watch
@@ -503,11 +880,26 @@ than guaranteed delivery. Decisions are remembered per bystander in
 | `OHBOT_PORT` | `Pico` | Serial-port hint passed to `ohbot.init()`. |
 | `NO_OHBOT` | unset | Set to `1` to skip the Ohbot entirely and speak via the OS voice (`say` on macOS, `espeak` on Linux). Lets you test the watch consent + memory flow without the robot plugged in. |
 | `VOICE_INPUT_DEVICE` | PortAudio default | Microphone device index or case-insensitive name substring; shared by all voice scripts. |
+| `CAMERA_DEVICE` | first external camera, else index 0 | Camera index or case-insensitive name substring; shared by every camera script (apps, `enroll_face`, the eval-set capture tool). The default is the head-mounted USB webcam whenever it is plugged in. |
+| `CAMERA_RES` | the camera's own default | `WIDTHxHEIGHT` requested from the camera, e.g. `1280x720`. Rarely needed — a 1080p head camera costs ~11 ms/frame for the per-frame Haar pass, well inside the frame budget. |
+| `HEAD_SCAN` | enabled | Set to `0` to skip the head sweep and judge presence from the straight-ahead view only (the pre-sweep behaviour). Automatically off with `NO_OHBOT=1` — there is no head to turn. |
+| `HEAD_SCAN_POSITIONS` | `2,5,8` | Ohbot `HEADTURN` positions the sweep visits, `0`–`10` (`5` = straight ahead). More positions = wider coverage, longer sweep. |
+| `HEAD_SCAN_SETTLE_S` | `0.9` | Seconds to let the head stop moving before a frame from that position is trusted. The camera rides the head, so frames captured mid-turn are motion-blurred. |
+| `TEST_REMINDER_TEXT` | `your doctor's appointment` | What the `t` test reminder says. Testing only — it is never stored. |
+| `HEAD_SCAN_SAVE_DIR` | unset | Debug: write each sweep still to this directory, to check by eye that the head reached each position and the picture is sharp. **This is the only path that writes an image of anyone to disk** — normal operation keeps face embeddings only — so treat such a run as recorded data. |
 
 Example — run without the robot:
 
 ```bash
 NO_OHBOT=1 python -m robot.apps.camera_remember
+```
+
+Example — pick a camera by name (safer than an index, which is a position in a
+unique-ID-sorted list and shifts when a phone joins or leaves it):
+
+```bash
+CAMERA_DEVICE="HDR webcam" python -m robot.apps.camera_remember
+CAMERA_DEVICE="MacBook" python -m robot.apps.camera_remember
 ```
 
 ### Tunable thresholds
@@ -523,7 +915,8 @@ and [`face_id.py`](robot/perception/face_id.py):
 | `SFACE_OWNER_THRESHOLD` | `0.50` | Tighter threshold for matching the enrolled owner. |
 
 (The voice runner adds its own knobs — `--lead`, `--gate`, `--min-voiced`,
-`--peak`; see [Voice reminders](#voice-reminders-schedule-private-content-by-voice).)
+`--peak`, `--min-speech`, and `SPEECH_VAD`; see
+[Voice reminders](#voice-reminders-schedule-private-content-by-voice).)
 
 ---
 
@@ -559,6 +952,7 @@ These live under `robot/state/` as local, per-machine state (gitignored):
 | `owner_voice.json` | `enroll_voice.py` | Averaged owner **voice** embedding + metadata. |
 | `voice_db.json` | `mic_remember.py` | Bystander **voice** gallery (stable `person_NNN` IDs). |
 | `consent_cache_voice.json` | `mic_remember.py` | Remembered Yes/No decisions (voice), keyed by bystander. |
+| `consent_cache_fusion.json` | `fusion_remember.py` | Remembered Yes/No decisions (fused), keyed by a modality-prefixed bystander (`voice:person_001` / `face:person_001`). |
 | `reminders.json` | `add_reminder.py` | Scheduled reminders (text + due time + delivered flag + sensitivity label). |
 
 These all live under `robot/state/`, which is gitignored, so the biometric

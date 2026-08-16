@@ -39,8 +39,38 @@
 echo(0);
 NRF.on('connect', function () { echo(0); });
 
-Bangle.setLCDPower(1);
-Bangle.setLocked(false);
+// Keep the screen awake for the whole demo.
+//
+// This used to be a one-shot setLCDPower(1)/setLocked(false) at load, which is
+// NOT enough: Bangle.js re-locks and drops the backlight after its idle
+// timeout (~10 s by default), and only user input resets that timer - our
+// 1 Hz redraw does not. So by the time the laptop sent consent(...), the watch
+// was locked: the prompt was drawn to a dark screen and touch was ignored, so
+// the buzz fired but no usable UI appeared.
+//
+// Two layers now guarantee a visible, tappable prompt:
+//   1. setOptions(...timeout: 0) disables the auto-lock/backlight/LCD timeouts
+//      entirely (fine for a demo watch that sits on the charger); and
+//   2. wakeScreen() is called explicitly at the top of consent()/notify(), so
+//      the prompt is visible even if something (a firmware default, a reboot
+//      into the clock, a manual lock) re-armed the timeouts behind our back.
+try {
+  Bangle.setOptions({
+    lockTimeout: 0,        // never auto-lock (touch stays live)
+    backlightTimeout: 0,   // never dim the backlight
+    lcdPowerTimeout: 0     // never blank the LCD
+  });
+} catch (e) {
+  // Older firmware may not know all three options; wakeScreen() still covers us.
+}
+
+function wakeScreen() {
+  Bangle.setLCDPower(1);
+  Bangle.setLocked(false);
+  if (Bangle.setLCDBrightness) Bangle.setLCDBrightness(1);
+}
+
+wakeScreen();
 
 // Idle screen shown between prompts: just confirms the consent channel is
 // live. A consent()/notify() call takes over the screen and restoreScreen()
@@ -95,6 +125,7 @@ function consent(id, msg) {
     clearInterval(redrawTimer);
     redrawTimer = null;
   }
+  wakeScreen();           // prompt must be lit AND tappable, not just drawn
   Bangle.buzz(400);
   // finish() runs for whichever of tap / firmware-reject / timeout comes first.
   // answer === null means "timed out - send nothing". The seq guard drops it if
@@ -142,6 +173,7 @@ function notify(msg) {
     clearInterval(redrawTimer);
     redrawTimer = null;
   }
+  wakeScreen();           // same reason as in consent()
   Bangle.buzz(400);
   function restore() {
     if (seq !== uiSeq) return;

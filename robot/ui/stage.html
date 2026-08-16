@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Thesis Presentation Stage</title>
+  <link rel="stylesheet" href="/stage.css">
+</head>
+<body class="view-title">
+
+  <!-- ============ Title / idle view ============ -->
+  <section id="title-view">
+    <header class="title-header">
+      <p class="kicker">Master's thesis · Privacy-aware social robot</p>
+      <h1>Presence sensing, watch-mediated consent,<br>and privacy-safe reminder delivery</h1>
+    </header>
+
+    <p id="busy-note" class="busy-note hidden">The console is running a setup task — the stage waits until it finishes.</p>
+
+    <div id="scenario-grid" class="scenario-grid" role="listbox" aria-label="Demo scenarios"></div>
+    <p id="scenario-description" class="scenario-description"></p>
+
+    <div class="start-row">
+      <div class="start-option">
+        <button id="start-guided" class="start-button" type="button">▶&nbsp; Start guided walkthrough</button>
+        <p id="guided-caption" class="start-caption"></p>
+      </div>
+      <div class="start-option">
+        <button id="start-live" class="start-button live" type="button">⦿&nbsp; Start live run</button>
+        <p id="live-caption" class="start-caption"></p>
+      </div>
+    </div>
+
+    <p class="title-hint">1–6 select a scenario · Enter start · F fullscreen · ? keys</p>
+  </section>
+
+  <!-- ============ Stage view (demo / live) ============ -->
+  <section id="stage-view">
+    <header class="stage-header">
+      <div class="stage-header-left">
+        <span id="stage-mode-badge" class="mode-badge">GUIDED</span>
+        <span id="stage-scenario" class="stage-scenario"></span>
+      </div>
+      <div class="stage-header-right">
+        <span id="stage-config" class="config-chip"></span>
+        <span id="stage-status" class="status-dot idle"></span>
+      </div>
+    </header>
+
+    <main class="stage-main">
+      <div class="headline-block">
+        <p id="stage-eyebrow" class="stage-eyebrow"></p>
+        <h2 id="stage-headline" class="stage-headline"></h2>
+        <p id="stage-detail" class="stage-detail"></p>
+      </div>
+
+      <div id="rail" class="rail" aria-label="Demo pipeline"></div>
+
+      <div id="outcome-banner" class="outcome-banner hidden">
+        <span id="outcome-icon" class="outcome-icon"></span>
+        <span id="outcome-text" class="outcome-text"></span>
+      </div>
+    </main>
+
+    <div class="sensor-strip">
+      <article id="tile-camera" class="sensor-tile">
+        <div class="tile-head"><h3>Camera</h3><span id="camera-state" class="tile-state">lens closed</span></div>
+        <div class="camera-view">
+          <img id="camera-frame" class="camera-frame hidden" alt="Robot camera view">
+          <div id="camera-shutter" class="camera-shutter"><span>◉</span><p>Lens closed — nothing is being filmed</p></div>
+        </div>
+      </article>
+      <article id="tile-mic" class="sensor-tile">
+        <div class="tile-head"><h3>Microphone</h3><span id="mic-state" class="tile-state">closed</span></div>
+        <div class="meter-track"><div id="mic-meter" class="meter-fill"></div></div>
+        <p id="mic-remaining" class="tile-detail">no audio captured</p>
+      </article>
+      <article id="tile-watch" class="sensor-tile">
+        <div class="tile-head"><h3>Watch · Identity</h3><span id="watch-state" class="tile-state">checked during run</span></div>
+        <p id="identity-state" class="tile-detail">no bystander identified</p>
+      </article>
+    </div>
+
+    <footer class="stage-footer">
+      <div id="ticker" class="ticker hidden">
+        <span id="ticker-time" class="ticker-time"></span>
+        <span id="ticker-message" class="ticker-message"></span>
+      </div>
+      <div id="controls" class="controls">
+        <div id="guided-controls" class="control-group">
+          <span id="step-counter" class="step-counter"></span>
+          <button id="control-previous" class="control-button" type="button">‹ Prev</button>
+          <button id="control-next" class="control-button primary" type="button">Next ›</button>
+          <button id="control-restart" class="control-button" type="button" title="Restart scenario">↺</button>
+        </div>
+        <div id="live-controls" class="control-group hidden">
+          <span id="live-countdown" class="live-countdown"></span>
+          <button id="control-stop" class="control-button danger" type="button">■ Stop run</button>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ============ Overlays ============ -->
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <div id="keys-overlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h3>Keyboard</h3>
+      <dl class="keys-list">
+        <dt>→ · Space · PgDn</dt><dd>next step (clicker forward)</dd>
+        <dt>← · PgUp</dt><dd>previous step (clicker back)</dd>
+        <dt>R</dt><dd>restart the scenario</dd>
+        <dt>F</dt><dd>fullscreen</dd>
+        <dt>Esc</dt><dd>leave the stage / stop a live run</dd>
+        <dt>1–6 · Enter</dt><dd>pick and start a scenario</dd>
+        <dt>?</dt><dd>toggle this overlay</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div id="stop-confirm" class="overlay hidden">
+    <div class="overlay-card">
+      <h3>Stop the live run?</h3>
+      <p>The robot process will be interrupted and sensors released.</p>
+      <div class="overlay-actions">
+        <button id="confirm-cancel" class="control-button" type="button">Keep running</button>
+        <button id="confirm-stop" class="control-button danger" type="button">Stop run</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/stage.js"></script>
+</body>
+</html>

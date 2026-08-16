@@ -366,6 +366,8 @@ def main() -> None:
     ap.add_argument("--data", type=str, default=None)
     ap.add_argument("--only", type=str, default=None)
     ap.add_argument("--timeout", type=float, default=900.0)
+    ap.add_argument("--out-dir", type=str, default=None,
+                    help="write results here instead of bench/results")
     args = ap.parse_args()
 
     res = _parse_res(args.res)
@@ -393,7 +395,8 @@ def main() -> None:
     print(render_table(det, f"CAMERA - detection (latency = 1 frame @ {args.res})"))
     print(render_table(rec, "CAMERA - recognition (latency = 1 face crop 112x112)"))
 
-    out_dir = _HERE / "results"
+    out_dir = Path(args.out_dir).resolve() if args.out_dir else _HERE / "results"
+    out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(results, out_dir / "camera_results.csv")
     md = ["# Camera benchmark results", "",
           render_markdown(det, f"Detection (latency = one frame @ {args.res})"), "",

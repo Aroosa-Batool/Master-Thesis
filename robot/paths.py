@@ -29,3 +29,11 @@ OWNER_FACE_PATH = STATE_DIR / "owner_face.json"
 VOICE_CONSENT_CACHE_PATH = STATE_DIR / "consent_cache_voice.json"
 VOICE_DB_PATH = STATE_DIR / "voice_db.json"
 OWNER_VOICE_PATH = STATE_DIR / "owner_voice.json"
+VOICE_MEAN_PATH = STATE_DIR / "voice_mean.json"    # cohort mean for d-vector centering
+
+# Fused modality (robot.core.fusion_reminder: mic first, camera as a double-check).
+# The galleries and owner enrollments above are REUSED as-is; only the consent
+# memory is separate, because a fused decision is keyed by a modality-prefixed id
+# ("voice:person_001" / "face:person_001") that the single-modality apps do not
+# understand - writing those keys into their caches would corrupt them.
+FUSION_CONSENT_CACHE_PATH = STATE_DIR / "consent_cache_fusion.json"

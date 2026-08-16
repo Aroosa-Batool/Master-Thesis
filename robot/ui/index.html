@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Thesis Presentation Workstation</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="kicker">MASTER'S THESIS</p>
+      <h1>PRIVACY-AWARE SOCIAL ROBOT</h1>
+      <p class="subtitle">Presence sensing, watch-mediated consent, and privacy-safe reminder delivery</p>
+    </div>
+    <div class="header-actions">
+      <span id="global-status" class="status-pill idle">Ready</span>
+      <a class="button secondary" href="/stage">Stage view ↗</a>
+      <button id="fullscreen-button" class="button secondary" type="button">Full screen</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Application sections">
+    <button class="tab active" data-tab="presentation" type="button">1 · Presentation</button>
+    <button class="tab" data-tab="setup" type="button">2 · Setup</button>
+    <button class="tab" data-tab="algorithms" type="button">3 · Algorithms</button>
+    <button class="tab" data-tab="evaluation" type="button">4 · Evaluation Data</button>
+  </nav>
+
+  <div id="notice" class="notice hidden" role="status"></div>
+
+  <main>
+    <section id="tab-presentation" class="tab-panel active">
+      <div class="presentation-layout">
+        <aside class="control-column">
+          <article class="card">
+            <div class="section-heading">
+              <div><p class="eyebrow">PRESENTATION MODE</p><h2>Run the thesis story</h2></div>
+            </div>
+            <div class="segmented" role="group" aria-label="Presentation mode">
+              <button id="mode-guided" class="segment active" type="button">Guided rehearsal</button>
+              <button id="mode-live" class="segment" type="button">Live hardware</button>
+            </div>
+
+            <div id="guided-controls" class="control-stack">
+              <label>Scenario
+                <select id="scenario-select"></select>
+              </label>
+              <div class="two-fields">
+                <label>Consent policy
+                  <select id="guided-policy"><option value="remember">Remember answers</option><option value="reask">Ask every time</option></select>
+                </label>
+                <label>Sensors
+                  <select id="guided-sensors"><option value="both">Mic → camera</option><option value="mic">Microphone only</option></select>
+                </label>
+              </div>
+              <button id="guided-start" class="button primary wide" type="button">Load guided scenario</button>
+              <div class="button-row">
+                <button id="guided-previous" class="button secondary" type="button">← Previous</button>
+                <button id="guided-next" class="button primary" type="button">Next step →</button>
+                <button id="guided-restart" class="button ghost" type="button">Restart</button>
+              </div>
+              <p class="hint">Use ← and → while presenting. Guided mode never opens hardware.</p>
+            </div>
+
+            <div id="live-controls" class="control-stack hidden">
+              <div class="two-fields">
+                <label>Consent policy
+                  <select id="live-policy"><option value="remember">Remember answers</option><option value="reask">Ask every time</option></select>
+                </label>
+                <label>Sensors
+                  <select id="live-sensors"><option value="both">Mic → camera</option><option value="mic">Microphone only</option></select>
+                </label>
+              </div>
+              <div id="next-reminder" class="next-reminder empty">
+                <p class="eyebrow">NEXT APPROACHING REMINDER</p>
+                <h3 id="next-reminder-text">No pending reminder</h3>
+                <p id="next-reminder-countdown" class="countdown">—</p>
+                <p id="next-reminder-meta" class="muted">Add one in the Reminders tab; the console follows the queue automatically.</p>
+              </div>
+              <label>Timing preset
+                <select id="timing-preset">
+                  <option value="quick">Quick presentation · 90s / 45s</option>
+                  <option value="research">Research timing · 420s / 300s</option>
+                  <option value="custom">Custom timing</option>
+                </select>
+              </label>
+              <div id="custom-timing" class="two-fields hidden">
+                <label>Lead seconds<input id="custom-lead" type="number" min="5" value="90"></label>
+                <label>Listen seconds<input id="custom-listen" type="number" min="5" value="45"></label>
+              </div>
+              <p class="hint">The run idles until the countdown above enters the lead window, then opens the mic. Mic and camera stay closed until then.</p>
+              <label class="check-row"><input id="laptop-voice" type="checkbox" checked> Use laptop speech instead of Ohbot</label>
+              <p class="privacy-note">Live consent still happens only on the Bangle.js watch.</p>
+              <div class="button-row">
+                <button id="live-start" class="button danger" type="button">Start live experiment</button>
+                <button id="live-stop" class="button secondary" type="button">Stop safely</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card compact">
+            <p class="eyebrow">CURRENT OUTCOME</p>
+            <h3 id="headline">Ready for a guided walkthrough or live experiment</h3>
+            <p id="outcome" class="muted">No delivery outcome yet.</p>
+          </article>
+        </aside>
+
+        <div class="stage-column">
+          <section class="sensor-grid" aria-label="Live sensors">
+            <article id="microphone-card" class="sensor-card off">
+              <div class="sensor-title"><span class="sensor-dot"></span><div><p class="eyebrow">MICROPHONE</p><h3 id="microphone-state">Closed</h3></div></div>
+              <div class="meter" aria-label="Microphone level"><span id="microphone-meter"></span></div>
+              <p id="microphone-detail" class="muted">No audio is being captured.</p>
+            </article>
+            <article id="camera-card" class="sensor-card camera off">
+              <div class="sensor-title"><span class="sensor-dot"></span><div><p class="eyebrow">ROBOT-EYE CAMERA</p><h3 id="camera-state">Closed</h3></div></div>
+              <div class="camera-viewport">
+                <img id="camera-frame" alt="Live annotated view from the camera mounted on the robot" class="hidden">
+                <div id="camera-shutter" class="camera-shutter"><span>Lens closed</span><small>No image retained</small></div>
+              </div>
+              <p id="head-position" class="muted">Head centred · 5/10</p>
+            </article>
+            <article class="sensor-card summary">
+              <p class="eyebrow">PRIVATE CHANNEL</p>
+              <h3 id="watch-state">Watch checked during live run</h3>
+              <p id="identity-state" class="muted">No bystander identity resolved.</p>
+              <div class="privacy-badge">Raw live audio/video is not saved</div>
+            </article>
+          </section>
+
+          <section class="card workflow-card">
+            <div class="section-heading">
+              <div><p class="eyebrow">VISIBLE DECISION PIPELINE</p><h2>What the robot is doing now</h2></div>
+              <span id="step-counter" class="counter">0 / 10</span>
+            </div>
+            <div id="workflow" class="workflow"></div>
+          </section>
+
+          <details class="card evidence-card">
+            <summary>Evidence log <span>Raw engine output + structured presentation events</span></summary>
+            <div id="event-log" class="event-log"></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-setup" class="tab-panel">
+      <div class="page-heading"><div><p class="eyebrow">PRESENTATION-DAY PREPARATION</p><h2>Setup wizard</h2></div><button id="refresh-readiness" class="button secondary" type="button">Refresh checks</button></div>
+      <div id="readiness-grid" class="readiness-grid"></div>
+
+      <div class="three-column">
+        <article class="card">
+          <p class="eyebrow">1 · DEVICE TESTS</p><h3>Verify the physical kit</h3>
+          <p class="muted">Hardware opens only after you press a test button.</p>
+          <div class="button-list">
+            <button class="button secondary job-button" data-kind="device_microphone" type="button">Test microphone · 5s</button>
+            <button class="button secondary job-button" data-kind="device_camera" type="button">Test robot camera · 8s</button>
+            <button class="button secondary job-button" data-kind="device_watch" type="button">Test Bangle.js link</button>
+            <button class="button secondary job-button" data-kind="device_ohbot" type="button">Test Ohbot movement + speech</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <p class="eyebrow">2 · OWNER ENROLLMENT</p><h3>Create local owner templates</h3>
+          <label class="check-row"><input id="overwrite-enrollment" type="checkbox"> Confirm replacement of an existing enrollment</label>
+          <div class="button-list">
+            <button id="enroll-voice" class="button primary" type="button">Enroll owner voice</button>
+            <button id="enroll-face" class="button primary" type="button">Enroll owner face</button>
+          </div>
+          <p class="privacy-note">Biometric embeddings are stored locally. Raw enrollment audio/video is not retained.</p>
+        </article>
+
+        <article class="card">
+          <p class="eyebrow">3 · ACTIVE JOB</p><h3 id="job-title">No setup task running</h3>
+          <div class="meter large"><span id="job-meter"></span></div>
+          <p id="job-result" class="muted">Choose a test, enrollment, capture, or benchmark.</p>
+          <button id="job-stop" class="button secondary wide" type="button">Cancel active task</button>
+        </article>
+      </div>
+
+      <section class="card reminder-builder">
+        <div class="section-heading"><div><p class="eyebrow">4 · REMINDER</p><h2>Create the presentation trigger</h2></div></div>
+        <div class="two-panels">
+          <div>
+            <h3>Speak it to the robot</h3>
+            <p class="muted">Whisper transcribes, dateparser schedules, and the local classifier proposes sensitivity.</p>
+            <div class="two-fields">
+              <label>Recording<select id="voice-seconds"><option value="8">8 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select></label>
+              <label>Whisper model<select id="whisper-model"><option value="base.en">base.en</option><option value="tiny.en">tiny.en</option><option value="small.en">small.en</option></select></label>
+            </div>
+            <button id="record-reminder" class="button primary" type="button">Record voice reminder</button>
+          </div>
+          <form id="reminder-form">
+            <h3>Review or enter manually</h3>
+            <label>Reminder subject<input id="reminder-text" maxlength="300" required placeholder="Doctor's appointment"></label>
+            <label>Delivery time<input id="reminder-time" type="datetime-local" step="1" required></label>
+            <label>Sensitivity<select id="reminder-sensitive"><option value="true">Sensitive · presence gated</option><option value="false">Non-sensitive · speak normally</option></select></label>
+            <p id="classifier-reason" class="hint">A spoken draft will place its classifier explanation here.</p>
+            <button class="button primary" type="submit">Save reminder</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-algorithms" class="tab-panel">
+      <div class="page-heading"><div><p class="eyebrow">TECHNICAL EVIDENCE</p><h2>Algorithms, embeddings, and thresholds</h2></div><button id="refresh-algorithms" class="button secondary" type="button">Refresh results</button></div>
+      <div id="algorithm-catalog" class="algorithm-catalog"></div>
+      <div class="two-panels algorithms-layout">
+        <article class="card">
+          <p class="eyebrow">RUN A COMPARISON</p><h3>Isolated CPU benchmark</h3>
+          <label>Modality<select id="benchmark-modality"><option value="camera">Camera</option><option value="voice">Voice</option></select></label>
+          <label>Candidates<input id="benchmark-candidates" value="yunet,sface" placeholder="Comma-separated names"></label>
+          <div class="two-fields"><label>Repetitions<input id="benchmark-repeats" type="number" min="1" value="50"></label><label>Timeout seconds<input id="benchmark-timeout" type="number" min="10" value="900"></label></div>
+          <label id="resolution-field">Resolution<input id="benchmark-resolution" value="640x480"></label>
+          <label class="check-row"><input id="benchmark-eval" type="checkbox"> Include local labelled evaluation data</label>
+          <button id="benchmark-start" class="button primary wide" type="button">Run selected benchmark</button>
+          <p class="hint">Results go to gitignored timestamped folders; bundled thesis results are never overwritten.</p>
+        </article>
+        <article class="card chart-card">
+          <div class="two-fields"><label>Result set<select id="result-dataset"></select></label><label>Metric<select id="result-metric"><option value="lat_median_ms">Median latency · ms</option><option value="fps">Throughput · FPS</option><option value="peak_rss_mb">Peak memory · MB</option><option value="model_size_mb">Model size · MB</option><option value="embedding_dim">Embedding dimensions</option><option value="accuracy_value">Evaluation accuracy · %</option></select></label></div>
+          <div id="benchmark-chart" class="benchmark-chart"></div>
+        </article>
+      </div>
+      <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Algorithm</th><th>Stage</th><th>Median ms</th><th>P95 ms</th><th>FPS</th><th>Peak MB</th><th>Model MB</th><th>Embedding</th><th>Accuracy</th><th>Status</th></tr></thead><tbody id="benchmark-table"></tbody></table></div></article>
+    </section>
+
+    <section id="tab-evaluation" class="tab-panel">
+      <div class="page-heading"><div><p class="eyebrow">LABELLED RESEARCH DATA</p><h2>Evaluation capture</h2></div><button id="refresh-evaluation" class="button secondary" type="button">Refresh coverage</button></div>
+      <div class="warning-banner"><strong>Explicit recording mode.</strong> Unlike normal presentation viewing, these controls intentionally save labelled face images or voice clips in the gitignored evaluation folder. Capture only with participant consent.</div>
+      <div class="two-panels">
+        <article class="card">
+          <p class="eyebrow">FACE DATASET</p><h3>Capture labelled robot-eye frames</h3>
+          <div class="two-fields"><label>Person label<input id="eval-face-label" placeholder="alice"></label><label>Condition<input id="eval-face-condition" value="near"></label></div>
+          <label>Number of shots<input id="eval-face-count" type="number" min="1" value="5"></label>
+          <label class="check-row"><input id="eval-face-negative" type="checkbox"> Background/no-face negatives</label>
+          <div class="button-row"><button id="eval-face-start" class="button primary" type="button">Open capture session</button><button id="eval-face-capture" class="button danger" type="button">Capture current frame</button></div>
+        </article>
+        <article class="card">
+          <p class="eyebrow">VOICE DATASET</p><h3>Record labelled speaker clips</h3>
+          <div class="two-fields"><label>Speaker label<input id="eval-voice-label" placeholder="alice"></label><label>Condition<input id="eval-voice-condition" value="quiet"></label></div>
+          <div class="two-fields"><label>Clips<input id="eval-voice-count" type="number" min="1" value="3"></label><label>Seconds each<input id="eval-voice-seconds" type="number" min="1" value="4"></label></div>
+          <button id="eval-voice-start" class="button primary" type="button">Record voice clips</button>
+        </article>
+      </div>
+      <article class="card coverage-card"><div class="section-heading"><div><p class="eyebrow">DATASET COVERAGE</p><h3 id="coverage-summary">No evaluation data loaded</h3></div><span class="privacy-badge">Target: ≥3 people · ≥2 conditions · ≥4 samples</span></div><div id="coverage-grid" class="coverage-grid"></div></article>
+    </section>
+  </main>
+
+  <footer>Local-only workstation · bound to 127.0.0.1 · no cloud UI services</footer>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -19,7 +19,9 @@ the watch, and the only laptop interaction is pressing 'q' in the camera window.
 
 Run:
     python -m robot.apps.camera_reask
-Press 'q' in the camera window to quit.
+In the camera window: 'q' quits, 't' fires a TEST reminder immediately (a
+sensitive one, so it exercises the head sweep and the consent flow) without
+scheduling anything or waiting for the watch to be in range.
 """
 
 from __future__ import annotations
@@ -39,6 +41,7 @@ try:
 except ModuleNotFoundError as exc:
     raise SystemExit("Missing dependency: install with `pip install ohbot`.") from exc
 
+from robot.perception.camera_device import open_camera
 from robot.perception.face_db import FaceDB
 from robot.perception.face_id import (
     FaceIdentifier,
@@ -46,6 +49,8 @@ from robot.perception.face_id import (
     SFACE_OWNER_THRESHOLD,
     ensure_models,
 )
+from robot.perception.presence import identify_people_in_frames
+from robot.core.head_scan import HeadScanner, LatestFrame, SCAN_SPEED
 from robot.core.owner import OwnerStore
 from robot.core.policy import BangleClient
 from robot.core.reminders import Reminder, ReminderStore
@@ -55,6 +60,10 @@ log = get_logger(__name__)
 
 
 OHBOT_PORT_HINT = os.environ.get("OHBOT_PORT", "Pico")
+# Text spoken by the 't' test reminder (see fire_test_reminder in main).
+TEST_REMINDER_TEXT = os.environ.get(
+    "TEST_REMINDER_TEXT", "your doctor's appointment"
+)
 # Set NO_OHBOT=1 to skip Ohbot init/use entirely - the consent flow on the watch
 # still runs and disclose/withhold are spoken via the OS voice.
 NO_OHBOT = os.environ.get("NO_OHBOT") == "1"
@@ -174,46 +183,35 @@ def sensitivity_for(rem: Reminder) -> tuple[bool, str]:
 
 
 @logcall
-def identify_people_in_frame(
+def look_around(
+    scanner: HeadScanner,
     face_identifier: FaceIdentifier,
     face_db: FaceDB,
     owner_store: OwnerStore,
     frame_bgr,
 ) -> tuple[str, list[tuple[str, float, bool, bool]], bool]:
-    """Return (bystander_id, per_face_info, owner_detected).
+    """Sweep the head, then identify everyone seen across the sweep.
 
-    Same semantics as ``camera_remember.py``'s helper: BLE establishes owner
-    presence in the room, so the camera is free to see only the bystander; any
-    face not matching the owner template is treated as a bystander.
+    Identical sensing to ``camera_remember.py`` - the two apps differ only in
+    whether the answer is remembered - so both call the shared
+    ``robot.perception.presence.identify_people_in_frames``.
     """
 
-    faces = face_identifier.detect_and_embed(frame_bgr)
-    faces.sort(key=lambda f: f.area, reverse=True)
-    if not faces:
-        return "", [], False
-
-    owner_scores = [
-        owner_store.matches(face.embedding, threshold=SFACE_OWNER_THRESHOLD)
-        for face in faces
-    ]
-    owner_idx = -1
-    best_sim = SFACE_OWNER_THRESHOLD
-    for i, (is_owner, sim) in enumerate(owner_scores):
-        if is_owner and sim >= best_sim:
-            best_sim = sim
-            owner_idx = i
-
-    per_face: list[tuple[str, float, bool, bool]] = []
-    bystanders: list[str] = []
-    for i, face in enumerate(faces):
-        if i == owner_idx:
-            per_face.append(("owner", owner_scores[i][1], False, True))
-            continue
-        pid, sim, is_new = face_db.identify(face.embedding)
-        per_face.append((pid, sim, is_new, False))
-        bystanders.append(pid)
-
-    return ":".join(sorted(set(bystanders))), per_face, owner_idx >= 0
+    if scanner.enabled:
+        print("[info-status] Before I say anything private, I will look around the "
+              "room to check whether anyone else is here.")
+    shots = scanner.scan(fallback_frame=frame_bgr)
+    if not shots:
+        print("[scan] no usable view captured; falling back to the frame in hand.")
+        shots_frames = [frame_bgr]
+    else:
+        shots_frames = [s.frame for s in shots]
+        if scanner.enabled:
+            seen = ", ".join(f"{s.position:g}/10" for s in shots)
+            print(f"[scan] looked at {len(shots)} head position(s): {seen}.")
+    return identify_people_in_frames(
+        face_identifier, face_db, owner_store, shots_frames
+    )
 
 
 @logcall
@@ -225,6 +223,7 @@ def run_reminder_policy(
     reminder: Reminder,
     frame_bgr,
     sensitive: bool,
+    scanner: HeadScanner,
 ) -> str:
     """Deliver one due reminder - ALWAYS re-asking (no consent cache).
 
@@ -246,8 +245,8 @@ def run_reminder_policy(
 
     print("[info-status] Sensitive - checking the camera to see whether the owner "
           "is alone or with someone else...")
-    bystander_id, per_face, owner_detected = identify_people_in_frame(
-        face_identifier, face_db, owner_store, frame_bgr
+    bystander_id, per_face, owner_detected = look_around(
+        scanner, face_identifier, face_db, owner_store, frame_bgr
     )
     if owner_store.has_owner() and per_face and not owner_detected:
         sims = ", ".join(f"sim={sim:.2f}" for _, sim, _, _ in per_face)
@@ -256,8 +255,8 @@ def run_reminder_policy(
             f"in-room). Treating all faces as bystanders. owner-sim = [{sims}]."
         )
     if not bystander_id:
-        print("[info-status] The owner is alone - no other face in view, so I can "
-              "say the reminder out loud.")
+        print("[info-status] The owner is alone - nobody else anywhere I looked, so "
+              "I can say the reminder out loud.")
         print(f"[reminder] {reminder.id}: no bystander in view -> owner alone.")
         log.info("reminder %s: no bystander in view -> owner alone", reminder.id,
                  extra={"event": "no_presence"})
@@ -325,12 +324,8 @@ def main() -> None:
         raise SystemExit(f"Could not load face detector from {cascade_path}.")
 
     print("[startup] opening webcam...", flush=True)
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        raise SystemExit(
-            "Could not open webcam. Close any app using the camera "
-            "(Zoom, Teams, browser tabs) and try again."
-        )
+    # Prefers the external head-mounted camera; CAMERA_DEVICE pins another one.
+    cap = open_camera()
     print("[startup] webcam open.", flush=True)
 
     if NO_OHBOT:
@@ -387,7 +382,10 @@ def main() -> None:
               flush=True)
     print(
         "Camera RE-ASK app running (reminder-triggered; always re-asks, never "
-        "remembers). Press 'q' in the camera window to quit."
+        "remembers).\n"
+        "Keys (in the camera window): 'q' quit, 't' fire a TEST reminder now "
+        "(sensitive; runs the head sweep + consent flow without scheduling "
+        "anything or needing the watch in range)."
     )
 
     trial_lock = threading.Lock()
@@ -395,18 +393,56 @@ def main() -> None:
     last_reminder_poll = 0.0
     next_reminder_info = "checking..."
 
-    def fire_delivery_async(reminder: Reminder, frame_snapshot, sensitive: bool) -> bool:
+    # Head sweep. The camera rides the head, so turning it is how the robot sees
+    # more of the room than the owner's seat; the worker thread drives it while
+    # this loop keeps capturing, and the two meet at `latest`.
+    latest = LatestFrame()
+
+    def move_head(position: float) -> None:
+        if NO_OHBOT:
+            return
+        with ohbot_lock:
+            if shutting_down.is_set():
+                return
+            try:
+                ohbot.move(ohbot.HEADTURN, position, SCAN_SPEED)
+            except Exception as exc:
+                print(f"[scan] head move to {position:g} failed: {exc}")
+
+    def set_scan_status(message: str) -> None:
+        with trial_lock:
+            trial_state["last_status"] = f"scanning - {message}"
+
+    scanner = HeadScanner(
+        latest,
+        None if NO_OHBOT else move_head,
+        on_status=set_scan_status,
+        should_abort=shutting_down.is_set,
+    )
+    if scanner.enabled:
+        positions = ", ".join(f"{p:g}" for p in scanner.positions)
+        print(f"[scan] head sweep ON - checking for bystanders at HEADTURN {positions} "
+              "before each sensitive reminder. Disable with HEAD_SCAN=0.", flush=True)
+    else:
+        print("[scan] head sweep OFF (no robot, or HEAD_SCAN=0); presence is judged "
+              "from the straight-ahead view only.", flush=True)
+
+    def fire_delivery_async(
+        reminder: Reminder, frame_snapshot, sensitive: bool, persist: bool = True,
+    ) -> bool:
         def worker() -> None:
             try:
                 status = run_reminder_policy(
                     watch, face_identifier, face_db, owner_store,
-                    reminder, frame_snapshot, sensitive,
+                    reminder, frame_snapshot, sensitive, scanner,
                 )
             except Exception as exc:
                 traceback.print_exc()
                 status = f"error: {exc}"
             finally:
-                ReminderStore(REMINDERS_PATH).mark_delivered(reminder.id)
+                # A test reminder was never in the store, so leave it untouched.
+                if persist:
+                    ReminderStore(REMINDERS_PATH).mark_delivered(reminder.id)
                 with trial_lock:
                     trial_state["last_status"] = status
                     trial_state["in_trial"] = False
@@ -419,11 +455,37 @@ def main() -> None:
             threading.Thread(target=worker, daemon=True, name="delivery-worker").start()
             return True
 
+    test_counter = {"n": 0}
+
+    def fire_test_reminder(frame_snapshot) -> None:
+        """Deliver a made-up sensitive reminder now ('t' in the camera window).
+
+        Runs the real delivery path - head sweep, identification, consent - so
+        the behaviour can be rehearsed without scheduling a reminder or waiting
+        for one to fall due. It is marked sensitive so the sweep always runs,
+        never touches ``reminders.json``, and skips the watch-in-range hold that
+        gates a genuine reminder, so it works with the Bangle.js switched off.
+        """
+
+        test_counter["n"] += 1
+        rem = Reminder(
+            id=f"test_{test_counter['n']}",
+            text=TEST_REMINDER_TEXT,
+            remind_at=datetime.datetime.now().isoformat(timespec="seconds"),
+            sensitive=True,
+        )
+        print(f"\n[test] firing test reminder {rem.id}: {rem.text!r} (sensitive). "
+              "Nothing is written to reminders.json.", flush=True)
+        if not fire_delivery_async(rem, frame_snapshot.copy(), True, persist=False):
+            print("[test] a delivery is already running; ignoring.", flush=True)
+
     try:
         while True:
             ok, frame = cap.read()
             if not ok:
                 continue
+            # Offer every frame to a running head sweep (a no-op otherwise).
+            latest.set(frame)
 
             now = time.monotonic()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -479,16 +541,20 @@ def main() -> None:
             line2 = f"reminders: {next_reminder_info}"
             trial_tag = "[DELIVERING] " if in_trial else ""
             line3 = f"{trial_tag}last: {last_trial_status}"
-            for i, line in enumerate((line1, line2, line3)):
+            line4 = "q=quit  t=test reminder (sensitive)"
+            for i, line in enumerate((line1, line2, line3, line4)):
                 cv2.putText(
                     frame, line, (20, 40 + i * 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2,
                 )
             cv2.imshow("Camera - re-ask (reminder-triggered)", frame)
 
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
                 shutting_down.set()
                 break
+            if key == ord("t"):
+                fire_test_reminder(frame)
     finally:
         shutting_down.set()
         cap.release()

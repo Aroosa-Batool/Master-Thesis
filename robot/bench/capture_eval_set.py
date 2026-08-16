@@ -57,6 +57,11 @@ def _next_index(folder: Path, prefix: str, suffix: str) -> int:
 def capture_faces(args) -> None:
     import cv2
 
+    # Repo root on sys.path so this stays runnable as a plain script
+    # (`python robot/bench/capture_eval_set.py ...`), not only as a module.
+    sys.path.insert(0, str(_HERE.parent.parent))
+    from robot.perception.camera_device import open_camera  # noqa: E402
+
     root = Path(args.root) / "faces"
     if args.negative:
         out = root / "_negative"
@@ -68,9 +73,9 @@ def capture_faces(args) -> None:
         label, condition = args.person, args.condition
     out.mkdir(parents=True, exist_ok=True)
 
-    cap = cv2.VideoCapture(args.camera)
-    if not cap.isOpened():
-        sys.exit(f"could not open camera index {args.camera}")
+    # Capture the eval set through the same camera the demos sense with -
+    # accuracy measured on a different lens does not transfer.
+    cap = open_camera(args.camera)
     print(f"Capturing {args.shots} shot(s) for '{label}' [{condition}].")
     print("  SPACE = capture frame, q = quit early.")
     if not args.negative:
@@ -140,7 +145,9 @@ def main() -> None:
     f.add_argument("--condition", default="default",
                    help="filename prefix encoding the condition (near/far/backlit/...)")
     f.add_argument("--shots", type=int, default=5)
-    f.add_argument("--camera", type=int, default=0)
+    f.add_argument("--camera", default=None,
+                   help="camera index or name substring "
+                        "(default: CAMERA_DEVICE, else the external camera)")
     f.add_argument("--root", default=str(DEFAULT_ROOT))
     f.set_defaults(func=capture_faces)
 

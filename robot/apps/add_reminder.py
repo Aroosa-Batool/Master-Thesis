@@ -27,9 +27,11 @@ from __future__ import annotations
 import argparse
 import datetime
 import logging
+import os
 import re
 import subprocess
 import sys
+import time
 
 import numpy as np
 
@@ -45,6 +47,7 @@ from robot.perception.audio_device import pick_input_device
 from robot.core.reminders import ReminderStore
 from robot.core.sensitivity import SensitivityResult, get_classifier
 from robot.core.logsetup import setup_logging, logcall, get_logger
+from robot.core import presentation_telemetry as telemetry
 
 # Whisper works at 16 kHz mono, same as the rest of the voice stack.
 SR = 16000
@@ -73,8 +76,18 @@ def record(seconds: float) -> np.ndarray:
     sd.default.device = (pick_input_device(), sd.default.device[1])
     print(f"\n[record] Speak your reminder now - recording for {seconds:.0f}s...",
           flush=True)
+    telemetry.sensor("microphone", True, duration_s=seconds)
     audio = sd.rec(int(seconds * SR), samplerate=SR, channels=1, dtype="float32")
+    started = time.monotonic()
+    while time.monotonic() - started < seconds:
+        elapsed = min(seconds, time.monotonic() - started)
+        filled = min(len(audio), int(elapsed * SR))
+        level = float(np.sqrt(np.mean(audio[max(0, filled - SR // 4):filled, 0] ** 2))) if filled else 0.0
+        telemetry.metric("microphone_level", level, progress=elapsed / seconds,
+                         remaining_s=max(0.0, seconds - elapsed))
+        time.sleep(0.1)
     sd.wait()
+    telemetry.sensor("microphone", False)
     print("[record] done.", flush=True)
     return audio[:, 0].copy()
 
@@ -287,6 +300,13 @@ def main() -> None:
         log.info("subject=%r when=%s sensitive=%s (%s)", text,
                  dt.isoformat(timespec="minutes"), sens.sensitive, sens.backend,
                  extra={"event": "parsed"})
+        if os.environ.get("THESIS_UI_JOB") == "1":
+            telemetry.emit(
+                "reminder_draft", text=text, remind_at=dt.isoformat(timespec="minutes"),
+                sensitive=sens.sensitive, backend=sens.backend, reason=sens.reason,
+                detail="Voice reminder draft ready for review",
+            )
+            return
         if confirm_and_save(store, text, dt, sens) == "retry":
             continue
         return

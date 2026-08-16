@@ -62,6 +62,10 @@ modules launched with `python -m robot.apps.<name>`.
 | `python -m robot.apps.add_reminder` | Record, transcribe, parse, classify sensitivity, confirm, and store one reminder. | Microphone; Whisper, dateparser, and the sensitivity classifier. | Terminal `yes/switch/retry/quit` confirmation. |
 | `python -m robot.apps.mic_remember` | Voice cache-memory app (thin wrapper over `robot.core.voice_reminder`): poll reminders with the mic off, record the pre-reminder window, deliver a due reminder, and remember each bystander's Yes/No. | Voice enrollment, reminder, watch, and Ohbot or fallback. | `Ctrl-C`. |
 | `python -m robot.apps.mic_reask` | Voice re-consent counterpart to `mic_remember` (same wrapper): identical delivery but re-asks the watch every time and stores no decision. | Same as `mic_remember`. | `Ctrl-C`. |
+| `python -m robot.apps.fusion_remember` | Fused mic→camera delivery (thin wrapper over `robot.core.fusion_reminder`): listens across the window, opens the camera for a head scan only if the mic heard nobody, remembers each bystander's Yes/No in `consent_cache_fusion.json`. | Voice **and** face enrollment (unless `--no-camera`); reminder; watch; Ohbot or `NO_OHBOT=1`. | `Ctrl-C`. |
+| `python -m robot.apps.fusion_reask` | Re-consent counterpart to `fusion_remember` (same wrapper): identical sensing, but asks the watch every time and stores nothing. | Same as `fusion_remember`. | `Ctrl-C`. |
+| `python -m robot.apps.reminder_app` | **Unified interactive app**: asks two startup questions — remember disclosure decisions? (yes → cache-memory / no → re-consent) and which sensors? (1 → mic only / 2 → mic then camera) — then runs the matching engine with the split T−7 min wake / 5-min recording timeline and fail-safe camera handling. CLI flags (`--policy`, `--sensors`, `--monitor-lead`, `--listen-duration`) pre-answer questions; answers are never persisted. | Voice enrollment (mic mode) or voice + face enrollment (both mode); reminder; watch; Ohbot or `NO_OHBOT=1`. | `Ctrl-C` (also exits the startup questions cleanly, before any hardware is touched). |
+| `python -m pytest tests/` | Hardware-free automated tests for the reminder pipelines and the unified app (mocked mic/camera/watch/robot; no downloads, no network). | `pip install -r requirements.txt` (includes `pytest`). | Exits after the run. |
 | `python robot/bench/bench_camera.py` | Compare camera algorithms in isolated subprocesses. | Base dependencies; optional challenger packages/models. | Exits after writing result tables. |
 | `python robot/bench/bench_voice.py` | Compare voice algorithms in isolated subprocesses. | Base dependencies; optional challenger packages/models. | Exits after writing result tables. |
 | `python robot/bench/capture_eval_set.py ...` | Capture labelled face or voice evaluation data. | Camera or microphone. | Mode-specific count, or `q` for face capture. |
@@ -136,6 +140,47 @@ separation or diarisation: a bystander who stays completely silent for the whole
 window cannot be heard and is treated as absent (the camera flow covers silent
 presence).
 
+### 3.2b Unified reminder app flow (`reminder_app`)
+
+`python -m robot.apps.reminder_app` is one interactive entry point over the same
+engines. Startup order matters: **first** the two questions (consent policy:
+remember/reask; sensors: mic only / mic-then-camera), with invalid answers
+re-prompted and `Ctrl-C`/EOF exiting cleanly **before** any model, device, or
+BLE initialisation; **then** a printed configuration summary; **then** the
+selected engine starts (`run_config` on `robot.core.voice_reminder` or
+`robot.core.fusion_reminder`). CLI flags `--policy` / `--sensors` bypass the
+matching question; `--monitor-lead` / `--listen-duration` set the timing. The
+choices are never persisted — the next interactive run asks again.
+
+Per reminder scheduled at T (defaults 420 s / 300 s):
+
+1. **T−7 min** — wake, resolve sensitivity (stored flag or live classifier),
+   and confirm owner presence via the watch BLE link. Watch offline → the
+   reminder is **held**; no sensor opens, nothing is spoken, and the BLE client
+   keeps rescanning in the background.
+2. **Sensitive** → the mic records continuously for exactly 5 minutes
+   (T−7 → ~T−2), then closes; the recording is analysed immediately (energy
+   gate → Silero VAD → speaker embedding → owner subtraction → voice gallery)
+   and the raw audio is dropped. **Non-sensitive** → both sensors stay off and
+   the reminder is simply spoken at T (owner presence re-confirmed).
+3. A non-owner voice ⇒ that identity is the bystander; the camera is never
+   opened. No voice + **both-sensor mode** ⇒ the head-mounted camera opens only
+   for a head scan, scheduled so the freshest practical scan finishes close to
+   T (`HeadScanner` + `LatestFrame` + `identify_people_in_frames`); the head is
+   re-centred and the camera released in every path. No voice + mic-only mode ⇒
+   "no audible bystander".
+4. **At T** — owner presence is re-confirmed (owner gone → hold, stale presence
+   discarded). No bystander → speak. Bystander → the selected consent policy on
+   the watch: remember mode reuses an explicit stored Yes/No and asks only on a
+   cache miss (storing only explicit answers); reask mode always asks and never
+   touches a consent store. Yes → speak aloud; No / timeout / disconnect →
+   private wrist note + neutral greeting, and the non-answer is never cached.
+5. **Failure = privacy-safe**: a failed camera open, missing frame, failed
+   scan, unusable audio, or failed identity analysis is never read as "owner
+   alone" — the fused engine runs fail-safe here and withholds privately.
+   Transient errors leave the reminder pending with bounded retries; on final
+   give-up it is pushed privately to the watch rather than lost silently.
+
 ### 3.3 Reminder creation and sensitivity
 
 `add_reminder.py` records a fixed-length clip (default eight seconds), runs
@@ -184,6 +229,9 @@ downloaded ONNX weights. On-disk data-file paths are centralised in
 | [`robot/core/owner.py`](../robot/core/owner.py) | Modality-independent, single-owner embedding store and cosine match. |
 | [`robot/perception/face_db.py`](../robot/perception/face_db.py) | Modality-independent embedding gallery despite its historical class/file name; assigns `person_NNN`. |
 | [`robot/perception/audio_device.py`](../robot/perception/audio_device.py) | Shared PortAudio input-device selection and `VOICE_INPUT_DEVICE` handling. |
+| [`robot/perception/camera_device.py`](../robot/perception/camera_device.py) | Shared camera selection (`CAMERA_DEVICE`/`CAMERA_RES`), defaulting to the head-mounted USB webcam, plus capture warm-up and a black-frame check. |
+| [`robot/core/head_scan.py`](../robot/core/head_scan.py) | Head sweep before a sensitive delivery: `LatestFrame` hands the newest frame from the capture loop to the delivery worker, and `HeadScanner` turns the head through `HEAD_SCAN_POSITIONS`, waiting for a frame captured after the head settled. |
+| [`robot/perception/presence.py`](../robot/perception/presence.py) | Identifies everyone across the sweep's frames, clustering repeat sightings of one person (across frames only, never within a frame) so a bystander gets one gallery ID and one consent key. |
 | [`robot/core/reminders.py`](../robot/core/reminders.py) | Reminder data model (including the `sensitive` flag), due/pending queries, and atomic JSON persistence. |
 | [`robot/core/sensitivity.py`](../robot/core/sensitivity.py) | Local sentence-transformer sensitivity classifier: cosine-matches reminder text to labelled prototypes with a keyword override, or a keyword-only fallback when the model is absent. |
 | [`robot/core/robot_io.py`](../robot/core/robot_io.py) | Shared voice support module (not runnable): Ohbot glue, on-disk paths, reminder templates, `deliver_reminder_spoken`, `behavior_withhold`, and `identify_bystander_averaged`; imported by the voice engine `robot.core.voice_reminder`. |
@@ -336,6 +384,12 @@ because reminder text may be sensitive.
 | `OHBOT_PORT` | `Pico` | Demos and reminder runner | Hint passed to `ohbot.init`. |
 | `NO_OHBOT` | unset | Demos and reminder runner | `1` skips serial/robot use and selects OS TTS. |
 | `VOICE_INPUT_DEVICE` | PortAudio default, then first input | All microphone scripts | Numeric device index or case-insensitive device-name substring. |
+| `CAMERA_DEVICE` | First external camera, then index 0 | All camera scripts | Numeric capture index or case-insensitive device-name substring. The default resolves to the USB webcam mounted on the robot's head; built-in and Continuity (phone) cameras are skipped. |
+| `CAMERA_RES` | Camera default | All camera scripts | Requested capture size as `WIDTHxHEIGHT`. |
+| `HEAD_SCAN` | Enabled | Camera delivery apps | `0` disables the head sweep; presence is then judged from the straight-ahead view. Implicitly off under `NO_OHBOT=1`. |
+| `HEAD_SCAN_POSITIONS` | `2,5,8` | Camera delivery apps | Comma-separated Ohbot `HEADTURN` positions (0–10) visited during the sweep. |
+| `HEAD_SCAN_SETTLE_S` | `0.9` | Camera delivery apps | Seconds to wait after each head move before trusting a frame from that position. |
+| `TEST_REMINDER_TEXT` | `your doctor's appointment` | Camera delivery apps | Text of the `t`-key test reminder, which runs the full delivery path without persisting anything or requiring the watch. |
 
 ### Reminder CLI options
 
@@ -343,12 +397,23 @@ because reminder text may be sensitive.
 python -m robot.apps.add_reminder [--seconds SECONDS] [--model MODEL]
 python -m robot.apps.mic_remember [--lead SECONDS] [--poll SECONDS] [--gate G] [--min-voiced F] [--peak P]
 python -m robot.apps.mic_reask    [--lead SECONDS] [--poll SECONDS] [--gate G] [--min-voiced F] [--peak P]
+python -m robot.apps.fusion_remember [--lead SECONDS] [--poll SECONDS] [--gate G] [--min-voiced F] [--peak P] [--no-camera]
+python -m robot.apps.fusion_reask    [same flags as fusion_remember]
+python -m robot.apps.reminder_app [--policy remember|reask] [--sensors mic|both]
+                                  [--monitor-lead SECONDS] [--listen-duration SECONDS]
 ```
 
 Defaults are an 8-second reminder recording, Whisper `base.en`, a five-minute
 (`--lead`) continuously-recorded pre-reminder window, and a 2-second clock-poll
 interval. The `--gate`/`--min-voiced`/`--peak` knobs tune the dual
 sustained-or-bursty voice-energy test used to spot a bystander.
+
+The legacy apps use **one** `--lead` value as both the wake-up lead and the
+recording window (record until the due time). `reminder_app` separates the two:
+`--monitor-lead` (default 420 s) is when the pipeline wakes before T, and
+`--listen-duration` (default 300 s) is how long the mic records from the wake
+(so by default the mic runs T−7 min → T−2 min and delivery still happens at T).
+`--listen-duration` must not exceed `--monitor-lead`.
 
 Algorithm thresholds are intentionally source constants rather than a config
 file. The canonical table is in

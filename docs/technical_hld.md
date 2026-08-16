@@ -219,6 +219,15 @@ The single matching algorithm reused by **both** modalities (embedding-agnostic)
 | **Where** | `sensitivity.py` (`classify`); run once at add time (`add_reminder.py`), or lazily at delivery for reminders saved before the field existed. |
 | **Reference** | Same deep-embedding + cosine lineage as A4/A6 (FaceNet / GE2E families); model card `all-MiniLM-L6-v2`. |
 
+### 3.13 · A13 — Unified reminder app: startup selection & split monitoring timeline
+
+| | |
+| --- | --- |
+| **Role** | `python -m robot.apps.reminder_app` — ONE interactive entry point that selects among the existing engines. Two questions are asked **before** any model load, device open, or BLE scan: (1) remember disclosure decisions? *yes* → cache-memory policy, *no* → re-consent policy (nothing stored, ever); (2) sensors? *1* → microphone only (`robot.core.voice_reminder`), *2* → mic first, camera as a fallback (`robot.core.fusion_reminder`). CLI flags `--policy remember\|reask` and `--sensors mic\|both` pre-answer a question; only unanswered ones are asked. The choices are never persisted. |
+| **Timing** | Splits the legacy single `--lead` into **two** values: `--monitor-lead` (default **420 s**) is the wake-up time before T, `--listen-duration` (default **300 s**) is the continuous mic recording. Default timeline: wake at **T−7 min**; sensitive → mic records **T−7 min → T−2 min**; the buffer is analysed the moment the mic closes (raw audio is then dropped, never persisted); in both-sensor mode a mic miss schedules the head scan late in the remaining interval (a budget estimate: camera open + per-position settle/frame + margin) so it finishes close to T; delivery and any watch consent prompt happen at **T**. Implemented as `record_s` on `VoiceReminderConfig`/`FusionReminderConfig`; `record_s=None` preserves the legacy record-until-due semantics of the `--lead` apps. |
+| **Fail-safe** | The unified app runs the fused engine with `camera_fail_safe=True`: an INCONCLUSIVE camera stage (failed open, no usable frame, failed scan or identification) **withholds** a sensitive reminder — private wrist note + neutral greeting — instead of being read as "owner alone". The legacy `fusion_*` apps keep their documented fail-open. A delivery that keeps raising is retried up to `MAX_DELIVERY_ATTEMPTS`; on giving up, the reminder is pushed privately to the watch (best-effort), never spoken. The BLE client (A9) now **rescans in the background** after a missing watch or a dropped link, so held reminders resume without a restart. |
+| **Where** | `robot/apps/reminder_app.py` (questions, validation, summary, dispatch); `run_config()` + `deliver_due_reminder()` in the two engines; tested hardware-free in `tests/`. |
+
 ---
 
 ## 4. Where each algorithm runs (thread & timing)
@@ -367,9 +376,15 @@ python -m robot.apps.enroll_face            # or -m robot.apps.enroll_voice   (A
 python -m robot.apps.add_reminder      # create a scheduled reminder by voice (A11 + A12)
 python -m robot.apps.camera_remember    # camera, reminder-triggered, remembers | -m robot.apps.camera_reask = re-ask baseline
 python -m robot.apps.mic_remember       # voice, reminder-triggered, remembers (mic opens only when a reminder is due) | -m robot.apps.mic_reask = re-ask baseline
+python -m robot.apps.reminder_app       # UNIFIED interactive app (A13): asks policy (remember/reask) + sensors (mic/both), then runs the matching engine
+#   flags: --policy remember|reask  --sensors mic|both  --monitor-lead 420  --listen-duration 300   (T−7 min wake, 5-min mic window ending ~T−2 min)
 #   the four delivery apps are a 2x2 of modality (camera / mic) x consent policy (remember / re-ask); the mic apps are thin wrappers over robot/core/voice_reminder.py
+python -m pytest tests/                 # hardware-free test suite (mocked mic/camera/watch/robot)
 #   NO_OHBOT=1 → run without the robot (A10 fallback);  OHBOT_PORT=… → serial hint
 #   VOICE_INPUT_DEVICE=… → mic index or name substring
+#   CAMERA_DEVICE=… → camera index or name substring (default: the head-mounted USB webcam)
+#   HEAD_SCAN=0 / HEAD_SCAN_POSITIONS=2,5,8 / HEAD_SCAN_SETTLE_S=0.9 → head sweep before a sensitive delivery
+#   python -m robot.apps.list_cameras [--preview N] → which camera the camera apps will open
 #   (robot/core/robot_io.py is a shared support module, not a runnable entry point)
 ```
 

@@ -274,6 +274,8 @@ def main() -> None:
     ap.add_argument("--only", type=str, default=None,
                     help="comma list to restrict candidates")
     ap.add_argument("--timeout", type=float, default=600.0)
+    ap.add_argument("--out-dir", type=str, default=None,
+                    help="write results here instead of bench/results")
     args = ap.parse_args()
 
     data_dir = Path(args.data).resolve() if args.data else None
@@ -299,7 +301,8 @@ def main() -> None:
     print(render_table(vad, "VOICE - VAD (latency = 1 block ~30ms)"))
     print(render_table(spk, f"VOICE - speaker embedding (latency = 1 x {UTTER_S:.0f}s utterance)"))
 
-    out_dir = _HERE / "results"
+    out_dir = Path(args.out_dir).resolve() if args.out_dir else _HERE / "results"
+    out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(results, out_dir / "voice_results.csv")
     md = ["# Voice benchmark results", "",
           render_markdown(vad, f"VAD (latency = one ~{BLOCK_MS} ms block)"), "",

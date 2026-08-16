@@ -28,11 +28,6 @@ import threading
 
 import numpy as np
 
-try:
-    from ohbot import ohbot
-except ModuleNotFoundError as exc:
-    raise SystemExit("Missing dependency: install with `pip install ohbot`.") from exc
-
 from robot.perception.face_db import FaceDB
 from robot.core.owner import OwnerStore
 from robot.perception.voice_id import VOICE_OWNER_THRESHOLD, VoiceIdentifier
@@ -46,22 +41,47 @@ OHBOT_PORT_HINT = os.environ.get("OHBOT_PORT", "Pico")
 # watch still runs and disclose/withhold are spoken via the OS voice.
 NO_OHBOT = os.environ.get("NO_OHBOT") == "1"
 
-# macOS shim for the ohbot SDK (it shells out to `aplay`, absent on Darwin).
-if sys.platform == "darwin":
-    _silence_wav = os.path.join(os.path.dirname(ohbot.__file__), "Silence1.wav")
+# Importing the third-party Ohbot module opens a serial port immediately on some
+# SDK versions.  Keep it genuinely lazy so importing the reminder engines is
+# safe in tests, in the presentation dashboard, and in laptop-voice mode.
+ohbot = None
+
+
+def load_ohbot():
+    """Return the Ohbot SDK module, importing it only for a real robot run."""
+
+    global ohbot
+    if NO_OHBOT:
+        return None
+    if ohbot is not None:
+        return ohbot
+    try:
+        from ohbot import ohbot as sdk
+    except ModuleNotFoundError as exc:
+        raise SystemExit("Missing dependency: install with `pip install ohbot`.") from exc
+    ohbot = sdk
+    _configure_macos_playback(ohbot)
+    return ohbot
+
+def _configure_macos_playback(sdk) -> None:
+    """Install the macOS playback shim after the SDK has been loaded."""
+
+    if sys.platform != "darwin":
+        return
+    silence_wav = os.path.join(os.path.dirname(sdk.__file__), "Silence1.wav")
 
     @logcall
     def _say_speech_macos(addSilence):
         try:
             if addSilence:
-                subprocess.run(["afplay", _silence_wav], timeout=5, check=False)
+                subprocess.run(["afplay", silence_wav], timeout=5, check=False)
             subprocess.run(["afplay", "ohbotspeech.wav"], timeout=30, check=False)
         except subprocess.TimeoutExpired:
             print("[ohbot] afplay timed out; continuing.")
         except FileNotFoundError:
             print("[ohbot] afplay not found; skipping audio.")
 
-    ohbot.saySpeech = _say_speech_macos
+    sdk.saySpeech = _say_speech_macos
 
 
 # Shared state for thread-safe Ohbot access and shutdown coordination.
@@ -127,12 +147,13 @@ def behavior_withhold() -> None:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(WITHHOLD_LINE)
         return
+    bot = load_ohbot()
     with ohbot_lock:
         if shutting_down.is_set():
             return
         try:
-            ohbot.move(ohbot.HEADTURN, 5)
-            ohbot.say(WITHHOLD_LINE, untilDone=True, lipSync=True)
+            bot.move(bot.HEADTURN, 5)
+            bot.say(WITHHOLD_LINE, untilDone=True, lipSync=True)
         except Exception as exc:
             print(f"[ohbot] withhold failed: {exc}")
 
@@ -148,13 +169,14 @@ def deliver_reminder_spoken(text: str) -> None:
         print("[ohbot] NO_OHBOT=1; speaking via OS TTS instead.")
         _speak_fallback(msg)
         return
+    bot = load_ohbot()
     with ohbot_lock:
         if shutting_down.is_set():
             return
         try:
-            ohbot.move(ohbot.HEADTURN, 5)
-            ohbot.move(ohbot.HEADNOD, 5)
-            ohbot.say(msg, untilDone=True, lipSync=True)
+            bot.move(bot.HEADTURN, 5)
+            bot.move(bot.HEADNOD, 5)
+            bot.say(msg, untilDone=True, lipSync=True)
         except Exception as exc:
             print(f"[ohbot] reminder disclose failed: {exc}")
 

@@ -6,4 +6,5 @@
   - ``policy``      - Bangle.js BLE client + consent memory store
   - ``owner``       - enrolled-owner template store (face or voice)
   - ``robot_io``    - Ohbot glue + reminder speech + averaged bystander id
+  - ``head_scan``   - head sweep: look around the room before disclosing
 """

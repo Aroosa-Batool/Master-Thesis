@@ -557,6 +557,11 @@ macOS uses `say`; Linux uses `espeak`.
 | `OHBOT_PORT` | `Pico` | Serial-port hint passed to `ohbot.init`. |
 | `NO_OHBOT` | Unset | Set to `1` to skip Ohbot initialization and use OS TTS. |
 | `VOICE_INPUT_DEVICE` | PortAudio default | Numeric input-device index or case-insensitive substring of the device name. |
+| `CAMERA_DEVICE` | First external camera, else index 0 | Numeric capture index or case-insensitive substring of the camera name. The default selects the USB webcam mounted on the robot's head, skipping the built-in and any phone Continuity Camera. |
+| `CAMERA_RES` | Camera default | Requested capture resolution as `WIDTHxHEIGHT` (for example `1280x720`). |
+| `HEAD_SCAN` | Enabled | Set to `0` to disable the head sweep performed before a sensitive delivery. Implicitly disabled under `NO_OHBOT=1`. |
+| `HEAD_SCAN_POSITIONS` | `2,5,8` | Comma-separated Ohbot `HEADTURN` positions (0–10, 5 = straight ahead) visited during the sweep. |
+| `HEAD_SCAN_SETTLE_S` | `0.9` | Seconds allowed for the head to stop moving before a frame from that position is used. |
 
 ### 13.2 Key camera and policy constants
 
@@ -734,7 +739,12 @@ This is a GDPR-informed research design, not a claim of legal compliance.
 | BLE disconnect during prompt | Pending consent resolves as no decision; it is not cached. |
 | Consent timeout | Private content is not spoken; no consent value is cached. |
 | Watch `notify(...)` write failure | Error is logged; no retry or acknowledgement exists. |
-| Camera cannot open | Application exits with guidance to close other camera users. |
+| Camera cannot open | Application exits with guidance to close other camera users, a list of the cameras found, and the `CAMERA_DEVICE` override. |
+| Camera opens but never delivers a frame | Application exits after a 5-second warm-up window instead of spinning silently on failed reads. |
+| Camera delivers all-black frames | Startup warns (lens cover / privacy shutter) and continues; no face can be detected in a black frame. |
+| Head sweep gets no frame at a position | That position is logged and skipped; the delivery proceeds on the positions that did return a view. |
+| Head move fails mid-sweep | The error is printed and the sweep continues; the head is returned to centre in a `finally` block. |
+| Quit pressed during a sweep | The sweep aborts at the next position boundary and the delivery worker unwinds. |
 | Microphone default is invalid | The shared selector uses `VOICE_INPUT_DEVICE`, then a valid default, then the first input device. |
 | Face model download fails | Application exits and prints the expected manual destination. |
 | Owner template missing | Corresponding demo exits and requests enrollment. |
@@ -771,6 +781,15 @@ Python process after making the watch available.
 
 - Close Zoom, Teams, browsers, or other camera applications.
 - Grant camera permission to the terminal or IDE.
+- Run `python -m robot.apps.list_cameras` to see the cameras found and which one
+  the apps will select, and `--preview <index>` to confirm it visually.
+- Set `CAMERA_DEVICE` to an index or name substring to pin a specific camera.
+
+### The wrong camera is used, or the preview is black
+
+- The apps prefer the external (head-mounted) webcam; check the USB cable if the
+  listing does not show it.
+- An all-black preview usually means the lens cover or privacy shutter is closed.
 
 ### Microphone does not open
 
