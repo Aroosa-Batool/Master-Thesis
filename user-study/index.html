@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Anonymous master's-thesis questionnaire about microphone and camera sensing in a privacy-aware social robot.">
+  <title>Robot Sensor Comfort Study</title>
+  <link rel="stylesheet" href="study.css">
+  <script src="study-config.js" defer></script>
+  <script src="study.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#study-form">Skip to questionnaire</a>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="kicker">MASTER'S THESIS · USER STUDY</p>
+      <h1 data-config="title">How should a privacy-aware robot sense who is nearby?</h1>
+      <p class="lede">Compare three ways a desktop social robot could use a microphone and camera before delivering a sensitive reminder.</p>
+      <div class="hero-meta" aria-label="Study summary">
+        <span>About <strong data-config="estimatedMinutes">8–10</strong> minutes</span>
+        <span>Ages <strong data-config="minimumAge">18</strong>+</span>
+        <span>No names requested</span>
+      </div>
+    </div>
+    <img src="assets/condition-mic-then-camera.png" alt="Illustration of a desktop robot using a microphone first and a camera second" width="1448" height="1086">
+  </header>
+
+  <main>
+    <noscript><div class="notice error">This questionnaire needs JavaScript to randomize the conditions and prepare the response file.</div></noscript>
+    <div id="setup-warning" class="notice warning" hidden>
+      <strong>Researcher setup is incomplete.</strong> Replace every bracketed field in <code>study-config.js</code> and obtain the required ethics approval before distributing this form.
+    </div>
+
+    <div class="progress-shell" aria-live="polite">
+      <div>
+        <strong>Questionnaire progress</strong>
+        <span id="progress-label">0% complete</span>
+      </div>
+      <progress id="progress" max="100" value="0">0%</progress>
+    </div>
+
+    <form id="study-form">
+      <section class="card prose" aria-labelledby="information-title">
+        <p class="section-number">01</p>
+        <h2 id="information-title">Participant information</h2>
+        <p><strong>Purpose.</strong> This study examines how people feel about microphone and camera sensing in a privacy-aware reminder robot. You will read one shared scenario, view three illustrations, and rate each approach.</p>
+        <p><strong>What happens.</strong> The three conditions contain the same reminder and watch-mediated consent behavior. Only the method used to detect a nearby person changes. The order of the conditions is randomized.</p>
+        <p><strong>Possible discomfort.</strong> Some questions concern privacy, sensing, and biometric recognition. You may stop before sending or returning your response, without giving a reason.</p>
+        <p><strong>Data handling.</strong> The form does not ask for your name, email address, exact age, or reminder content. Do not include identifying, health, or financial details in free-text answers. <span id="collection-description">By default, this page does not transmit responses; it prepares a file for you to return through the researcher's approved method.</span></p>
+        <dl class="contact-grid">
+          <div><dt>Institution</dt><dd data-config="institution">[REPLACE: institution]</dd></div>
+          <div><dt>Researcher</dt><dd data-config="researcher">[REPLACE: researcher name]</dd></div>
+          <div><dt>Contact</dt><dd data-config="contact">[REPLACE: university email]</dd></div>
+          <div><dt>Supervisor</dt><dd data-config="supervisor">[REPLACE: supervisor name and email]</dd></div>
+          <div><dt>Ethics reference</dt><dd data-config="ethicsReference">[REPLACE: ethics approval/reference or approved wording]</dd></div>
+        </dl>
+      </section>
+
+      <fieldset class="card consent-card">
+        <legend><span class="section-number">02</span> Consent</legend>
+        <label class="check"><input type="checkbox" name="consent_age" required> I confirm that I am at least <span data-config="minimumAge">18</span> years old.</label>
+        <label class="check"><input type="checkbox" name="consent_information" required> I have read the information above and understand what participation involves.</label>
+        <label class="check"><input type="checkbox" name="consent_voluntary" required> I understand that participation is voluntary and that I may stop before returning or submitting my response.</label>
+        <label class="check"><input type="checkbox" name="consent_participate" required> I freely agree to take part in this study.</label>
+      </fieldset>
+
+      <section class="card prose" aria-labelledby="scenario-title">
+        <p class="section-number">03</p>
+        <h2 id="scenario-title">Shared scenario</h2>
+        <div class="scenario">
+          <p>Imagine that you own a small desktop social robot and wear its connected smartwatch. The robot is about to deliver a <strong>sensitive reminder</strong> while another person might be nearby.</p>
+          <p>Before speaking, the robot checks whether a bystander is present. If it detects one, it privately asks on your watch whether the reminder may be spoken aloud. If you say no or do not answer, the reminder appears privately on your watch.</p>
+          <p>In every condition, sensing is processed locally and raw audio and video are not retained. For this scenario, the robot stores a compact face or voice representation and your previous yes/no choice locally so it can recognize a returning bystander and reuse your choice. Sensor status is visible.</p>
+        </div>
+        <label class="check"><input type="checkbox" name="scenario_understood" required> I understand that the consent behavior and local data handling are the same in all three conditions; only the sensing method changes.</label>
+        <p class="image-note">The images are standardized AI-generated illustrations of hypothetical conditions, not photographs of a real participant or actual sensor recordings.</p>
+      </section>
+
+      <section aria-labelledby="conditions-title">
+        <div class="section-heading">
+          <div><p class="section-number">04</p><h2 id="conditions-title">Rate the three sensing approaches</h2></div>
+          <p>Condition order is randomized for each participant.</p>
+        </div>
+        <div id="condition-list"></div>
+      </section>
+
+      <fieldset class="card" id="comparison-section">
+        <legend><span class="section-number">05</span> Compare the approaches</legend>
+
+        <div class="question-block">
+          <span class="question-label">Which approach would you most prefer for this robot? <span aria-hidden="true">*</span></span>
+          <div class="choice-grid" role="radiogroup" aria-label="Most preferred approach">
+            <label><input type="radio" name="overall_preferred" value="microphone" required> Microphone only</label>
+            <label><input type="radio" name="overall_preferred" value="camera" required> Camera only</label>
+            <label><input type="radio" name="overall_preferred" value="sequential" required> Microphone, then camera if needed</label>
+            <label><input type="radio" name="overall_preferred" value="none" required> None of these</label>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <span class="question-label">Which approach would you least prefer? <span aria-hidden="true">*</span></span>
+          <div class="choice-grid" role="radiogroup" aria-label="Least preferred approach">
+            <label><input type="radio" name="overall_least_preferred" value="microphone" required> Microphone only</label>
+            <label><input type="radio" name="overall_least_preferred" value="camera" required> Camera only</label>
+            <label><input type="radio" name="overall_least_preferred" value="sequential" required> Microphone, then camera if needed</label>
+            <label><input type="radio" name="overall_least_preferred" value="none" required> No least preference</label>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <label for="preference-reason"><span class="question-label">What is the main reason for your preference?</span></label>
+          <textarea id="preference-reason" name="overall_preference_reason" maxlength="1200" rows="4" placeholder="Optional. Please do not include names or sensitive personal details."></textarea>
+        </div>
+
+        <div class="question-block">
+          <span class="question-label">When the same bystander returns, what should the robot do with your earlier yes/no choice? <span aria-hidden="true">*</span></span>
+          <div class="choice-grid" role="radiogroup" aria-label="Preference for remembered consent">
+            <label><input type="radio" name="policy_preference" value="reask" required> Ask me every time</label>
+            <label><input type="radio" name="policy_preference" value="remember" required> Reuse my choice until I change it</label>
+            <label><input type="radio" name="policy_preference" value="expire" required> Reuse it for a limited time</label>
+            <label><input type="radio" name="policy_preference" value="context" required> It depends on the person or context</label>
+            <label><input type="radio" name="policy_preference" value="unsure" required> Unsure</label>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <label for="retention-preference"><span class="question-label">If a choice is remembered, when should it expire? <span aria-hidden="true">*</span></span></label>
+          <select id="retention-preference" name="retention_preference" required>
+            <option value="">Select one</option>
+            <option value="session">At the end of the current session</option>
+            <option value="day">After one day</option>
+            <option value="week">After one week</option>
+            <option value="month">After one month</option>
+            <option value="manual">Only when I change or delete it</option>
+            <option value="never_store">It should never be stored</option>
+            <option value="unsure">Unsure</option>
+          </select>
+        </div>
+
+        <div class="question-block">
+          <span class="question-label">A visible light showing which sensor is active would make me more comfortable. <span aria-hidden="true">*</span></span>
+          <div class="inline-scale" role="radiogroup" aria-label="Status light agreement">
+            <span>Strongly disagree</span>
+            <div class="scale-options" data-radio-group="status_light_helpful"></div>
+            <span>Strongly agree</span>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <label for="design-change"><span class="question-label">What one change would make you feel safer or more comfortable?</span></label>
+          <textarea id="design-change" name="overall_design_change" maxlength="1200" rows="4" placeholder="Optional. Please do not include names or sensitive personal details."></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset class="card">
+        <legend><span class="section-number">06</span> About your experience</legend>
+        <p class="muted">These broad questions help describe the sample. “Prefer not to say” is always available.</p>
+
+        <div class="form-grid">
+          <label>Age range
+            <select name="dem_age_band" required>
+              <option value="">Select one</option>
+              <option value="18_24">18–24</option>
+              <option value="25_34">25–34</option>
+              <option value="35_44">35–44</option>
+              <option value="45_54">45–54</option>
+              <option value="55_64">55–64</option>
+              <option value="65_plus">65+</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </label>
+          <label>How often do you use voice assistants or smart speakers?
+            <select name="dem_voice_assistant_use" required>
+              <option value="">Select one</option>
+              <option value="never">Never</option>
+              <option value="less_monthly">Less than monthly</option>
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="daily">Daily</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </label>
+          <label>How often do you use a webcam for calls or meetings?
+            <select name="dem_webcam_use" required>
+              <option value="">Select one</option>
+              <option value="never">Never</option>
+              <option value="less_monthly">Less than monthly</option>
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="daily">Daily</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </label>
+          <label>Prior experience with a social robot
+            <select name="dem_robot_experience" required>
+              <option value="">Select one</option>
+              <option value="none">None</option>
+              <option value="seen_demo">Seen one in a video or demonstration</option>
+              <option value="brief">Interacted once or twice</option>
+              <option value="regular">Regular interaction</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <section class="card finish-card">
+        <p class="section-number">07</p>
+        <h2>Review and prepare your response</h2>
+        <p>Your random participant code is <strong id="participant-code">Generating…</strong>. It is created in this browser and is not based on your identity.</p>
+        <p id="submit-explanation">Selecting the button below validates the required answers and prepares a response file. It does not send anything automatically.</p>
+        <button id="submit-button" class="button primary" type="submit">Prepare coded response</button>
+        <button id="reset-button" class="button secondary" type="button">Clear this form</button>
+        <p id="form-error" class="form-error" role="alert" hidden>Please complete the highlighted required question(s).</p>
+      </section>
+    </form>
+
+    <section id="completion" class="card completion" tabindex="-1" hidden>
+      <p class="section-number">RESPONSE READY</p>
+      <h2>Thank you</h2>
+      <p id="completion-message">Your coded response has not left this browser. Download one of the files below and return it using the method provided by the researcher.</p>
+      <div class="button-row">
+        <button id="download-json" class="button primary" type="button">Download JSON response</button>
+        <button id="download-csv" class="button secondary" type="button">Download CSV response</button>
+        <button id="print-response" class="button secondary" type="button">Print / save as PDF</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong data-config="institution">[REPLACE: institution]</strong> · <span data-config="contact">[REPLACE: university email]</span></p>
+    <p>This research form is separate from the robot's live sensing software.</p>
+  </footer>
+</body>
+</html>

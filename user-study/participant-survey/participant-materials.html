@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>How should a reminder robot sense who is nearby?</title>
+  <link rel="stylesheet" href="survey.css">
+  <script>window.SURVEY_MATERIALS_MODE = true;</script>
+  <script src="config.js" defer></script>
+  <script src="survey.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#page">Skip to survey</a>
+  <header><div class="brand">OHBOT + BANGLE.JS <span>Master’s thesis study</span></div></header>
+  <main>
+    <div id="setup" class="notice" hidden></div>
+    <div class="progress-row"><span id="step-label">Participant information</span><span id="step-count"></span></div>
+    <progress id="progress" max="10" value="0" aria-label="Survey progress"></progress>
+    <form id="survey" novalidate>
+      <section id="page" tabindex="-1" aria-labelledby="page-title"></section>
+      <p id="error" class="error" role="alert" hidden></p>
+      <nav id="navigation" aria-label="Survey navigation">
+        <button id="back" type="button" class="secondary">Back</button>
+        <button id="next" type="submit">Continue</button>
+      </nav>
+    </form>
+    <button id="withdraw" type="button" class="text-button" hidden>Withdraw and clear my answers</button>
+    <noscript><p class="notice">Please enable JavaScript to view the stories and answer this survey.</p></noscript>
+  </main>
+  <footer>This survey does not activate your microphone, camera or smartwatch.</footer>
+</body>
+</html>

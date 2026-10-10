@@ -1,0 +1,192 @@
+[
+  [
+    "Privacy-aware\nrobot reminders",
+    "Watch-mediated consent\nMaster\u2019s thesis midterm",
+    [
+      "Aroosa Batool"
+    ],
+    0.5,
+    "My thesis explores how a social robot can deliver a useful reminder without revealing private information to people nearby. I use an Ohbot, a Bangle.js watch and local sensing. Today I will show the prototype, component measurements and the study I am preparing.",
+    "README.md"
+  ],
+  [
+    "The privacy problem",
+    "A reminder changes meaning when someone else can hear it",
+    [
+      "\u201cYour doctor\u2019s appointment is at 3 PM.\u201d",
+      "Helpful when alone. Potentially revealing with a visitor.",
+      "The robot needs to choose public or private delivery.",
+      "The wearer makes the disclosure decision on the watch."
+    ],
+    1.5,
+    "Use the appointment example throughout. Detection alone cannot determine whether sharing is socially acceptable. The watch lets the wearer respond discreetly and receive the reminder privately. Do not claim perfect privacy or visitor consent to recognition. Transition to the research questions.",
+    "README.md; docs/design_hld.md"
+  ],
+  [
+    "Research questions",
+    "Proposed questions for the current thesis scope",
+    [
+      "RQ1: How can a robot coordinate sensing and private consent?",
+      "RQ2: How acceptable are microphone, camera and fallback packages?",
+      "RQ3: When do users prefer memory or fresh consent?"
+    ],
+    1.25,
+    "RQ1 addresses the architecture. RQ2 is the main empirical question in the revised story survey. RQ3 currently addresses stated preferences, since the main study does not manipulate memory. These are proposed questions, not completed findings. Contribution at midterm: an end-to-end prototype and a clearly scoped evaluation design.",
+    "README.md; user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "System components",
+    "Ohbot and Bangle.js communicate through a Python host",
+    [
+      "Ohbot: spoken reminder or neutral greeting over USB.",
+      "Bangle.js: private Yes/No prompt and reminder over BLE.",
+      "Python: scheduling, sensitivity, recognition and policy.",
+      "Camera and microphone: estimate bystander presence."
+    ],
+    2.25,
+    "The laptop coordinates reminder scheduling, sensitivity classification and presence sensing. It sends a consent request to the watch and commands the robot. BLE connectivity is a coarse owner-presence proxy, not proof of wearing or room location. Core presence processing is local. The watch provides both consent input and private delivery.",
+    "README.md; docs/technical_hld.md"
+  ],
+  [
+    "Reminder delivery policy",
+    "Sensitivity and social context determine the delivery path",
+    [
+      "Non-sensitive: speak at the scheduled time.",
+      "Sensitive, no detected bystander: allow spoken delivery.",
+      "Bystander detected: request or retrieve a watch decision.",
+      "Yes: speak. No or no reply: deliver privately to the watch."
+    ],
+    2.25,
+    "Walk through the four cases. Unanswered prompts never become remembered preferences. A refusal produces a neutral greeting and a watch note. The unified app withholds sensitive speech when sensing is inconclusive. Legacy fusion paths differ, so scope this safety behavior to the unified app. Recognition and sensitivity errors remain risks.",
+    "README.md; user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Sensing packages",
+    "Coverage and sensing burden differ across packages",
+    [
+      "Microphone: detects visitors who speak while listening.",
+      "Camera: detects visible faces, including silent visitors.",
+      "Fallback: microphone first, camera after an audio miss.",
+      "Face and voice identities remain separate."
+    ],
+    1.5,
+    "A silent visitor can evade microphone detection. A camera has a limited field of view. Fusion escalates after no non-owner voice is detected, including the owner-alone case. It does not guarantee less sensing in every situation. Current packages also differ in activation duration and head movement, so the study estimates perceptions of complete packages.",
+    "README.md; user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Consent memory",
+    "Remembered choices reduce prompts but may become stale",
+    [
+      "Remember: reuse a recognized bystander\u2019s explicit Yes/No.",
+      "Re-ask: request a fresh decision each time.",
+      "Both policies retain recognition galleries.",
+      "Expiry, topic-specific consent and watch editing are proposed."
+    ],
+    1.25,
+    "Memory exists in camera, microphone and fusion apps. Re-ask stores no disclosure decisions but still retains recognition galleries. Apps use a broad reminder key, so an answer can transfer across topics. Current revocation requires clearing local state. The trade-off is convenience versus outdated preferences. Revised survey memory items measure preference, not a causal treatment effect.",
+    "README.md; user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Prototype progress",
+    "The repository contains the full delivery workflow",
+    [
+      "Implemented: reminder capture, scheduling and sensitivity.",
+      "Implemented: enrollment, sensing and watch consent.",
+      "Implemented: standalone and fused engines with both policies.",
+      "Prepared: presentation UI, benchmarks and survey materials."
+    ],
+    1.25,
+    "This is the progress checkpoint. The repository contains integrated delivery paths, a local presentation workstation, evaluation capture tools and revised survey preparation materials. Code availability does not prove real-world recognition accuracy, trust or confirmed private receipt. No participant findings are claimed today. The next slide contains actual bundled component measurements.",
+    "README.md; robot/bench/results"
+  ],
+  [
+    "Early technical measurements",
+    "Bundled CPU measurements support further testing",
+    [
+      "YuNet detection: 5.15 ms median per 640\u00d7480 frame.",
+      "SFace recognition: 7.33 ms per 112\u00d7112 face crop.",
+      "Resemblyzer: 23.74 ms per 6-second utterance.",
+      "Accuracy and end-to-end delay remain to measure."
+    ],
+    1.5,
+    "Explain input sizes and units. Component latency is not total response time and excludes acquisition windows and user interaction. Do not rank face and voice models by these unlike units. Bundled ArcFace is 81.01 ms per crop and ECAPA is 31.28 ms per six-second utterance. Faster computation does not prove better identification. Labeled capture and false-match evaluation remain necessary.",
+    "robot/bench/results/camera_results.md; robot/bench/results/voice_results.md"
+  ],
+  [
+    "Main study design",
+    "Six matched stories compare three sensing packages",
+    [
+      "Each person sees 2 microphone, 2 camera and 2 fallback stories.",
+      "Three topics crossed with friend/home and colleague/office.",
+      "Each package has one Yes/aloud and one No/private outcome.",
+      "Allocation and story order rotate across 36 cells."
+    ],
+    1.75,
+    "The revised design is dated October 4. Six stories cross health, financial and personal topics with two relationship/settings. Each participant sees a story once, while sensing versions rotate between participants. Three allocations, two response schedules and six balanced orders yield 36 cells. This is not the sample size. Main visitors are detected in every package, enabling matched outcomes.",
+    "user-study/story-survey-v2/README.md; research-design.md"
+  ],
+  [
+    "Outcomes and analysis",
+    "Acceptability is the primary outcome",
+    [
+      "Primary: Q10 acceptability, fallback versus each single sensor.",
+      "Secondary: privacy, trust, sensing comfort and control.",
+      "Planned: ordinal mixed model for repeated participant ratings.",
+      "Power simulation and a cognitive pilot precede recruitment."
+    ],
+    1.5,
+    "Plan two primary contrasts with Holm correction. Account for participant dependence, base story, response schedule, actual outcome and presentation position. Core questions are adaptations or new items, not a validated scale. Optional RoSAS or MDMT modules would add burden. Participant N is the sampling unit. Sample size and survey duration require simulation and pilot evidence.",
+    "user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Study interpretation",
+    "The main outcome concerns described sensing packages",
+    [
+      "Main visitors speak, so the fallback camera stays inactive.",
+      "Timing and head movement differ between packages.",
+      "The no-sensor story changes policy and is exploratory.",
+      "Memory questions measure preference, not treatment effects."
+    ],
+    1.25,
+    "Primary fallback stories do not test experiencing camera activation. Camera-only has a continuous session preview. Microphone has a scheduled five-minute window. The audit finds that fusion camera capture may fill the remaining interval, so do not describe every scan as brief. The no-sensor story is private-only and appears last. Hypothetical judgments cannot establish live behavior or visitor experience.",
+    "user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Remaining work",
+    "Proposed sequence for the second half of the thesis",
+    [
+      "1. Freeze behavior, stimuli and approved study information.",
+      "2. Pilot comprehension and burden, then finalize power.",
+      "3. Recruit, collect ratings and test recognition robustness.",
+      "4. Analyze effects and limitations, then complete the thesis."
+    ],
+    1.5,
+    "Present a sequence rather than invented dates. Complete institutional, ethics, storage, retention and withdrawal details. Pilot active-sensor and consent comprehension. Technical tests need labeled data, silent visitors, off-camera visitors, false matches and failure paths. Freeze the analysis before collection. Ask whether the current package comparison is sufficient or a distinct live fallback evaluation should be prioritized.",
+    "user-study/story-survey-v2/README.md; docs/algorithm_comparison.md"
+  ],
+  [
+    "Midterm takeaway",
+    "The prototype is implemented. Human evaluation is next.",
+    [
+      "The watch provides private consent and delivery.",
+      "Early latency measurements support component feasibility.",
+      "The revised study separates sensing from memory preferences.",
+      "Feedback: retain this scope or add live fallback evaluation?"
+    ],
+    0.75,
+    "Close: the system implements a concrete privacy-aware reminder workflow. Early measurements address feasibility. The next phase addresses acceptability and recognition robustness. Request feedback on the package-comparison scope and whether a separate live fallback test is needed. Pause for questions.",
+    "README.md; user-study/story-survey-v2/research-design.md"
+  ],
+  [
+    "Discussion",
+    "Thank you",
+    [
+      "Study scope and fallback evaluation",
+      "Consent expiry and changing social context",
+      "Recognition robustness and sensing permissions"
+    ],
+    0,
+    "Outside the 20-minute speaking budget. Likely answers: BLE does not prove room presence. Re-ask does not delete recognition galleries. Consent expiry is proposed. The survey does not establish live behavior. Silent visitors can evade microphone detection and trigger camera fallback. No participant results are available in these materials.",
+    "user-study/story-survey-v2/research-design.md"
+  ]
+]

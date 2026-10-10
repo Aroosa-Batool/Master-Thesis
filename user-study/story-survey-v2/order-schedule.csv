@@ -1,0 +1,7 @@
+order_id,position_1,position_2,position_3,position_4,position_5,position_6
+W1,S1,S2,S6,S3,S5,S4
+W2,S2,S3,S1,S4,S6,S5
+W3,S3,S4,S2,S5,S1,S6
+W4,S4,S5,S3,S6,S2,S1
+W5,S5,S6,S4,S1,S3,S2
+W6,S6,S1,S5,S2,S4,S3

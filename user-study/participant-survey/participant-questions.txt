@@ -1,0 +1,2216 @@
+How should a reminder robot sense who is nearby?
+
+  Skip to survey
+  OHBOT + BANGLE.JS Master’s thesis study
+
+Please complete the participant information and consent supplied separately by the researcher before answering. Choose one option per question unless indicated otherwise. All opinion and experience questions are optional.
+
+Meet the robot and watch
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+Ohbot is a small desktop robot head connected to a computer. It delivers reminders scheduled beforehand, including sensitive appointments or payments. An external camera and a microphone can help the computer recognize whether another person is nearby. Ohbot’s eyes are not camera lenses.
+
+Bangle.js displays private permission questions and reminder messages. A wrist display reduces public exposure, although someone looking at it could still read it. The watch connection is an approximate sign that the wearer is nearby, not proof of the exact room or that the watch is being worn. This reminder app does not use unrelated health or GPS data from the watch.
+
+Three different decisions
+
+Sensor access: permitting the microphone, camera, both or neither. This does not permit aloud disclosure.
+
+Aloud disclosure: when another person is detected, the watch asks whether a sensitive reminder may be spoken. Yes permits speech; No withholds the content from speech and sends a private watch note.
+
+Remembering: permitting a previous Yes or No to be stored and reused. The main stories ask each time and do not reuse an earlier answer.
+
+The current watch app handles disclosure questions and private notes. Sensor and memory settings are configured on the computer; putting these setup choices on the watch is a proposed extension. Assume the sensing setup in each story was explicitly allowed before the scene.
+
+The sensing approaches
+
+Microphone only
+
+The system listens for non-owner voices. With the unified app’s defaults it records continuously for five minutes, from seven to two minutes before a sensitive reminder. A silent visitor, or someone arriving after listening ends, may be missed. The camera is not used.
+
+Camera only
+
+In the current camera-only application the camera stays open during the running session, with a head scan used for reminder checks. It may miss a face outside its view, hidden from it or incorrectly recognized. The microphone is not used for presence sensing.
+
+Microphone first, camera fallback
+
+The microphone listens first. When a non-owner voice is detected, the camera is not activated. Otherwise, the microphone closes and the camera scans. With the unified app’s defaults this can continue for about two minutes until just before delivery. Both sensors are permitted but never active simultaneously.
+
+These approaches have different activation durations. Detection can be wrong. If no visitor is detected, the system can speak a sensitive reminder without a disclosure question. A No or no reply withholds sensitive speech and attempts watch delivery. If the watch is disconnected, that private delivery is not guaranteed. All stories assume a working watch connection.
+
+What is stored?
+
+The presence pipeline processes audio and frames on the computer. Raw presence recordings and frames are temporary during ordinary reminder delivery. Numerical face and voice recognition representations are saved locally to recognize owners and visitors later. These are identifying data, even though they are not replayable recordings.
+
+Even the repeated-question mode can retain recognition representations. Reminder text and timing are saved. Remembering mode also saves explicit disclosure answers. Logs can include reminder content, person IDs and decisions. The code does not establish an automatic deletion period for all these files. A separate evaluation-data mode intentionally saves raw images or voice clips; it is outside these ordinary reminder stories.
+
+Before the stories
+
+Imagine you are Alex, the watch wearer. Judge the described behavior. Opinion questions have no right or wrong answers, and may be skipped.
+
+Does permitting microphone access automatically permit sensitive reminders to be spoken around other people?
+Yes
+
+No
+
+Not sure
+
+Which statement is correct?
+No recordings means no identifying data are stored
+
+Numerical face or voice representations can still be stored
+
+The robot reads unrelated health data from the watch
+
+Not sure
+
+Story 1 of 6 · Microphone only
+Appointment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s living roomPeopleAlex and Sam, a close friend visiting for tea
+      
+Context: Alex scheduled a sensitive reminder: “your mental-health appointment at 3 PM today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Microphone only. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Would you like some tea?” Alex replies, “Yes, thanks.” Sam’s face is visible to the robot if the camera is used.
+
+The microphone listens during the five-minute window before the reminder. Sam’s voice is detected. The camera is not used.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps No.
+
+Ohbot says only “Hello there.” The connected watch displays “Reminder: your mental-health appointment at 3 PM today” as a private note. Sam does not hear the reminder content.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Story 2 of 6 · Camera only
+Appointment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s desk in a shared officePeopleAlex and Sam, a colleague Alex knows through work
+      
+Context: Alex scheduled a sensitive reminder: “your mental-health appointment at 3 PM today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Camera only. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Shall we look at the task after this?” Alex replies, “Yes, in a moment.” Sam’s face is visible to the robot if the camera is used.
+
+The camera is open during this session. At the reminder check, the robot turns its head and the camera detects Sam’s face. The microphone is not used for presence sensing.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps Yes.
+
+Ohbot says “Here is your reminder for your mental-health appointment at 3 PM today.” Sam hears the reminder content. A private note is not used for this delivery.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Story 3 of 6 · Microphone first, camera fallback
+Personal appointment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s desk in a shared officePeopleAlex and Sam, a colleague Alex knows through work
+      
+Context: Alex scheduled a sensitive reminder: “your confidential job interview at 4 PM today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Microphone and camera. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Shall we look at the task after this?” Alex replies, “Yes, in a moment.” Sam’s face is visible to the robot if the camera is used.
+
+The microphone listens during the five-minute window before the reminder. Sam’s voice is detected, so the camera is not activated.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps Yes.
+
+Ohbot says “Here is your reminder for your confidential job interview at 4 PM today.” Sam hears the reminder content. A private note is not used for this delivery.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Story 4 of 6 · Microphone first, camera fallback
+Payment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s living roomPeopleAlex and Sam, a close friend visiting for tea
+      
+Context: Alex scheduled a sensitive reminder: “your overdue loan payment due today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Microphone and camera. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Would you like some tea?” Alex replies, “Yes, thanks.” Sam’s face is visible to the robot if the camera is used.
+
+The microphone listens during the five-minute window before the reminder. Sam’s voice is detected, so the camera is not activated.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps No.
+
+Ohbot says only “Hello there.” The connected watch displays “Reminder: your overdue loan payment due today” as a private note. Sam does not hear the reminder content.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Story 5 of 6 · Camera only
+Personal appointment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s living roomPeopleAlex and Sam, a close friend visiting for tea
+      
+Context: Alex scheduled a sensitive reminder: “your confidential job interview at 4 PM today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Camera only. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Would you like some tea?” Alex replies, “Yes, thanks.” Sam’s face is visible to the robot if the camera is used.
+
+The camera is open during this session. At the reminder check, the robot turns its head and the camera detects Sam’s face. The microphone is not used for presence sensing.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps No.
+
+Ohbot says only “Hello there.” The connected watch displays “Reminder: your confidential job interview at 4 PM today” as a private note. Sam does not hear the reminder content.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Story 6 of 6 · Microphone only
+Payment
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+      LocationAlex’s desk in a shared officePeopleAlex and Sam, a colleague Alex knows through work
+      
+Context: Alex scheduled a sensitive reminder: “your overdue loan payment due today”. Sam remains nearby throughout sensing and delivery.
+
+Previously allowed sensing: Microphone only. Disclosure policy: ask each time a visitor is detected; do not remember disclosure answers.
+
+1. Conversation and sensing
+
+During the pre-reminder interval, Sam says, “Shall we look at the task after this?” Alex replies, “Yes, in a moment.” Sam’s face is visible to the robot if the camera is used.
+
+The microphone listens during the five-minute window before the reminder. Sam’s voice is detected. The camera is not used.
+
+2. Private watch question
+
+Robot asks: “I have noticed that someone is present with you. Do you want me to send private reminders in front of them?”
+
+Watch buttons: Yes / No. Here, “send … in front of them” means speaking aloud.
+
+3. Alex’s response and delivery
+
+Alex taps Yes.
+
+Ohbot says “Here is your reminder for your overdue loan payment due today.” Sam hears the reminder content. A private note is not used for this delivery.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby while the sensors described in this story are active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+Proposed comparison · Neither sensor
+A private-only approach
+
+Hypothetical AI-generated scene. Read the captions for sensing state, watch messages and delivery outcome.
+
+This is a proposed design, not a mode implemented in the current reminder app.
+
+      LocationAlex’s living roomPeopleAlex and Sam, a close friend visiting for tea
+      
+Alex scheduled the sensitive reminder “your mental-health appointment at 3 PM today”. Sam says, “Would you like some tea?” and stays nearby.
+
+1. Neither sensor permitted
+
+Alex previously selected no microphone or camera access. Neither sensor operates. The system cannot tell whether Alex is alone.
+
+2. No disclosure question
+
+Every sensitive reminder goes privately to the connected watch. There is no Yes/No disclosure question. The watch gesture in the illustration represents viewing the note.
+
+3. Private delivery
+
+Ohbot says only “Hello there.” The watch displays “Reminder: your mental-health appointment at 3 PM today.” Sam does not hear the reminder content.
+
+This policy gives up automatic aloud delivery of sensitive reminders, even when the wearer is alone.
+
+Your view of this situation
+
+Imagine being Alex. Choose one answer per statement, or leave it unanswered. All seven agreement labels are shown.
+
+This situation could realistically happen in everyday life.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The reminder contains sensitive information.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The robot protected Alex’s privacy in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+The way the robot delivered the reminder was appropriate in this situation.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would trust this robot to handle my sensitive reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable giving this robot sensitive information for reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable being nearby with neither sensor active.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of whether my reminder content was spoken aloud.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel in control of which sensors this system could use.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+This sensing and reminder-delivery approach would be acceptable to me.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be willing to use this approach for my own reminders.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would be concerned about the system storing face or voice recognition representations.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+What did Alex’s decision in this scene permit?
+Speaking the reminder aloud
+
+Delivering it privately without speaking its content
+
+Remembering the answer for future encounters
+
+There was no disclosure decision in this scene
+
+Not sure
+
+Which sensors actually operated for presence sensing?
+Microphone only
+
+Camera only
+
+Microphone then camera
+
+Neither
+
+Not sure
+
+Which approach was allowed in the setup?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+Neither
+
+Not sure
+
+What most influenced your answers? (optional)
+
+Your overall preferences
+
+Think about all the stories. These choices express your opinions; they do not activate sensors or set permissions on a real device.
+
+Which implemented sensing approach did you like most?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+No preference
+
+I would use none of them
+
+Why did you like that approach most?
+
+Which approach did you like least?
+Microphone only
+
+Camera only
+
+Microphone first, camera only if no bystander voice is detected
+
+No preference
+
+I found all unacceptable
+
+Why did you like that approach least?
+
+Which sensor access would you permit?
+Neither
+
+Microphone only
+
+Camera only
+
+Both
+
+Not sure
+
+I would feel comfortable allowing microphone access for the sensing behavior described.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+I would feel comfortable allowing camera access for the sensing behavior described.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+If you permitted both sensors, which activation policy would you prefer?
+Microphone first, camera only if no bystander voice is detected
+
+Camera first, microphone only if needed (proposed alternative)
+
+Both at the same time (proposed alternative)
+
+Let me choose before each reminder
+
+No preference
+
+I would not permit both
+
+Not sure
+
+Why do you prefer that activation policy?
+
+If the visitor stays silent
+
+Suppose Sam stayed silent but was visible. The microphone-first approach would detect no bystander voice, close the microphone and scan with the camera. If the camera detected Sam, the watch would ask about aloud disclosure.
+
+I would prefer this microphone-first/camera-fallback sequence to using the camera for every sensitive reminder.
+1Strongly disagree
+
+2Disagree
+
+3Somewhat disagree
+
+4Neither agree nor disagree
+
+5Somewhat agree
+
+6Agree
+
+7Strongly agree
+
+Cannot judge / prefer not to answer
+
+Would you choose the proposed no-sensor policy, where all sensitive reminders go privately to the watch?
+Yes
+
+No
+
+It depends
+
+Not sure
+
+Why would you choose or reject the no-sensor policy?
+
+Should disclosure decisions be remembered?
+
+This is a separate preference. Ask each time means asking again when a visitor is detected for a sensitive reminder. Remember means reusing an explicit Yes or No when that visitor is recognized.
+
+The current applications use a broad “reminder” key, so an answer can apply to later reminders with different topics. There is no automatic expiry. Face and voice identities are separate, so the same person may prompt again through a different sensor. Recognition can be wrong. These are the wearer’s disclosure decisions, not permission from the visitor.
+
+Which disclosure policy would you prefer?
+Always ask again
+
+Remember only No answers (proposed)
+
+Remember both Yes and No answers
+
+Let me choose for each answer (proposed)
+
+No preference
+
+Not sure
+
+Should a previous Yes ever allow a later sensitive reminder to be spoken without a new question?
+Yes
+
+No
+
+It depends
+
+Not sure
+
+Why?
+
+If remembering is enabled, when should an answer expire?
+After that reminder
+
+At the end of that day
+
+After one week
+
+After one month
+
+Only when I remove it
+
+A duration I choose
+
+Never remember answers
+
+Not sure
+
+Automatic expiry and choosing a duration are proposed controls.
+
+When should the robot ask again despite a saved answer? Choose all that apply.
+Different reminder topic or sensitivity
+
+Different location
+
+Additional people present
+
+Uncertain identity match
+
+A different sensor recognizes the person
+
+A long time since the last encounter
+
+I changed or revoked a preference
+
+Every reminder
+
+Other
+
+Not sure
+
+How important would it be to view, change or delete saved disclosure decisions on the watch?
+1Not at all important
+
+2Slightly important
+
+3Somewhat important
+
+4Moderately important
+
+5Important
+
+6Very important
+
+7Extremely important
+
+Cannot judge / prefer not to answer
+
+Editing saved decisions on the watch is a proposed capability.
+
+What one change would most improve your comfort or trust?
+
+A little about your experience
+
+All questions are optional. We ask for broad categories, not identifying information.
+
+Age band
+Select an answer (optional)18–2425–3435–4445–5455–6465+Prefer not to answer
+      
+Gender
+Select an answer (optional)WomanManNonbinarySelf-describePrefer not to answer
+If you selected self-describe (optional)
+
+Highest completed education
+Select an answer (optional)Secondary school or belowVocational qualificationBachelor’s degreeMaster’s degreeDoctorateOtherPrefer not to answer
+      
+Smartwatch use
+Select an answer (optional)NeverPreviously, but not currentlyLess than weeklyWeeklyDailyPrefer not to answer
+      
+Voice-assistant use
+Select an answer (optional)NeverLess than monthlyMonthlyWeeklyDailyPrefer not to answer
+Camera-based identification use, such as face unlock
+Select an answer (optional)NeverLess than monthlyMonthlyWeeklyDailyPrefer not to answer
+      
+Interaction with a social robot
+Select an answer (optional)NeverOnceA few timesRegularlyPrefer not to answer
+      
+Familiarity with Ohbot
+Select an answer (optional)Never heard of itHeard of it but not used itUsed itPrefer not to answer
+      
+Familiarity with Bangle.js
+Select an answer (optional)Never heard of itHeard of it but not used itUsed itPrefer not to answer
+      
+Technical experience
+Select an answer (optional)NoneBasic everyday useSome programming or electronicsExtensive programming or electronicsPrefer not to answer
+Thank you
+
+The stories are fictional and the pictures are AI-generated. Your answers express opinions about the described research prototype and proposed features.
+
+    Withdraw and clear my answers
+
+  This survey does not activate your microphone, camera or smartwatch.

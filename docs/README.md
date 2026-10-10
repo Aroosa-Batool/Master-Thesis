@@ -13,6 +13,7 @@ implementation details, and thesis evidence. Start with the root
 | [`algorithm_comparison.md`](algorithm_comparison.md) | Literature-backed comparison of the camera and voice algorithms and the measured benchmark results. |
 | [`literature_review.md`](literature_review.md) | Research background, gaps, candidate thesis directions, and research questions. |
 | [`../robot/bench/README.md`](../robot/bench/README.md) | Reproducing latency/memory benchmarks and collecting a labelled evaluation set. |
+| [`../user-study/README.md`](../user-study/README.md) | Draft participant form, matched sensor vignettes, recruitment copy, codebook, and pre-specified analysis plan. |
 
 ## Documentation boundaries
 
@@ -23,6 +24,8 @@ implementation details, and thesis evidence. Start with the root
   calls out deviations in the current prototype.
 - The comparison and literature documents are thesis evidence; they are not
   required to operate the demo.
+- The user-study package is a draft instrument and must receive the required
+  ethics/supervisor approval before distribution.
 
 Runtime identity, consent, and reminder JSON files contain participant-related
 data and are not documentation. See [Runtime data and schemas](codebase_guide.md#7-runtime-data-and-schemas)

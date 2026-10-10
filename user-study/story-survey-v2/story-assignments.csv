@@ -1,0 +1,217 @@
+cell_id,allocation,response_schedule,order_id,position,story_id,condition,approach,active_sensors,topic,relationship,watch_response,delivery,stimulus_id,image
+L1-A-W1,L1,A,W1,1,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-A-W1,L1,A,W1,2,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-A-W1,L1,A,W1,3,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-A-W1,L1,A,W1,4,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-A-W1,L1,A,W1,5,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-A-W1,L1,A,W1,6,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-B-W1,L1,B,W1,1,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L1-B-W1,L1,B,W1,2,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L1-B-W1,L1,B,W1,3,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L1-B-W1,L1,B,W1,4,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L1-B-W1,L1,B,W1,5,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L1-B-W1,L1,B,W1,6,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L2-A-W1,L2,A,W1,1,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-A-W1,L2,A,W1,2,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-A-W1,L2,A,W1,3,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-A-W1,L2,A,W1,4,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-A-W1,L2,A,W1,5,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-A-W1,L2,A,W1,6,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-B-W1,L2,B,W1,1,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L2-B-W1,L2,B,W1,2,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L2-B-W1,L2,B,W1,3,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L2-B-W1,L2,B,W1,4,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L2-B-W1,L2,B,W1,5,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L2-B-W1,L2,B,W1,6,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L3-A-W1,L3,A,W1,1,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-A-W1,L3,A,W1,2,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-A-W1,L3,A,W1,3,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-A-W1,L3,A,W1,4,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-A-W1,L3,A,W1,5,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-A-W1,L3,A,W1,6,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-B-W1,L3,B,W1,1,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L3-B-W1,L3,B,W1,2,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L3-B-W1,L3,B,W1,3,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L3-B-W1,L3,B,W1,4,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png
+L3-B-W1,L3,B,W1,5,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L3-B-W1,L3,B,W1,6,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L1-A-W2,L1,A,W2,1,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-A-W2,L1,A,W2,2,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-A-W2,L1,A,W2,3,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-A-W2,L1,A,W2,4,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-A-W2,L1,A,W2,5,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-A-W2,L1,A,W2,6,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-B-W2,L1,B,W2,1,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L1-B-W2,L1,B,W2,2,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L1-B-W2,L1,B,W2,3,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L1-B-W2,L1,B,W2,4,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L1-B-W2,L1,B,W2,5,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L1-B-W2,L1,B,W2,6,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L2-A-W2,L2,A,W2,1,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-A-W2,L2,A,W2,2,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-A-W2,L2,A,W2,3,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-A-W2,L2,A,W2,4,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-A-W2,L2,A,W2,5,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-A-W2,L2,A,W2,6,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-B-W2,L2,B,W2,1,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L2-B-W2,L2,B,W2,2,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L2-B-W2,L2,B,W2,3,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L2-B-W2,L2,B,W2,4,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L2-B-W2,L2,B,W2,5,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L2-B-W2,L2,B,W2,6,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L3-A-W2,L3,A,W2,1,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-A-W2,L3,A,W2,2,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-A-W2,L3,A,W2,3,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-A-W2,L3,A,W2,4,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-A-W2,L3,A,W2,5,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-A-W2,L3,A,W2,6,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-B-W2,L3,B,W2,1,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L3-B-W2,L3,B,W2,2,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png
+L3-B-W2,L3,B,W2,3,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L3-B-W2,L3,B,W2,4,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L3-B-W2,L3,B,W2,5,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L3-B-W2,L3,B,W2,6,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L1-A-W3,L1,A,W3,1,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-A-W3,L1,A,W3,2,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-A-W3,L1,A,W3,3,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-A-W3,L1,A,W3,4,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-A-W3,L1,A,W3,5,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-A-W3,L1,A,W3,6,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-B-W3,L1,B,W3,1,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L1-B-W3,L1,B,W3,2,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L1-B-W3,L1,B,W3,3,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L1-B-W3,L1,B,W3,4,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L1-B-W3,L1,B,W3,5,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L1-B-W3,L1,B,W3,6,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L2-A-W3,L2,A,W3,1,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-A-W3,L2,A,W3,2,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-A-W3,L2,A,W3,3,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-A-W3,L2,A,W3,4,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-A-W3,L2,A,W3,5,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-A-W3,L2,A,W3,6,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-B-W3,L2,B,W3,1,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L2-B-W3,L2,B,W3,2,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L2-B-W3,L2,B,W3,3,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L2-B-W3,L2,B,W3,4,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L2-B-W3,L2,B,W3,5,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L2-B-W3,L2,B,W3,6,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L3-A-W3,L3,A,W3,1,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-A-W3,L3,A,W3,2,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-A-W3,L3,A,W3,3,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-A-W3,L3,A,W3,4,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-A-W3,L3,A,W3,5,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-A-W3,L3,A,W3,6,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-B-W3,L3,B,W3,1,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png
+L3-B-W3,L3,B,W3,2,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L3-B-W3,L3,B,W3,3,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L3-B-W3,L3,B,W3,4,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L3-B-W3,L3,B,W3,5,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L3-B-W3,L3,B,W3,6,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L1-A-W4,L1,A,W4,1,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-A-W4,L1,A,W4,2,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-A-W4,L1,A,W4,3,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-A-W4,L1,A,W4,4,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-A-W4,L1,A,W4,5,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-A-W4,L1,A,W4,6,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-B-W4,L1,B,W4,1,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L1-B-W4,L1,B,W4,2,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L1-B-W4,L1,B,W4,3,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L1-B-W4,L1,B,W4,4,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L1-B-W4,L1,B,W4,5,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L1-B-W4,L1,B,W4,6,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L2-A-W4,L2,A,W4,1,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-A-W4,L2,A,W4,2,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-A-W4,L2,A,W4,3,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-A-W4,L2,A,W4,4,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-A-W4,L2,A,W4,5,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-A-W4,L2,A,W4,6,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-B-W4,L2,B,W4,1,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L2-B-W4,L2,B,W4,2,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L2-B-W4,L2,B,W4,3,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L2-B-W4,L2,B,W4,4,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L2-B-W4,L2,B,W4,5,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L2-B-W4,L2,B,W4,6,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L3-A-W4,L3,A,W4,1,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-A-W4,L3,A,W4,2,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-A-W4,L3,A,W4,3,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-A-W4,L3,A,W4,4,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-A-W4,L3,A,W4,5,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-A-W4,L3,A,W4,6,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-B-W4,L3,B,W4,1,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L3-B-W4,L3,B,W4,2,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L3-B-W4,L3,B,W4,3,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png
+L3-B-W4,L3,B,W4,4,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L3-B-W4,L3,B,W4,5,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L3-B-W4,L3,B,W4,6,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L1-A-W5,L1,A,W5,1,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-A-W5,L1,A,W5,2,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-A-W5,L1,A,W5,3,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-A-W5,L1,A,W5,4,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-A-W5,L1,A,W5,5,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-A-W5,L1,A,W5,6,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-B-W5,L1,B,W5,1,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L1-B-W5,L1,B,W5,2,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L1-B-W5,L1,B,W5,3,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L1-B-W5,L1,B,W5,4,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L1-B-W5,L1,B,W5,5,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L1-B-W5,L1,B,W5,6,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L2-A-W5,L2,A,W5,1,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-A-W5,L2,A,W5,2,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-A-W5,L2,A,W5,3,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-A-W5,L2,A,W5,4,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-A-W5,L2,A,W5,5,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-A-W5,L2,A,W5,6,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-B-W5,L2,B,W5,1,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L2-B-W5,L2,B,W5,2,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L2-B-W5,L2,B,W5,3,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L2-B-W5,L2,B,W5,4,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L2-B-W5,L2,B,W5,5,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L2-B-W5,L2,B,W5,6,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L3-A-W5,L3,A,W5,1,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-A-W5,L3,A,W5,2,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-A-W5,L3,A,W5,3,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-A-W5,L3,A,W5,4,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-A-W5,L3,A,W5,5,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-A-W5,L3,A,W5,6,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-B-W5,L3,B,W5,1,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L3-B-W5,L3,B,W5,2,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L3-B-W5,L3,B,W5,3,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L3-B-W5,L3,B,W5,4,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L3-B-W5,L3,B,W5,5,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png
+L3-B-W5,L3,B,W5,6,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L1-A-W6,L1,A,W6,1,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,YES,aloud,S6-F-YES,assets/office-triptych.png
+L1-A-W6,L1,A,W6,2,S1,M,Microphone only,microphone,Health appointment,friend,NO,private,S1-M-NO,assets/home-triptych.png
+L1-A-W6,L1,A,W6,3,S5,C,Camera only,camera,Personal appointment,friend,NO,private,S5-C-NO,assets/home-triptych.png
+L1-A-W6,L1,A,W6,4,S2,C,Camera only,camera,Health appointment,colleague,YES,aloud,S2-C-YES,assets/office-triptych.png
+L1-A-W6,L1,A,W6,5,S4,M,Microphone only,microphone,Financial payment,colleague,YES,aloud,S4-M-YES,assets/office-triptych.png
+L1-A-W6,L1,A,W6,6,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,NO,private,S3-F-NO,assets/home-triptych.png
+L1-B-W6,L1,B,W6,1,S6,F,"Microphone first, camera fallback",microphone,Personal appointment,colleague,NO,private,S6-F-NO,assets/office-triptych.png
+L1-B-W6,L1,B,W6,2,S1,M,Microphone only,microphone,Health appointment,friend,YES,aloud,S1-M-YES,assets/home-triptych.png
+L1-B-W6,L1,B,W6,3,S5,C,Camera only,camera,Personal appointment,friend,YES,aloud,S5-C-YES,assets/home-triptych.png
+L1-B-W6,L1,B,W6,4,S2,C,Camera only,camera,Health appointment,colleague,NO,private,S2-C-NO,assets/office-triptych.png
+L1-B-W6,L1,B,W6,5,S4,M,Microphone only,microphone,Financial payment,colleague,NO,private,S4-M-NO,assets/office-triptych.png
+L1-B-W6,L1,B,W6,6,S3,F,"Microphone first, camera fallback",microphone,Financial payment,friend,YES,aloud,S3-F-YES,assets/home-triptych.png
+L2-A-W6,L2,A,W6,1,S6,M,Microphone only,microphone,Personal appointment,colleague,YES,aloud,S6-M-YES,assets/office-triptych.png
+L2-A-W6,L2,A,W6,2,S1,C,Camera only,camera,Health appointment,friend,NO,private,S1-C-NO,assets/home-triptych.png
+L2-A-W6,L2,A,W6,3,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,NO,private,S5-F-NO,assets/home-triptych.png
+L2-A-W6,L2,A,W6,4,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,YES,aloud,S2-F-YES,assets/office-triptych.png
+L2-A-W6,L2,A,W6,5,S4,C,Camera only,camera,Financial payment,colleague,YES,aloud,S4-C-YES,assets/office-triptych.png
+L2-A-W6,L2,A,W6,6,S3,M,Microphone only,microphone,Financial payment,friend,NO,private,S3-M-NO,assets/home-triptych.png
+L2-B-W6,L2,B,W6,1,S6,M,Microphone only,microphone,Personal appointment,colleague,NO,private,S6-M-NO,assets/office-triptych.png
+L2-B-W6,L2,B,W6,2,S1,C,Camera only,camera,Health appointment,friend,YES,aloud,S1-C-YES,assets/home-triptych.png
+L2-B-W6,L2,B,W6,3,S5,F,"Microphone first, camera fallback",microphone,Personal appointment,friend,YES,aloud,S5-F-YES,assets/home-triptych.png
+L2-B-W6,L2,B,W6,4,S2,F,"Microphone first, camera fallback",microphone,Health appointment,colleague,NO,private,S2-F-NO,assets/office-triptych.png
+L2-B-W6,L2,B,W6,5,S4,C,Camera only,camera,Financial payment,colleague,NO,private,S4-C-NO,assets/office-triptych.png
+L2-B-W6,L2,B,W6,6,S3,M,Microphone only,microphone,Financial payment,friend,YES,aloud,S3-M-YES,assets/home-triptych.png
+L3-A-W6,L3,A,W6,1,S6,C,Camera only,camera,Personal appointment,colleague,YES,aloud,S6-C-YES,assets/office-triptych.png
+L3-A-W6,L3,A,W6,2,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,NO,private,S1-F-NO,assets/home-triptych.png
+L3-A-W6,L3,A,W6,3,S5,M,Microphone only,microphone,Personal appointment,friend,NO,private,S5-M-NO,assets/home-triptych.png
+L3-A-W6,L3,A,W6,4,S2,M,Microphone only,microphone,Health appointment,colleague,YES,aloud,S2-M-YES,assets/office-triptych.png
+L3-A-W6,L3,A,W6,5,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,YES,aloud,S4-F-YES,assets/office-triptych.png
+L3-A-W6,L3,A,W6,6,S3,C,Camera only,camera,Financial payment,friend,NO,private,S3-C-NO,assets/home-triptych.png
+L3-B-W6,L3,B,W6,1,S6,C,Camera only,camera,Personal appointment,colleague,NO,private,S6-C-NO,assets/office-triptych.png
+L3-B-W6,L3,B,W6,2,S1,F,"Microphone first, camera fallback",microphone,Health appointment,friend,YES,aloud,S1-F-YES,assets/home-triptych.png
+L3-B-W6,L3,B,W6,3,S5,M,Microphone only,microphone,Personal appointment,friend,YES,aloud,S5-M-YES,assets/home-triptych.png
+L3-B-W6,L3,B,W6,4,S2,M,Microphone only,microphone,Health appointment,colleague,NO,private,S2-M-NO,assets/office-triptych.png
+L3-B-W6,L3,B,W6,5,S4,F,"Microphone first, camera fallback",microphone,Financial payment,colleague,NO,private,S4-F-NO,assets/office-triptych.png
+L3-B-W6,L3,B,W6,6,S3,C,Camera only,camera,Financial payment,friend,YES,aloud,S3-C-YES,assets/home-triptych.png

@@ -1,0 +1,11 @@
+# Revised survey illustrations
+
+Generated with the built-in image generation tool. Original images retained; revised images use the `neutral-v2` suffix. The participant questionnaire uses the revised images.
+
+## Home prompt
+
+Edit the supplied home survey triptych. Preserve its wide three equal panels, home setting, laptop, blue acrylic Ohbot hardware, black smartwatch, natural lighting, and action sequence: conversation, Alex tapping their watch, Alex looking up. Change Alex (watch wearer on left) to an intentionally androgynous adult with no explicit gender cues: clean-shaven soft neutral face, simple short hair, loose gray crewneck clothing, no makeup or gender-coded styling. Same Alex in all panels. Keep Sam the bystander on right consistent. In EVERY panel rotate Ohbot's actual entire head and its eyes toward Sam on the right, with a clearly visible three-quarter side orientation and gaze directed at Sam's face, not the viewer or Alex. Keep robot base stationary and realistic neck articulation; camera accessory follows head orientation. Do not imply camera activation with lights or beams. No words, icons, labels, watermark, or dramatic emotions. Keep neutral expression and survey stimulus consistency. Output one complete wide triptych.
+
+## Office prompt
+
+Edit Image 1 (office triptych) using Image 2 (updated home triptych) as the exact reference for Alex's gender-neutral appearance and the robot's bystander-facing head orientation. Preserve office background, laptop, desk, black Bangle.js wristwatch, blue acrylic Ohbot, three equal panels and sequence conversation / watch tap / looking up. Replace the watch wearer Alex on LEFT with the same androgynous adult as Image 2: clean-shaven soft neutral face, short swept dark hair, loose gray crewneck, no makeup or gender-coded styling. Same person across all panels and both settings. Keep Sam on RIGHT unchanged. In ALL THREE panels rotate Ohbot's entire head, eyes and camera mount visibly toward Sam on the RIGHT, in the same realistic three-quarter orientation as Image 2. Gaze points at Sam's face, not viewer or Alex. Preserve stationary base, neutral expressions, lighting and photorealistic style. No text, icons, beams, sensor indicator lights, or watermark. Output one complete wide office triptych.

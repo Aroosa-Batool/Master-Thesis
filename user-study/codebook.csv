@@ -1,0 +1,37 @@
+variable,section,construct,type,values_or_range,scoring_note
+schema_version,metadata,export schema,text,1.0,Do not analyze as an outcome
+study_id,metadata,instrument version,text,sensor-comfort-v1,Use to prevent mixing incompatible versions
+participant_code,metadata,random record key,text,P- plus 8 characters,Check duplicates; not an identity
+condition_order,metadata,presentation order,array,microphone|camera|sequential,Pipe-delimited in flat CSV
+duration_seconds,metadata,completion duration,integer,positive seconds,Set any fast-completion flag from pilot before outcome analysis
+illustration_disclosure,metadata,stimulus provenance,text,fixed statement,Not an outcome
+manipulation_check_pass.microphone,quality,condition comprehension,boolean,true|false,Do not silently exclude; follow analysis plan
+manipulation_check_pass.camera,quality,condition comprehension,boolean,true|false,Do not silently exclude; follow analysis plan
+manipulation_check_pass.sequential,quality,condition comprehension,boolean,true|false,Do not silently exclude; follow analysis plan
+answers.consent_age,consent,age confirmation,boolean,true|false,Must be true for eligibility
+answers.consent_information,consent,informed consent,boolean,true|false,Must be true for eligibility
+answers.consent_voluntary,consent,voluntariness,boolean,true|false,Must be true for eligibility
+answers.consent_participate,consent,participation consent,boolean,true|false,Must be true for eligibility
+answers.scenario_understood,scenario,scenario acknowledgement,boolean,true|false,Must be true for a complete record
+answers.{condition}_COM1,condition rating,participant comfort,ordinal,1-7,Higher means more comfort
+answers.{condition}_PRV1,condition rating,privacy concern,ordinal,1-7,Higher means more concern; reverse only in a predeclared composite
+answers.{condition}_CTL1,condition rating,perceived control,ordinal,1-7,Higher means more control
+answers.{condition}_TRN1,condition rating,active-sensor transparency,ordinal,1-7,Higher means more clarity
+answers.{condition}_TRU1,condition rating,trust in handling,ordinal,1-7,Higher means more trust
+answers.{condition}_ACC1,condition rating,acceptability,ordinal,1-7,Primary outcome; higher means more acceptable
+answers.{condition}_INT1,condition rating,willingness to use,ordinal,1-7,Higher means more willingness
+answers.{condition}_BYS1,condition rating,expected bystander comfort,ordinal,1-7,Higher means more expected comfort
+answers.{condition}_BEN1,condition rating,benefit versus sensor cost,ordinal,1-7,Higher means benefit more strongly justifies sensing
+answers.{condition}_manipulation_check,condition rating,described sensing sequence,nominal,microphone|camera|sequential|simultaneous|unsure,Correct value matches condition name
+answers.{condition}_comment,condition rating,reassurance or concern,text,0-1000 characters,Optional qualitative response
+answers.overall_preferred,comparison,most preferred condition,nominal,microphone|camera|sequential|none,Report counts and percentages
+answers.overall_least_preferred,comparison,least preferred condition,nominal,microphone|camera|sequential|none,Report counts and percentages
+answers.overall_preference_reason,comparison,preference rationale,text,0-1200 characters,Optional qualitative response
+answers.policy_preference,comparison,remembered-consent policy,nominal,reask|remember|expire|context|unsure,Report counts and percentages
+answers.retention_preference,comparison,decision expiry preference,ordinal-like,session|day|week|month|manual|never_store|unsure,Treat as categorical unless an ordering is justified
+answers.status_light_helpful,comparison,status-light agreement,ordinal,1-7,Higher means status indicator is more reassuring
+answers.overall_design_change,comparison,desired design change,text,0-1200 characters,Optional qualitative response
+answers.dem_age_band,sample,age band,ordinal-like,18_24|25_34|35_44|45_54|55_64|65_plus|prefer_not,Describe sample; prefer_not is missing/not disclosed
+answers.dem_voice_assistant_use,sample,voice-assistant experience,ordinal,never|less_monthly|monthly|weekly|daily|prefer_not,Potential exploratory moderator
+answers.dem_webcam_use,sample,webcam experience,ordinal,never|less_monthly|monthly|weekly|daily|prefer_not,Potential exploratory moderator
+answers.dem_robot_experience,sample,social-robot experience,ordinal,none|seen_demo|brief|regular|prefer_not,Potential exploratory moderator

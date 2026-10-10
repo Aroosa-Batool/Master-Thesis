@@ -1,0 +1,22 @@
+{
+  "survey_id": 477574,
+  "edit_url": "https://umfragen.uni-siegen.de/index.php/surveyAdministration/view?iSurveyID=477574",
+  "import_verified": true,
+  "groups": 11,
+  "questions": 154,
+  "answers": 915,
+  "subquestions": 10,
+  "images_uploaded": true,
+  "images_loaded_in_preview": true,
+  "preview_verified_sections": [
+    "introduction",
+    "six main stories",
+    "private-only comparison",
+    "overall preferences",
+    "demographics"
+  ],
+  "final_transition_verified": false,
+  "preview_blocker": "401 sign-in error after Next from demographics",
+  "assignment": "L1-A-W1",
+  "status": "inactive draft"
+}

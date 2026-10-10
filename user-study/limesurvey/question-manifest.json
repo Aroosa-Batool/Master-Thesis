@@ -1,0 +1,5312 @@
+[
+  {
+    "name": "I1",
+    "type": "L",
+    "wording": "Does permitting microphone access automatically permit sensitive reminders to be spoken around other people?",
+    "options": [
+      {
+        "code": "yes",
+        "portal_code": "1",
+        "label": "Yes"
+      },
+      {
+        "code": "no",
+        "portal_code": "2",
+        "label": "No"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "3",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "I2",
+    "type": "L",
+    "wording": "Which statement is correct?",
+    "options": [
+      {
+        "code": "nothing",
+        "portal_code": "1",
+        "label": "No recordings means no identifying data are stored"
+      },
+      {
+        "code": "representations",
+        "portal_code": "2",
+        "label": "Numerical face or voice representations can still be stored"
+      },
+      {
+        "code": "health",
+        "portal_code": "3",
+        "label": "The robot reads unrelated health data from the watch"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "4",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S1Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S1Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S1Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S1Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S1Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S2Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S2Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S2Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S2Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S2Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S6Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S6Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S6Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S6Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S6Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S3Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S3Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S3Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S3Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S3Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S5Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S5Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S5Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S5Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S5Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S4Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby while the sensors described in this story are active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S4Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S4Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S4Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S4Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "S7Q1",
+    "type": "L",
+    "wording": "This situation could realistically happen in everyday life.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q2",
+    "type": "L",
+    "wording": "The reminder contains sensitive information.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q3",
+    "type": "L",
+    "wording": "The robot protected Alex’s privacy in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q4",
+    "type": "L",
+    "wording": "The way the robot delivered the reminder was appropriate in this situation.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q5",
+    "type": "L",
+    "wording": "I would trust this robot to handle my sensitive reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q6",
+    "type": "L",
+    "wording": "I would feel comfortable giving this robot sensitive information for reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q7",
+    "type": "L",
+    "wording": "I would feel comfortable being nearby with neither sensor active.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q8",
+    "type": "L",
+    "wording": "I would feel in control of whether my reminder content was spoken aloud.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q9",
+    "type": "L",
+    "wording": "I would feel in control of which sensors this system could use.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q10",
+    "type": "L",
+    "wording": "This sensing and reminder-delivery approach would be acceptable to me.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q11",
+    "type": "L",
+    "wording": "I would be willing to use this approach for my own reminders.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q12",
+    "type": "L",
+    "wording": "I would be concerned about the system storing face or voice recognition representations.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "S7Q13",
+    "type": "L",
+    "wording": "What did Alex’s decision in this scene permit?",
+    "options": [
+      {
+        "code": "aloud",
+        "portal_code": "1",
+        "label": "Speaking the reminder aloud"
+      },
+      {
+        "code": "private",
+        "portal_code": "2",
+        "label": "Delivering it privately without speaking its content"
+      },
+      {
+        "code": "memory",
+        "portal_code": "3",
+        "label": "Remembering the answer for future encounters"
+      },
+      {
+        "code": "none",
+        "portal_code": "4",
+        "label": "There was no disclosure decision in this scene"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S7Q14",
+    "type": "L",
+    "wording": "Which sensors actually operated for presence sensing?",
+    "options": [
+      {
+        "code": "microphone",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "sequential",
+        "portal_code": "3",
+        "label": "Microphone then camera"
+      },
+      {
+        "code": "neither",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S7Q15",
+    "type": "L",
+    "wording": "Which approach was allowed in the setup?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "N",
+        "portal_code": "4",
+        "label": "Neither"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "S7Q16",
+    "type": "T",
+    "wording": "What most influenced your answers? (optional)"
+  },
+  {
+    "name": "O1",
+    "type": "L",
+    "wording": "Which implemented sensing approach did you like most?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "equal",
+        "portal_code": "4",
+        "label": "No preference"
+      },
+      {
+        "code": "none",
+        "portal_code": "5",
+        "label": "I would use none of them"
+      }
+    ]
+  },
+  {
+    "name": "O1reason",
+    "type": "T",
+    "wording": "Why did you like that approach most?"
+  },
+  {
+    "name": "O2",
+    "type": "L",
+    "wording": "Which approach did you like least?",
+    "options": [
+      {
+        "code": "M",
+        "portal_code": "1",
+        "label": "Microphone only"
+      },
+      {
+        "code": "C",
+        "portal_code": "2",
+        "label": "Camera only"
+      },
+      {
+        "code": "F",
+        "portal_code": "3",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "equal",
+        "portal_code": "4",
+        "label": "No preference"
+      },
+      {
+        "code": "all",
+        "portal_code": "5",
+        "label": "I found all unacceptable"
+      }
+    ]
+  },
+  {
+    "name": "O2reason",
+    "type": "T",
+    "wording": "Why did you like that approach least?"
+  },
+  {
+    "name": "O3",
+    "type": "L",
+    "wording": "Which sensor access would you permit?",
+    "options": [
+      {
+        "code": "neither",
+        "portal_code": "1",
+        "label": "Neither"
+      },
+      {
+        "code": "microphone",
+        "portal_code": "2",
+        "label": "Microphone only"
+      },
+      {
+        "code": "camera",
+        "portal_code": "3",
+        "label": "Camera only"
+      },
+      {
+        "code": "both",
+        "portal_code": "4",
+        "label": "Both"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "5",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O4a",
+    "type": "L",
+    "wording": "I would feel comfortable allowing microphone access for the sensing behavior described.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "O4b",
+    "type": "L",
+    "wording": "I would feel comfortable allowing camera access for the sensing behavior described.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "O5",
+    "type": "L",
+    "wording": "If you permitted both sensors, which activation policy would you prefer?",
+    "options": [
+      {
+        "code": "mic_first",
+        "portal_code": "1",
+        "label": "Microphone first, camera only if no bystander voice is detected"
+      },
+      {
+        "code": "camera_first",
+        "portal_code": "2",
+        "label": "Camera first, microphone only if needed (proposed alternative)"
+      },
+      {
+        "code": "simultaneous",
+        "portal_code": "3",
+        "label": "Both at the same time (proposed alternative)"
+      },
+      {
+        "code": "choose",
+        "portal_code": "4",
+        "label": "Let me choose before each reminder"
+      },
+      {
+        "code": "equal",
+        "portal_code": "5",
+        "label": "No preference"
+      },
+      {
+        "code": "neither",
+        "portal_code": "6",
+        "label": "I would not permit both"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "7",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O5reason",
+    "type": "T",
+    "wording": "Why do you prefer that activation policy?"
+  },
+  {
+    "name": "O6",
+    "type": "L",
+    "wording": "I would prefer this microphone-first/camera-fallback sequence to using the camera for every sensitive reminder.",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Strongly disagree"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Disagree"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat disagree"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Neither agree nor disagree"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Somewhat agree"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Agree"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Strongly agree"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "O7",
+    "type": "L",
+    "wording": "Would you choose the proposed no-sensor policy, where all sensitive reminders go privately to the watch?",
+    "options": [
+      {
+        "code": "Yes",
+        "portal_code": "1",
+        "label": "Yes"
+      },
+      {
+        "code": "No",
+        "portal_code": "2",
+        "label": "No"
+      },
+      {
+        "code": "It depends",
+        "portal_code": "3",
+        "label": "It depends"
+      },
+      {
+        "code": "Not sure",
+        "portal_code": "4",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O7reason",
+    "type": "T",
+    "wording": "Why would you choose or reject the no-sensor policy?"
+  },
+  {
+    "name": "O8",
+    "type": "L",
+    "wording": "Which disclosure policy would you prefer?",
+    "options": [
+      {
+        "code": "reask",
+        "portal_code": "1",
+        "label": "Always ask again"
+      },
+      {
+        "code": "no_only",
+        "portal_code": "2",
+        "label": "Remember only No answers (proposed)"
+      },
+      {
+        "code": "remember",
+        "portal_code": "3",
+        "label": "Remember both Yes and No answers"
+      },
+      {
+        "code": "choose",
+        "portal_code": "4",
+        "label": "Let me choose for each answer (proposed)"
+      },
+      {
+        "code": "equal",
+        "portal_code": "5",
+        "label": "No preference"
+      },
+      {
+        "code": "unsure",
+        "portal_code": "6",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O9",
+    "type": "L",
+    "wording": "Should a previous Yes ever allow a later sensitive reminder to be spoken without a new question?",
+    "options": [
+      {
+        "code": "Yes",
+        "portal_code": "1",
+        "label": "Yes"
+      },
+      {
+        "code": "No",
+        "portal_code": "2",
+        "label": "No"
+      },
+      {
+        "code": "It depends",
+        "portal_code": "3",
+        "label": "It depends"
+      },
+      {
+        "code": "Not sure",
+        "portal_code": "4",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O9reason",
+    "type": "T",
+    "wording": "Why?"
+  },
+  {
+    "name": "O10",
+    "type": "L",
+    "wording": "If remembering is enabled, when should an answer expire?",
+    "options": [
+      {
+        "code": "After that reminder",
+        "portal_code": "1",
+        "label": "After that reminder"
+      },
+      {
+        "code": "At the end of that day",
+        "portal_code": "2",
+        "label": "At the end of that day"
+      },
+      {
+        "code": "After one week",
+        "portal_code": "3",
+        "label": "After one week"
+      },
+      {
+        "code": "After one month",
+        "portal_code": "4",
+        "label": "After one month"
+      },
+      {
+        "code": "Only when I remove it",
+        "portal_code": "5",
+        "label": "Only when I remove it"
+      },
+      {
+        "code": "A duration I choose",
+        "portal_code": "6",
+        "label": "A duration I choose"
+      },
+      {
+        "code": "Never remember answers",
+        "portal_code": "7",
+        "label": "Never remember answers"
+      },
+      {
+        "code": "Not sure",
+        "portal_code": "8",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O11",
+    "type": "M",
+    "wording": "When should the robot ask again despite a saved answer? Choose all that apply.",
+    "options": [
+      {
+        "code": "Different reminder topic or sensitivity",
+        "portal_code": "A1",
+        "label": "Different reminder topic or sensitivity"
+      },
+      {
+        "code": "Different location",
+        "portal_code": "A2",
+        "label": "Different location"
+      },
+      {
+        "code": "Additional people present",
+        "portal_code": "A3",
+        "label": "Additional people present"
+      },
+      {
+        "code": "Uncertain identity match",
+        "portal_code": "A4",
+        "label": "Uncertain identity match"
+      },
+      {
+        "code": "A different sensor recognizes the person",
+        "portal_code": "A5",
+        "label": "A different sensor recognizes the person"
+      },
+      {
+        "code": "A long time since the last encounter",
+        "portal_code": "A6",
+        "label": "A long time since the last encounter"
+      },
+      {
+        "code": "I changed or revoked a preference",
+        "portal_code": "A7",
+        "label": "I changed or revoked a preference"
+      },
+      {
+        "code": "Every reminder",
+        "portal_code": "A8",
+        "label": "Every reminder"
+      },
+      {
+        "code": "Other",
+        "portal_code": "A9",
+        "label": "Other"
+      },
+      {
+        "code": "Not sure",
+        "portal_code": "A10",
+        "label": "Not sure"
+      }
+    ]
+  },
+  {
+    "name": "O12",
+    "type": "L",
+    "wording": "How important would it be to view, change or delete saved disclosure decisions on the watch?",
+    "options": [
+      {
+        "code": "1",
+        "portal_code": "1",
+        "label": "1 Not at all important"
+      },
+      {
+        "code": "2",
+        "portal_code": "2",
+        "label": "2 Slightly important"
+      },
+      {
+        "code": "3",
+        "portal_code": "3",
+        "label": "3 Somewhat important"
+      },
+      {
+        "code": "4",
+        "portal_code": "4",
+        "label": "4 Moderately important"
+      },
+      {
+        "code": "5",
+        "portal_code": "5",
+        "label": "5 Important"
+      },
+      {
+        "code": "6",
+        "portal_code": "6",
+        "label": "6 Very important"
+      },
+      {
+        "code": "7",
+        "portal_code": "7",
+        "label": "7 Extremely important"
+      },
+      {
+        "code": "NA",
+        "portal_code": "NA",
+        "label": "Cannot judge / prefer not to answer"
+      }
+    ]
+  },
+  {
+    "name": "O13",
+    "type": "T",
+    "wording": "What one change would most improve your comfort or trust?"
+  },
+  {
+    "name": "D1",
+    "type": "!",
+    "wording": "Age band"
+  },
+  {
+    "name": "D2",
+    "type": "!",
+    "wording": "Gender"
+  },
+  {
+    "name": "D2description",
+    "type": "T",
+    "wording": "If you selected self-describe (optional)"
+  },
+  {
+    "name": "D3",
+    "type": "!",
+    "wording": "Highest completed education"
+  },
+  {
+    "name": "D4",
+    "type": "!",
+    "wording": "Smartwatch use"
+  },
+  {
+    "name": "D5",
+    "type": "!",
+    "wording": "Voice-assistant use"
+  },
+  {
+    "name": "D6",
+    "type": "!",
+    "wording": "Camera-based identification use, such as face unlock"
+  },
+  {
+    "name": "D7",
+    "type": "!",
+    "wording": "Interaction with a social robot"
+  },
+  {
+    "name": "D8",
+    "type": "!",
+    "wording": "Familiarity with Ohbot"
+  },
+  {
+    "name": "D9",
+    "type": "!",
+    "wording": "Familiarity with Bangle.js"
+  },
+  {
+    "name": "D10",
+    "type": "!",
+    "wording": "Technical experience"
+  }
+]
