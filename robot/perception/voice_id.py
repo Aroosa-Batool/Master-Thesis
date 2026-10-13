@@ -34,8 +34,7 @@ try:
     from resemblyzer import VoiceEncoder, preprocess_wav
 except ModuleNotFoundError as exc:
     raise SystemExit(
-        "Missing dependency: install with `pip install resemblyzer` "
-        "(pulls in torch). See requirements.txt."
+        "Missing dependency: resemblyzer. Run `uv sync` in the repo root."
     ) from exc
 
 log = get_logger(__name__)

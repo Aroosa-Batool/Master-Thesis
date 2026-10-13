@@ -1,6 +1,8 @@
-# Presence-Aware Social Robot with Watch-Mediated Consent
+# From Consent to Privacy Management
 
-A master's-thesis prototype. A desktop robot (**Ohbot**) reads out your
+**Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure**
+
+The prototype for this master's thesis. A desktop robot (**Ohbot**) reads out your
 scheduled reminders, but it checks **who else is in the room** first. If a
 reminder is private (e.g. a doctor's appointment) and someone else is present,
 the robot asks for your permission **on your smartwatch** (**Bangle.js**) before
@@ -51,19 +53,31 @@ time**; you choose when starting it.
 
 ### 1. Install the software
 
-You need **Python 3.13**. Newer versions don't work yet.
+Download the project:
 
 ```bash
 git clone https://github.com/Aroosa-Batool/Master-Thesis.git
-cd Master-Thesis
-python3.13 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
 ```
 
-The install is large (a few GB) because it includes the speech and recognition
-models. Some models also download the first time you run the app, so do one run
-with an internet connection before a session.
+**On a Mac**, double-click **`setup.command`** in the project folder. That's it.
+
+**On Windows or Linux**, run these from the project folder:
+
+```bash
+# 1. Install uv (one time)
+curl -LsSf https://astral.sh/uv/install.sh | sh                  # macOS / Linux
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"       # Windows
+
+# 2. Install Python 3.13 and all packages, then download the models
+uv sync
+uv run python -m robot.apps.download_models
+```
+
+[uv](https://docs.astral.sh/uv/) installs the correct Python version for you,
+along with the exact package versions this project was tested with (listed in
+`uv.lock`), so every laptop ends up with the same setup. The first install is
+large (a few GB) and needs an internet connection; after that, the app runs
+offline.
 
 Install **espeak**, which the robot uses to speak:
 
@@ -98,7 +112,7 @@ terminal app the first time you're asked.
 On macOS, double-click **`Start Thesis UI.command`**. Or run:
 
 ```bash
-python -m robot.apps.presentation_ui
+uv run python -m robot.apps.presentation_ui
 ```
 
 This opens a local page in your browser (it only runs on your laptop) with four
@@ -114,10 +128,10 @@ tabs:
 ### From the terminal
 
 ```bash
-python -m robot.apps.enroll_voice      # once: register your voice
-python -m robot.apps.enroll_face       # once: register your face (only needed for camera mode)
-python -m robot.apps.add_reminder      # add a reminder by voice
-python -m robot.apps.reminder_app      # start the robot
+uv run python -m robot.apps.enroll_voice    # once: register your voice
+uv run python -m robot.apps.enroll_face     # once: register your face (only needed for camera mode)
+uv run python -m robot.apps.add_reminder    # add a reminder by voice
+uv run python -m robot.apps.reminder_app    # start the robot
 ```
 
 `reminder_app` asks two questions at startup:
@@ -136,10 +150,10 @@ python -m robot.apps.reminder_app      # start the robot
 Put the setting before the command, for example:
 
 ```bash
-NO_OHBOT=1 python -m robot.apps.reminder_app
+NO_OHBOT=1 uv run python -m robot.apps.reminder_app
 ```
 
-To check which camera will be used: `python -m robot.apps.list_cameras --preview 0`.
+To check which camera will be used: `uv run python -m robot.apps.list_cameras --preview 0`.
 
 ---
 
@@ -161,8 +175,9 @@ Your face/voice profiles, reminders and remembered answers are saved only in
 | **Watch not found** | Close or disconnect the Espruino Web IDE, then restart the app. |
 | **Robot doesn't start or move** | Replug the USB cable, or set `OHBOT_PORT`. Use `NO_OHBOT=1` to test without it. |
 | **Robot is silent** | Make sure `espeak` is installed. |
+| **`uv: command not found`** | Close and reopen the terminal after installing uv. |
 | **Camera won't open / black image** | Close Zoom, Teams, etc. Replug the camera directly into the laptop. Check the lens isn't covered. |
-| **Install fails** | Make sure you're using Python 3.13 (`python --version`). |
+| **Install fails** | Check your internet connection and run `uv sync` again. |
 
 ---
 
@@ -171,7 +186,7 @@ Your face/voice profiles, reminders and remembered answers are saved only in
 The tests don't need any hardware:
 
 ```bash
-python -m pytest tests/
+uv run pytest tests/
 ```
 
 ---

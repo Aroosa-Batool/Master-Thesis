@@ -352,8 +352,8 @@ deployment candidates.
 ## 7. Reproducing
 
 ```bash
-pip install -r requirements.txt
-pip install onnxruntime insightface mediapipe silero-vad speechbrain   # challengers
+uv sync
+uv pip install onnxruntime insightface mediapipe speechbrain   # challengers (not in uv.lock)
 
 python robot/bench/bench_camera.py        # latency/memory/size
 python robot/bench/bench_voice.py

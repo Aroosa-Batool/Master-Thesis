@@ -1,6 +1,6 @@
 # Design High-Level Design (HLD)
 
-**Project:** Presence-Aware Social Robot with Watch-Mediated Consent
+**Project:** From Consent to Privacy Management: Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure
 **Type:** MSc thesis prototype
 **Companion document:** [Technical HLD](technical_hld.md) — the *how* (architecture,
 interfaces, concurrency, technology). This document is the *why*: problem, goals, the

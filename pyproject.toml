@@ -1,0 +1,41 @@
+[project]
+name = "presence-aware-robot"
+version = "1.0.0"
+description = "From Consent to Privacy Management: Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure"
+readme = "README.md"
+# Python 3.13 only: bleak 0.22 has no 3.14 wheel. uv downloads 3.13 itself if missing.
+requires-python = "==3.13.*"
+dependencies = [
+    # Array math used directly across the stack (embeddings, RMS, cosine).
+    "numpy>=1.24",
+    # Webcam capture + face detection (presence sensing).
+    "opencv-python>=4.8,<5",
+    # BLE client for the Bangle.js watch (CoreBluetooth / WinRT / BlueZ).
+    "bleak>=0.22,<1",
+    # Ohbot SDK (USB serial robot control + speech).
+    "ohbot>=2.0,<3",
+    # Microphone capture. PortAudio is bundled on macOS/Windows; on Linux:
+    # `apt install libportaudio2`.
+    "sounddevice>=0.4,<1",
+    # GE2E speaker embeddings; pulls in torch + librosa + webrtcvad.
+    "resemblyzer>=0.1.3,<0.2",
+    # webrtcvad still imports `pkg_resources`, which setuptools removed in 81.0.
+    "setuptools<81",
+    # Neural voice-activity detection: is a sound a HUMAN VOICE at all?
+    # (stops a grinder/fan being filed as a bystander).
+    "silero-vad>=5,<7",
+    # Speech-to-text for spoken reminders (model downloads on first use).
+    "openai-whisper>=20231117",
+    # Date/time extraction from spoken reminders.
+    "dateparser>=1.2,<2",
+    # Local reminder sensitivity classifier (MiniLM, downloads on first use).
+    "sentence-transformers>=2.2,<6",
+]
+
+[dependency-groups]
+# Hardware-free test suite: `uv run pytest tests/`.
+dev = ["pytest>=8"]
+
+[tool.uv]
+# The repo is run as `python -m robot.apps.<name>`, not installed as a package.
+package = false

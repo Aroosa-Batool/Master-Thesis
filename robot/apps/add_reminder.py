@@ -14,7 +14,7 @@ Run:
     python -m robot.apps.add_reminder
     python -m robot.apps.add_reminder --seconds 10 --model small.en
 
-Dependencies (see requirements.txt): openai-whisper, dateparser.
+Dependencies (see pyproject.toml): openai-whisper, dateparser.
 Whisper downloads its model (~74 MB for base.en) into ~/.cache/whisper on
 first use.
 
@@ -39,7 +39,7 @@ try:
     import sounddevice as sd
 except (ModuleNotFoundError, OSError) as exc:
     raise SystemExit(
-        "Missing dependency: install with `pip install sounddevice` "
+        "Missing dependency: sounddevice. Run `uv sync` in the repo root "
         "(needs the PortAudio library; on Linux: `apt install libportaudio2`)."
     ) from exc
 
@@ -259,8 +259,7 @@ def main() -> None:
         import whisper
     except ModuleNotFoundError as exc:
         raise SystemExit(
-            "Missing dependency: install with `pip install openai-whisper` "
-            "(uses torch, already a voice-stack dep)."
+            "Missing dependency: openai-whisper. Run `uv sync` in the repo root."
         ) from exc
 
     print(f"[startup] loading Whisper model '{args.model}' "

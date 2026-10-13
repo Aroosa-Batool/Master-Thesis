@@ -1,11 +1,13 @@
-# Presence-Aware Social Robot with Watch-Mediated Consent
+# From Consent to Privacy Management
+
+**Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure**
 
 ## Document control
 
 | Field | Value |
 | --- | --- |
 | Document type | System and operations documentation |
-| Project | MSc thesis prototype: Presence-Aware Social Robot with Watch-Mediated Consent |
+| Project | MSc thesis prototype: From Consent to Privacy Management: Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure |
 | Status | Research prototype / draft for evaluation |
 | Version | 1.2 |
 | Last updated | 16 July 2026 |
@@ -401,9 +403,8 @@ a newly due reminder is not delivered while another is still being handled.
 
 ### 9.2 Software
 
-- Modern Python. The code uses Python 3.10+ syntax; the documented benchmark
-  environment used CPython 3.13.
-- Python dependencies from `requirements.txt` at the repository root.
+- Python 3.13 (installed automatically by uv).
+- Python dependencies from `pyproject.toml`, pinned exactly in `uv.lock`.
 - espeak for Ohbot speech on macOS/Linux.
 - PortAudio system library on Linux for `sounddevice`.
 - Chrome or Edge with Web Bluetooth for initially loading the watch script.
@@ -426,9 +427,8 @@ The main requirements include:
 From the repository root:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync                                    # Python 3.13 + exact package versions
+uv run python -m robot.apps.download_models  # pre-fetch the models
 ```
 
 System speech dependency:

@@ -68,6 +68,14 @@ body.view-stage #stage-view { display: grid; }
   line-height: 1.2;
 }
 
+.title-sub {
+  margin: 10px 0 0;
+  max-width: 60ch;
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
 .busy-note {
   margin: 0;
   padding: 10px 18px;

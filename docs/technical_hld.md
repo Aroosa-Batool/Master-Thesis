@@ -1,6 +1,6 @@
 # Technical High-Level Design (HLD) — Algorithm-Centric
 
-**Project:** Presence-Aware Social Robot with Watch-Mediated Consent
+**Project:** From Consent to Privacy Management: Investigating Users’ Perceptions of a Social Robot That Remembers Their Privacy Preferences for Sensitive Information Disclosure
 **Type:** MSc thesis prototype
 **Organising axis:** the **algorithms** in the sensing → identity → decision → actuation
 pipeline. Each processing stage is specified as an algorithm (model, parameters, thresholds,
@@ -388,8 +388,8 @@ package. `--min-speech` (default 0.6 s) sets how much speech counts as a person.
 ## 10. Deployment
 
 ```
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt        # + system espeak; PortAudio on Linux
+uv sync                                # Python 3.13 + uv.lock; + system espeak; PortAudio on Linux
+uv run python -m robot.apps.download_models   # pre-fetch Whisper, MiniLM, YuNet/SFace
 # flash bangle/consent_app.js via Espruino Web IDE, then DISCONNECT the IDE
 # run apps as modules from the repo root
 python -m robot.apps.enroll_face            # or -m robot.apps.enroll_voice   (A7 template)
