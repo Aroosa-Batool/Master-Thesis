@@ -363,6 +363,26 @@ detector** — folding it into A3 YuNet would simplify the pipeline with no late
 (3) **x-vector is the fastest speaker embedder** — a cheap A6 upgrade pending EER. (4) VAD
 choice (A5) is an accuracy, not latency, decision — WebRTC is a near-free robustness upgrade.
 
+**Speech gate (Silero VAD) — measured noise rejection.** The voice pipeline has two
+gates: an RMS energy gate ("is there any sound?") and Silero VAD ("is that sound a
+human voice?"). Without the second gate any loud non-owner sound was filed as a
+bystander; resemblyzer's internal `webrtcvad` (mode 3) kept 99.8 % of pure broadband
+noise as "speech". Measured through the real `analyse_presence`:
+
+| Signal | Gate 1 (energy) | Gate 2 (Silero) | Verdict |
+| --- | --- | --- | --- |
+| A person talking | SOUND | 4.90 s of 5 s | bystander ✔ |
+| Person talking + grinder | SOUND | 4.80 s | bystander ✔ |
+| Coffee grinder | SOUND | 0.00 s | not a person ✔ |
+| Fan / vacuum | SOUND | 0.00 s | not a person ✔ |
+| Blender (harsh + whine) | SOUND | 0.00 s | not a person ✔ |
+| Door slam (impulse) | quiet | — | not a person ✔ |
+
+Cost: ~0.02 s to load, ~0.8 s to score a 5-minute window; weights ship inside the pip
+package. `--min-speech` (default 0.6 s) sets how much speech counts as a person.
+`SPEECH_VAD=energy` restores the old energy-only behaviour (a grinder becomes
+`person_001`) for A/B comparison only; it prints a warning and is named in the CSV logs.
+
 ---
 
 ## 10. Deployment
